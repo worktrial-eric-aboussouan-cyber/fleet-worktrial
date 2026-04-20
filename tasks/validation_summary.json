@@ -14,17 +14,17 @@
     "requests-6149"
   ],
   "failed": {
-    "requests-7305": "canary2_empty_passed",
     "requests-7309": "canary2_empty_passed",
-    "requests-6757": "canary2_empty_passed",
+    "requests-7305": "canary2_empty_passed",
     "requests-6592": "gold_patch_tests_failed",
     "requests-6587": "gold_patch_tests_failed",
     "requests-6505": "gold_patch_tests_failed",
-    "requests-6458": "canary2_empty_passed",
     "requests-7308": "canary2_empty_passed",
-    "requests-6154": "canary2_empty_passed",
     "requests-6498": "canary2_empty_passed",
+    "requests-6458": "canary2_empty_passed",
     "requests-7190": "canary2_empty_passed",
-    "requests-6336": "canary2_empty_passed"
+    "requests-6154": "canary2_empty_passed",
+    "requests-6336": "canary2_empty_passed",
+    "requests-6757": "gold_patch_tests_failed"
   }
 }

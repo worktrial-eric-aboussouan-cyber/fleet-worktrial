@@ -1,19 +1,19 @@
 {
-  "instance_id": "requests-7205",
-  "repo": "psf/requests",
   "base_commit": "1b40fdd004bfc8ba5301bcf8a6908264e9b6b877",
+  "eval_script": "#!/bin/bash\nset -e\ncd /repo\npytest tests/test_utils.py -x --tb=short -k \"test_empty_default_credentials_ignored\"\nexit $?\n",
+  "gold_patch": "diff --git a/src/requests/utils.py b/src/requests/utils.py\nindex 4d3039b2..d113a6ff 100644\n--- a/src/requests/utils.py\n+++ b/src/requests/utils.py\n@@ -231,7 +231,7 @@ def get_netrc_auth(url, raise_errors=False):\n \n         try:\n             _netrc = netrc(netrc_path).authenticators(host)\n-            if _netrc:\n+            if _netrc and any(_netrc):\n                 # Return with login / password\n                 login_i = 0 if _netrc[0] else 1\n                 return (_netrc[login_i], _netrc[2])\ndiff --git a/tests/test_utils.py b/tests/test_utils.py\nindex f9a287af..c477c408 100644\n--- a/tests/test_utils.py\n+++ b/tests/test_utils.py\n@@ -170,6 +170,16 @@ class TestGetNetrcAuth:\n         auth = get_netrc_auth(\"http://example.com:@evil.com/&apos;\")\n         assert auth is None\n \n+    def test_empty_default_credentials_ignored(self, tmp_path, monkeypatch):\n+        \"\"\"Empty default credentials should not be returned.\"\"\"\n+        netrc_path = tmp_path / \".netrc\"\n+        monkeypatch.setenv(\"NETRC\", str(netrc_path))\n+        with open(netrc_path, \"w\") as f:\n+            f.write(\"machine example.com login user password pass\\ndefault\\n\")\n+\n+        auth = get_netrc_auth(\"http://httpbin.org/\")\n+        assert auth is None\n+\n \n class TestToKeyValList:\n     @pytest.mark.parametrize(\n",
+  "image_name": "ghcr.io/worktrial-eric-aboussouan-cyber/swe-requests-7205:latest",
+  "instance_id": "requests-7205",
   "merge_sha": "47914226c2968802f2cdee3f6f0f6e06e4472f64",
+  "merged_at": "2026-02-13T02:07:05+00:00",
   "pr_number": 7205,
   "problem_statement": "PR: Fix empty netrc entry usage\n\nPrior to Python 3.11, a netrc entry without a username, account, or password entry was treated as malformed and raised a `NetrcParseError` disabling usage. For 3.11+, it now returns an empty tuple `('', '' ,'')` instead. That results in Requests sending an empty entry (`:`) for the value to encode in an Authorization header.\r\n\r\nThis PR brings Requests back to its intended behavior of ignoring these profiles. Anyone who may have some use case for this, we did not to intend to support this behavior. If you need it going forward, you can pass `auth=('', '')` with your request.",
-  "gold_patch": "diff --git a/src/requests/utils.py b/src/requests/utils.py\nindex 4d3039b2..d113a6ff 100644\n--- a/src/requests/utils.py\n+++ b/src/requests/utils.py\n@@ -231,7 +231,7 @@ def get_netrc_auth(url, raise_errors=False):\n \n         try:\n             _netrc = netrc(netrc_path).authenticators(host)\n-            if _netrc:\n+            if _netrc and any(_netrc):\n                 # Return with login / password\n                 login_i = 0 if _netrc[0] else 1\n                 return (_netrc[login_i], _netrc[2])\ndiff --git a/tests/test_utils.py b/tests/test_utils.py\nindex f9a287af..c477c408 100644\n--- a/tests/test_utils.py\n+++ b/tests/test_utils.py\n@@ -170,6 +170,16 @@ class TestGetNetrcAuth:\n         auth = get_netrc_auth(\"http://example.com:@evil.com/&apos;\")\n         assert auth is None\n \n+    def test_empty_default_credentials_ignored(self, tmp_path, monkeypatch):\n+        \"\"\"Empty default credentials should not be returned.\"\"\"\n+        netrc_path = tmp_path / \".netrc\"\n+        monkeypatch.setenv(\"NETRC\", str(netrc_path))\n+        with open(netrc_path, \"w\") as f:\n+            f.write(\"machine example.com login user password pass\\ndefault\\n\")\n+\n+        auth = get_netrc_auth(\"http://httpbin.org/\")\n+        assert auth is None\n+\n \n class TestToKeyValList:\n     @pytest.mark.parametrize(\n",
-  "image_name": "gcr.io/fleet-compute-489000/swe-task-requests-7205:latest",
-  "eval_script": "#!/bin/bash\nset -e\ncd /repo\npytest tests/test_utils.py -x --tb=short -k \"test_empty_default_credentials_ignored\"\nexit $?\n",
-  "test_paths": [
-    "tests/test_utils.py"
-  ],
+  "repo": "psf/requests",
   "source_paths": [
     "src/requests/utils.py"
   ],
-  "total_lines": 12,
-  "merged_at": "2026-02-13T02:07:05+00:00"
+  "test_paths": [
+    "tests/test_utils.py"
+  ],
+  "total_lines": 12
 }

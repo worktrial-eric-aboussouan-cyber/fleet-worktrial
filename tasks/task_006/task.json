@@ -1,19 +1,19 @@
 {
-  "instance_id": "requests-6963",
-  "repo": "psf/requests",
   "base_commit": "7bc45877a86192af77645e156eb3744f95b47dae",
+  "eval_script": "#!/bin/bash\nset -e\ncd /repo\npytest tests/test_utils.py -x --tb=short -k \"test_works or test_not_vulnerable_to_bad_url_parsing\"\nexit $?\n",
+  "gold_patch": "diff --git a/src/requests/utils.py b/src/requests/utils.py\nindex 8a307ca8..8ab55852 100644\n--- a/src/requests/utils.py\n+++ b/src/requests/utils.py\n@@ -219,14 +219,7 @@ def get_netrc_auth(url, raise_errors=False):\n         netrc_path = None\n \n         for f in netrc_locations:\n-            try:\n-                loc = os.path.expanduser(f)\n-            except KeyError:\n-                # os.path.expanduser can fail when $HOME is undefined and\n-                # getpwuid fails. See https://bugs.python.org/issue20164 &\n-                # https://github.com/psf/requests/issues/1846\n-                return\n-\n+            loc = os.path.expanduser(f)\n             if os.path.exists(loc):\n                 netrc_path = loc\n                 break\ndiff --git a/tests/test_utils.py b/tests/test_utils.py\nindex 5e9b56ea..f9a287af 100644\n--- a/tests/test_utils.py\n+++ b/tests/test_utils.py\n@@ -23,6 +23,7 @@ from requests.utils import (\n     get_encoding_from_headers,\n     get_encodings_from_content,\n     get_environ_proxies,\n+    get_netrc_auth,\n     guess_filename,\n     guess_json_utf,\n     is_ipv4_address,\n@@ -152,6 +153,24 @@ class TestSuperLen:\n         assert super_len(object()) == 0\n \n \n+class TestGetNetrcAuth:\n+    def test_works(self, tmp_path, monkeypatch):\n+        netrc_path = tmp_path / \".netrc\"\n+        monkeypatch.setenv(\"NETRC\", str(netrc_path))\n+        with open(netrc_path, \"w\") as f:\n+            f.write(\"machine example.com login aaaa password bbbb\\n\")\n+        auth = get_netrc_auth(\"http://example.com/thing\")\n+        assert auth == (\"aaaa\", \"bbbb\")\n+\n+    def test_not_vulnerable_to_bad_url_parsing(self, tmp_path, monkeypatch):\n+        netrc_path = tmp_path / \".netrc\"\n+        monkeypatch.setenv(\"NETRC\", str(netrc_path))\n+        with open(netrc_path, \"w\") as f:\n+            f.write(\"machine example.com login aaaa password bbbb\\n\")\n+        auth = get_netrc_auth(\"http://example.com:@evil.com/&apos;\")\n+        assert auth is None\n+\n+\n class TestToKeyValList:\n     @pytest.mark.parametrize(\n         \"value, expected\",\n",
+  "image_name": "ghcr.io/worktrial-eric-aboussouan-cyber/swe-requests-6963:latest",
+  "instance_id": "requests-6963",
   "merge_sha": "5b4b64c3467fd7a3c03f91ee641aaa348b6bed3b",
+  "merged_at": "2025-06-05T14:55:33+00:00",
   "pr_number": 6963,
   "problem_statement": "PR: fix CVE 2024 47081: manual url parsing leads to netloc credentials leak\n\nhttps://seclists.org/fulldisclosure/2025/Jun/2\r\n\r\nHonestly I have no idea why this lib used `netloc` + manual parsing instead of `hostname` as I can see references to `hostname` as early as from [the python 2.6 docs](https://docs.python.org/2.6/library/urlparse.html).",
-  "gold_patch": "diff --git a/src/requests/utils.py b/src/requests/utils.py\nindex 8a307ca8..8ab55852 100644\n--- a/src/requests/utils.py\n+++ b/src/requests/utils.py\n@@ -219,14 +219,7 @@ def get_netrc_auth(url, raise_errors=False):\n         netrc_path = None\n \n         for f in netrc_locations:\n-            try:\n-                loc = os.path.expanduser(f)\n-            except KeyError:\n-                # os.path.expanduser can fail when $HOME is undefined and\n-                # getpwuid fails. See https://bugs.python.org/issue20164 &\n-                # https://github.com/psf/requests/issues/1846\n-                return\n-\n+            loc = os.path.expanduser(f)\n             if os.path.exists(loc):\n                 netrc_path = loc\n                 break\ndiff --git a/tests/test_utils.py b/tests/test_utils.py\nindex 5e9b56ea..f9a287af 100644\n--- a/tests/test_utils.py\n+++ b/tests/test_utils.py\n@@ -23,6 +23,7 @@ from requests.utils import (\n     get_encoding_from_headers,\n     get_encodings_from_content,\n     get_environ_proxies,\n+    get_netrc_auth,\n     guess_filename,\n     guess_json_utf,\n     is_ipv4_address,\n@@ -152,6 +153,24 @@ class TestSuperLen:\n         assert super_len(object()) == 0\n \n \n+class TestGetNetrcAuth:\n+    def test_works(self, tmp_path, monkeypatch):\n+        netrc_path = tmp_path / \".netrc\"\n+        monkeypatch.setenv(\"NETRC\", str(netrc_path))\n+        with open(netrc_path, \"w\") as f:\n+            f.write(\"machine example.com login aaaa password bbbb\\n\")\n+        auth = get_netrc_auth(\"http://example.com/thing\")\n+        assert auth == (\"aaaa\", \"bbbb\")\n+\n+    def test_not_vulnerable_to_bad_url_parsing(self, tmp_path, monkeypatch):\n+        netrc_path = tmp_path / \".netrc\"\n+        monkeypatch.setenv(\"NETRC\", str(netrc_path))\n+        with open(netrc_path, \"w\") as f:\n+            f.write(\"machine example.com login aaaa password bbbb\\n\")\n+        auth = get_netrc_auth(\"http://example.com:@evil.com/&apos;\")\n+        assert auth is None\n+\n+\n class TestToKeyValList:\n     @pytest.mark.parametrize(\n         \"value, expected\",\n",
-  "image_name": "gcr.io/fleet-compute-489000/swe-task-requests-6963:latest",
-  "eval_script": "#!/bin/bash\nset -e\ncd /repo\npytest tests/test_utils.py -x --tb=short -k \"test_works or test_not_vulnerable_to_bad_url_parsing\"\nexit $?\n",
-  "test_paths": [
-    "tests/test_utils.py"
-  ],
+  "repo": "psf/requests",
   "source_paths": [
     "src/requests/utils.py"
   ],
-  "total_lines": 28,
-  "merged_at": "2025-06-05T14:55:33+00:00"
+  "test_paths": [
+    "tests/test_utils.py"
+  ],
+  "total_lines": 28
 }
