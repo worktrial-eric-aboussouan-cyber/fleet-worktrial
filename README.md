@@ -1,78 +1,102 @@
-# Fleet Work Trial: Task Generation Pipeline
+# Fleet SWE Worktrial — Eric Aboussouan
 
-This repository contains the end-to-end pipeline for generating, validating, and deploying coding tasks derived from real-world GitHub Pull Requests. These tasks are designed to benchmark and train agentic coding models like Harbor/SkyRL.
+End-to-end pipeline: GitHub PRs → verifiable Docker tasks → GRPO training on Qwen3 → OOD evaluation on SWE-bench Verified.
 
-## Overview
+## Results at a glance
 
-The pipeline follows these steps:
-1. **Scrape**: Identify high-quality candidate PRs from target repositories (`requests`, `click`, `flask`, `httpx`).
-2. **Build**: Materialize candidates into self-contained task directories containing a `task.json`, `Dockerfile`, and `eval_script.sh`.
-3. **Validate**: Perform a "two-canary" validation check using Docker to ensure the task is solvable (gold patch passes) and non-trivial (base state fails).
-4. **Deploy**: Build and push the validated task images to a container registry.
+| Metric | Value |
+|---|---|
+| In-distribution validated tasks | 12 / 24 |
+| OOD eval instances | 0 / 30 |
+| Training reward (start → end) | 0.0 → <TBD> |
+| OOD pass@1 (base model) | <TBD> |
+| OOD pass@1 (trained model) | <TBD> |
+| Wandb run | Pending |
 
-## Project Structure
+## Phase 1 — Task generation
 
-```text
-.
+**Source repos** (in-distribution): `psf/requests`, `pallets/click`, `pallets/flask`, `encode/httpx`.
+
+**Pipeline**:
+1. `scripts/scrape_prs.py` — scrape closed+merged PRs with a linked issue (`Fixes #N`), 5–500 LoC, ≤8 files, excluding meta/cosmetic titles.
+2. `scripts/build_task.py` — materialize `tasks/task_XXX/` with `Dockerfile`, `eval_script.sh`, `task.json`. `eval_script.sh` runs only the tests the PR added (`extract_new_test_names` via `git grep` against `base_commit`).
+3. `scripts/validate_task.py` — two-canary gate:
+   - Canary 1: `git apply gold_patch && eval_script` → exit 0
+   - Canary 2: empty patch → exit non-0
+4. `scripts/push_images.sh` — builds and pushes validated tasks to `ghcr.io/worktrial-eric-aboussouan-cyber/swe-<id>:latest` (public).
+
+**Stats**: 77 candidates scraped → 24 materialized (requests only, time-boxed) → 12 validated → 12 pushed.
+
+## Phase 2 — GRPO training
+
+- **Model**: Qwen3-8B
+- **Algorithm**: GRPO (group size <TBD>, KL coeff <TBD>)
+- **Framework**: `fleet-ai/harbor-train` (upstream SkyRL + Daytona sandboxes)
+- **Hardware**: 4× L4 on GCP via SkyPilot
+- **Reward**: exit code of `eval_script.sh` inside our GHCR image (1 if 0, else 0)
+- **Dataset**: `data/train.parquet` (12 tasks, Harbor format)
+
+Launch:
+```bash
+sky launch harbor-train/configs/harbor-grpo-qwen3-8b.yaml -c fleet-swe
+```
+
+Training curve: `results/training_curve.png` (export from wandb).
+
+## Phase 3 — OOD evaluation
+
+- **Dataset**: SWE-bench Verified, filtered to repos disjoint from training set
+- **Repos**: django, sympy, sphinx, matplotlib, scikit-learn, astropy, xarray, pytest, pylint, seaborn
+- **Instances**: 30 (1 django, rest balanced)
+- **Images**: `ghcr.io/worktrial-eric-aboussouan-cyber/swebench-<id>:latest`
+- **Metric**: pass@1 via `eval_script.sh` exit code
+
+Results: `results/eval_results.json`.
+
+## Reproduction
+
+```bash
+# 1. Scrape
+export GITHUB_TOKEN=...
+uv run scripts/scrape_prs.py --repo psf/requests --limit 25
+
+# 2. Materialize + validate
+uv run scripts/build_task.py
+uv run scripts/validate_task.py --all --parallel 4
+
+# 3. Push
+bash scripts/push_images.sh
+
+# 4. Train
+uv run scripts/prepare_harbor_dataset.py
+sky launch harbor-train/configs/harbor-grpo-qwen3-8b.yaml
+
+# 5. Eval
+uv run scripts/prepare_ood_eval.py --build --push
+# eval config TBD based on harbor eval path
+```
+
+## Files
+
+```
+fleet-worktrial/
+├── README.md                          # this file
+├── notes.md                           # design decisions, tradeoffs, known issues
 ├── scripts/
-│   ├── scrape_prs.py      # Scrapes candidate PRs using GitHub API
-│   ├── build_task.py      # Generates task folders from scraped candidates
-│   ├── validate_task.py   # Runs Docker-based two-canary validation
-│   └── push_images.py     # Parallel build & push to registry
-├── templates/
-│   ├── Dockerfile.*       # Repo-specific Docker templates
-│   └── README.md          # Documentation on repo extras chosen
-├── tasks/                 # Generated task instances (task_001, etc.)
-└── status.md              # Current project status and roadmap
+│   ├── scrape_prs.py
+│   ├── build_task.py
+│   ├── validate_task.py
+│   ├── push_images.sh
+│   ├── prepare_harbor_dataset.py
+│   └── prepare_ood_eval.py
+├── templates/Dockerfile.{requests,click,flask,httpx}
+├── tasks/task_XXX/                    # 12 validated tasks
+├── data/
+│   ├── train.parquet
+│   └── ood_eval.parquet
+├── results/
+│   ├── training_curve.png
+│   └── eval_results.json
+├── notes/                             # recon docs, debug logs
+└── harbor-train/                      # upstream clone
 ```
-
-## Getting Started
-
-### Prerequisites
-- Python 3.11+
-- Docker Desktop
-- GitHub Personal Access Token (for scraping)
-- `uv` for dependency management (optional but recommended)
-
-### Setup
-1. Clone the repository.
-2. Set up your environment variables in `.env` (refer to `.env.example` if available):
-   ```bash
-   GITHUB_TOKEN=your_token
-   DOCKER_REGISTRY=gcr.io/your-project
-   ```
-
-## Usage
-
-### 1. Scrape Candidates
-Identify merged PRs that include new tests and clear fixes.
-```bash
-python scripts/scrape_prs.py psf/requests pallets/click
-```
-
-### 2. Build Tasks
-Materialize the JSON candidates into directory-based task instances.
-```bash
-python scripts/build_task.py tasks/candidates_psf_requests.json
-```
-
-### 3. Validate Tasks
-Run the "Two-Canary" check:
-- **Canary 1**: Gold patch applied -> Tests MUST pass.
-- **Canary 2**: No patch applied -> Tests MUST fail.
-```bash
-python scripts/validate_task.py
-```
-
-### 4. Push Images
-Build and push the validated task images to your registry for use in training.
-```bash
-python scripts/push_images.py
-```
-
-## Task Design
-
-Each task uses a `python:3.11-slim` base image and includes:
-- **Editable Install**: The repository is installed in editable mode with appropriate test extras (e.g., `socks` for requests, `async,dotenv` for flask).
-- **Evaluation Script**: A standalone `eval_script.sh` that targets specific test files and functions affected by the PR.
-- **Parametrized Commits**: Dockerfiles are built using a `BASE_COMMIT` build argument to ensure reproducibility.
