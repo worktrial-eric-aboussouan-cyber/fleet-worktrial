@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew install *)",
+      "Bash(/opt/homebrew/bin/brew install *)",
+      "Read(//opt/homebrew/bin/**)",
+      "Read(//opt/**)",
+      "Bash(curl -LsSf https://astral.sh/uv/install.sh)",
+      "Bash(sh)",
+      "Bash(/Users/fleet/.local/bin/uv *)",
+      "Bash(curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-darwin-arm.tar.gz -L)",
+      "Bash(tar -xzf google-cloud-cli-darwin-arm.tar.gz -C /Users/fleet/)",
+      "Bash(CLOUDSDK_CORE_DISABLE_PROMPTS=1 /Users/fleet/google-cloud-sdk/install.sh --quiet --path-update=true)",
+      "Bash(/Users/fleet/google-cloud-sdk/bin/gcloud *)",
+      "Bash(xcode-select -p)",
+      "Bash(/usr/bin/python3 --version)",
+      "Bash(/Users/fleet/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/bin/python3.11 --version)",
+      "Bash(CLOUDSDK_PYTHON=/Users/fleet/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/bin/python3.11 /Users/fleet/google-cloud-sdk/bin/gcloud *)",
+      "Bash(export CLOUDSDK_PYTHON=/Users/fleet/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/bin/python3.11)",
+      "Bash(export PATH=\"/Users/fleet/google-cloud-sdk/bin:$PATH\")",
+      "Bash(gcloud auth *)",
+      "Bash(git clone *)",
+      "Bash(gcloud config *)",
+      "Bash(ln -sf /Users/fleet/google-cloud-sdk/bin/gcloud /Users/fleet/.local/bin/gcloud)",
+      "Bash(ln -sf /Users/fleet/google-cloud-sdk/bin/gsutil /Users/fleet/.local/bin/gsutil)",
+      "Bash(gcloud --version)",
+      "Bash(ln -sf /Users/fleet/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/bin/python3.11 /Users/fleet/.local/bin/python3.11)",
+      "Bash(python3.11 --version)",
+      "Bash(chmod 600 /Users/fleet/.ssh/config)",
+      "Bash(python3.11 *)",
+      "Bash(kill 7659)",
+      "Bash(python3 *)"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+Repos — picked 4 well-maintained, popular Python libraries with good test coverage:
+
+psf/requests, pallets/flask, pallets/click, encode/httpx
+
+PR filters (to get clean, learnable tasks):
+
+✅ Must have a linked issue (Fixes #NNN / Closes #NNN) — ensures there's a real problem statement
+✅ Must touch both source files AND test files — so the eval script has real tests to run
+✅ 5–500 lines changed, max 8 files — not too trivial, not too large
+❌ Drop bot PRs, doc-only PRs, pure refactors/chores/bumps — no meaningful coding signal
+❌ Drop PRs with no source changes (test-only) — agent needs something to actually fix
+

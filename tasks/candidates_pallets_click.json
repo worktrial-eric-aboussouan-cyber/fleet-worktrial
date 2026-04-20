@@ -1,0 +1,1081 @@
+[
+  {
+    "repo": "pallets/click",
+    "pr_number": 3328,
+    "pr_title": "Show default string in prompt",
+    "pr_body": "This PR build-up on #2837 (original contributor deleted its fork) and #3165 (revival based on AI slop) to use the value of `show_default` in prompt if the latter is a string. Which aligns the display with the help screen.\r\n\r\nAlso adds a lot of unit tests for edge-cases for default prompt displaying.\r\n\r\nThis closes #2836.",
+    "issue_number": "2836",
+    "issue_title": "`show_default` as a string isn't used in prompts as the default shown",
+    "issue_body": "The behavior of `click.Option(\"--name\", default=\"default\", show_default=\"show_default\", prompt=True)` is different for the help text and for the prompt.\r\n\r\nHelp: \ud83d\udc4d \r\n```\r\nUsage: foo.py [OPTIONS]\r\n\r\nOptions:\r\n  --name TEXT  [default: (show_default)]\r\n  --help       Show this message and exit.\r\n```\r\n\r\nPrompt: \ud83d\udc4e \r\n```\r\nName [default]:\r\n```\r\n\r\nIdeally, this would also show the `show_default`:\r\n```\r\nName [show_default]:\r\n```\r\n\r\nEnvironment:\r\n\r\n- Python version: 3.11.6\r\n- Click version: 8.1.6\r\n",
+    "merge_sha": "76552ff1e8c85837f911fc34037e702ae4327eda",
+    "base_commit": "8c95c73bd5ef89eac638f85f1904a104ba4b1a32",
+    "merged_at": "2026-04-16T08:23:20+00:00",
+    "additions": 82,
+    "deletions": 5,
+    "total_lines": 87,
+    "test_files": [
+      "tests/test_options.py",
+      "tests/test_termui.py"
+    ],
+    "source_files": [
+      "src/click/core.py",
+      "src/click/termui.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "src/click/termui.py",
+      "tests/test_options.py",
+      "tests/test_termui.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3299,
+    "pr_title": "Fix speculative empty string check",
+    "pr_body": "Fix #3298 by checking against a speculative empty string.\r\n\r\nThat not unreasonable given the hard-coded nature of the empty string.",
+    "issue_number": "3298",
+    "issue_title": "semver.Version as default causing an error",
+    "issue_body": "Any instance of `semver.Version` set as `default` in an option will lead to an error when Click tries to show it in the help text.\nThe problem seems to be that `Version` allows comparison to strings, and Click, when building the help text, tries to check the default value against an empty string `\"\"`, which cannot be parsed by `semver.Version`:\n\n```\n  File \".venv/lib/python3.12/site-packages/click/core.py\", line 3091, in get_help_extra\n    elif default_value == \"\":\n         ^^^^^^^^^^^^^^^^^^^\n  File \".venv/lib/python3.12/site-packages/semver/version.py\", line 52, in wrapper\n    return operator(self, other)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \".venv/lib/python3.12/site-packages/semver/version.py\", line 467, in __eq__\n    return self.compare(other) == 0\n           ^^^^^^^^^^^^^^^^^^^\n  File \".venv/lib/python3.12/site-packages/semver/version.py\", line 394, in compare\n    other = cls.parse(other)\n            ^^^^^^^^^^^^^^^^\n  File \".venv/lib/python3.12/site-packages/semver/version.py\", line 644, in parse\n    raise ValueError(f\"{version} is not valid SemVer string\")\nValueError:  is not valid SemVer string\n```\n\nThis can be replicated with the following code by trying to print the help text:\n\n<details>\n\n```python\nimport click\nfrom semver import Version\n\n\nclass SemverType(click.ParamType):\n    name = \"semver\"\n\n    def convert(self, value: str | Version, param: click.Parameter | None, ctx: click.Context | None) -> Version:\n        if isinstance(value, Version):\n            return value\n\n        try:\n            return Version.parse(value)\n        except ValueError as e:\n            raise self.fail(str(e), param, ctx) from e\n\n\n@click.command()\n@click.option(\n    \"--version\",\n    type=SemverType(),\n    default=Version(1, 0, 0),\n    show_default=True,\n)\ndef cli(version: Version | None) -> None:\n    print(version)\n\n\nif __name__ == \"__main__\":\n    cli()\n```\n\n</details>\n\nBy quickly inspecting the code, I'd say this could be fixed by checking whether `default_value` is actual",
+    "merge_sha": "1458800409ed12076f18451889b0857db36aa522",
+    "base_commit": "04ef3a6f473deb2499721a8d11f92a7d2c0912f2",
+    "merged_at": "2026-04-08T21:30:46+00:00",
+    "additions": 29,
+    "deletions": 5,
+    "total_lines": 34,
+    "test_files": [
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "src/click/core.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3244,
+    "pr_title": "Expose original file descriptor in `CliRunner`",
+    "pr_body": "In #2865, a user realized that using standard library's `faulthandler` is crashing in `CliRunner`. That's because in `CliRunner`'s isolation, `sys.stderr` is a `_NamedTextIOWrapper` around a `BytesIO` and as such as no `fileno()`.\r\n\r\nThis PR gives `_NamedTextIOWrapper` a real `fileno()` so it can play nice with  C-level consumers that need the original file descriptor, like `faulthandler`, `subprocess`, C extensions, etc.\r\n\r\nSolution is inspired by [pytest](https://docs.pytest.org/en/stable/how-to/capture-stdout-stderr.html) own's `capsys` and `capfd` modes.\r\n\r\nThis is an adjacent issue of #3139 and #3235, and fix #2865.",
+    "issue_number": "2865",
+    "issue_title": "`CliRunner` terminates with `io.UnsupportedOperation` when using `faulthandler`",
+    "issue_body": "It looks like the output redirection for `CliRunner` doesn't play nicely with Python's `faulthandler` library, as it terminates prematurely with the following backtrace (slightly modified to hide local filesystem details):\n\n```pytb\nTraceback (most recent call last):\n  File \"$CONDA_PREFIX/lib/python3.11/site-packages/click/testing.py\", line 408, in invoke\n    return_value = cli.main(args=args or (), prog_name=prog_name, **extra)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"$CONDA_PREFIX/lib/python3.11/site-packages/click/core.py\", line 1078, in main\n    rv = self.invoke(ctx)\n         ^^^^^^^^^^^^^^^^\n  File \"$CONDA_PREFIX/lib/python3.11/site-packages/click/core.py\", line 1434, in invoke\n    return ctx.invoke(self.callback, **ctx.params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"$CONDA_PREFIX/lib/python3.11/site-packages/click/core.py\", line 783, in invoke\n    return __callback(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"./test_click.py\", line 12, in main\n    faulthandler.enable()\nio.UnsupportedOperation: fileno\n```\n\nCode for `test_click.py` that replicates the problem:\n\n```python\nimport click\nfrom click.testing import CliRunner\nimport faulthandler\nimport traceback\n\n@click.command()\n@click.option('--flag', type=bool, default=True)\ndef main(flag):\n    print(\"Executing main function...\")\n    if flag:\n      print(\"Registering faulthandler\")\n      faulthandler.enable()\n    print(\"Finished executing main function.\")\n\nif __name__ == '__main__':\n    flag_value = True\n    runner = CliRunner()\n    result = runner.invoke(main, [\"--flag\", flag_value])\n    print(\"Exit code = %d; contents of stdout:\\n%s\" % (result.exit_code, result.stdout))\n    if result.exit_code != 0:\n        traceback.print_exception(result.exc_info[1])\n```\n\nThe code was then executed by running `python test_click.py`\n\nI assume the problem is that the `CliRunner` redirected stderr doesn't implement some details that are required by the `",
+    "merge_sha": "89af4ae2d682e8ab9f14a036bad19e8990d828d4",
+    "base_commit": "878de46100e9c29aea9dab5b385b8116863cb5e3",
+    "merged_at": "2026-04-16T08:06:04+00:00",
+    "additions": 137,
+    "deletions": 6,
+    "total_lines": 143,
+    "test_files": [
+      "tests/test_testing.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/testing.md",
+      "src/click/testing.py",
+      "tests/test_testing.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3240,
+    "pr_title": "Reduce blast-radius of `UNSET` in `default_map`",
+    "pr_body": "This PR reproduce the case pointed out at https://github.com/pallets/click/pull/3224#issuecomment-3968643305 , as we have no coverage of the effect of UNSET in `default_map`.\r\n\r\nThe problem is that default management is spread across `lookup_default`, `get_default` and `consume_value`, so we need to make all them bullet-proof else they all leaks into each other because they evaluate `UNSET` as a truthy value. To make the code somewhat manageable, I added a private `_default_map_has` utility method whose role is to be the single source of truth.\r\n\r\nSo this PR is somewhat a follow-up on #3224, where we had to make the evaluation in `lookup_default` more complex to hide `UNSET` to fix #3145.",
+    "issue_number": "3145",
+    "issue_title": "`lookup_default` returns `Sentinel.UNSET` instead of `None`",
+    "issue_body": "Upgrading click to 8.3.0 or 8.3.1 causes a regression in lookup_default\n\n# Reproduce\n\nChange the click dependency in the below reproduce case to 8.2.1 and the assertion does not fail.\n\nInstall uv.  Run with `uv run repro_click_unset_regression.py` or simply `repro_click_unset_regression.py'.\n \n```python\n#!/usr/bin/env -S uv run\n# /// script\n# dependencies = [\"click==8.3.1\"]\n# ///\n\"\"\"\nRun with uv installed:\n  repro_click_unset_regression.py\nExpected (pre 8.3.0): lookup_default returns the prefix-level default string or None.\nActual (8.3.0+): returns Sentinel.UNSET instead of None.\n\"\"\"\nimport importlib.metadata\nimport sys\nimport click\n\nclass CustomClickContext(click.Context):\n    def lookup_default(self, name: str, call: bool = False):\n        if call:\n            default = super().lookup_default(name, call=True)  # call: Literal[True]\n        else:\n            default = super().lookup_default(name, call=False)  # call: Literal[False]\n\n        # Original logic (kept to reproduce): treats any non-None (including sentinel) as a real default.\n        if default is not None:\n            return default\n        prefix = name.split(\"_\", 1)[0]\n        group = getattr(self, \"default_map\", {}).get(prefix)\n        if group:\n            return group.get(name)\n        return default\n\ndef describe(value):\n    cls = value.__class__\n    return {\n        \"repr\": repr(value),\n        \"type\": f\"{cls.__module__}.{cls.__qualname__}\",\n        \"has_name_attr\": hasattr(value, \"name\"),\n        \"name_attr\": getattr(value, \"name\", None),\n    }\n\ndef main():\n    default_map = {\"app\": {\"email\": \"prefix-param-level@example.com\"}}\n    cmd = click.Command(\"get-views\")\n    ctx = CustomClickContext(cmd, info_name=None)\n    ctx.default_map = default_map\n\n    val = ctx.lookup_default(\"email\", False)\n    info = describe(val)\n    print(f\"click version (importlib.metadata): {importlib.metadata.version('click')}\")\n    print(\"lookup_default raw:\", info)\n    # This assert fails under \u2265 8.3.0 because val is the",
+    "merge_sha": "4a352253c9ff013e36d11e4a6820d36d00ff2cd4",
+    "base_commit": "c7e1ba8448cbcb2cdd9c1c7f4a592e863dcc3995",
+    "merged_at": "2026-04-16T08:32:48+00:00",
+    "additions": 47,
+    "deletions": 12,
+    "total_lines": 59,
+    "test_files": [
+      "tests/test_defaults.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_defaults.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3235,
+    "pr_title": "Allow debugger interactions in tests",
+    "pr_body": "This PR patches `CliRunner` to allow `pdb` interactions in tests.\r\n\r\n`CliRunner` captures `stdout`, which breaks `pdb.set_trace()` and interactive debuggers. You can't debug inside an invoked command because `stdout` is redirected.\r\n\r\nBy playing nice with `pdb` in Click tests, we can improve the experience of developers and maintainers, and as a far reaching goal, maybe improve bug reporting from the community.\r\n\r\nThis PR:\r\n- addresses #654\r\n- addresses #843\r\n- addresses a side comment of https://github.com/pallets/click/issues/824#issuecomment-376249910\r\n- supersedes an attempt at fixing it at #951 ",
+    "issue_number": "654",
+    "issue_title": "`click.testing` is not properly proxying `stdout`",
+    "issue_body": "For example, you cannot set `import pdb; pdb.set_trace()` in your code, or drop into debugger on exceptions.\n\nThis works:\n\n``` python\nfrom io import StringIO\nimport sys\n\nfrom contextlib import contextmanager\n\nclass StreamWrapper(object):\n\n    def __init__(self, stream):\n        self.stream = stream\n        self._stringio_ = StringIO()\n\n    def __getattr__(self, name):\n        return getattr(self.stream, name)\n\n    def write(self, s, *args, **kw):\n        self.stream.write(s)\n        self._stringio_.write(s)\n\n    @classmethod\n    @contextmanager\n    def stdout(cls):\n        __stdout__ = sys.stdout\n        sys.stdout = cls(sys.stdout)\n        yield sys.stdout._stringio_\n        sys.stdout = __stdout__\n\ndef invoke(cmd, args=()):\n    with StreamWrapper.stdout() as c:\n        cmd(standalone_mode=False, args=args)\n    return c.getvalue()\n```\n",
+    "merge_sha": "ac2dd7aadf08aa0ce7f75bf0e96b95ad5e62d1b9",
+    "base_commit": "1339fd3323357119a9c7a6326c788f80295954ce",
+    "merged_at": "2026-04-11T08:32:02+00:00",
+    "additions": 100,
+    "deletions": 0,
+    "total_lines": 100,
+    "test_files": [
+      "tests/test_testing.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      ".pre-commit-config.yaml",
+      "CHANGES.rst",
+      "src/click/testing.py",
+      "tests/test_testing.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3225,
+    "pr_title": "Fix callable ``flag_value`` being instantiated when used as a default",
+    "pr_body": "This fix issue #3121, where a `flag_value` set to a class produce an instance of that class in the particular case that it is explicitly set as the default.\r\n\r\nThe fix consist in lazily resolving the default value at the time of use, with a branch dedicated to callables.\r\n\r\nI extended the unittests to `default_map` to demonstrate the current state of callable presence in them.",
+    "issue_number": "3121",
+    "issue_title": "Using a class as a `flag_value` causes the default to be instantiated in click 8.3.0",
+    "issue_body": "Consider the following code:\n\n```python\nimport click\n\nclass Foo:\n    pass\n\nclass Bar:\n    pass\n\n@click.command()\n@click.option(\"--foo\", \"ty\", flag_value=Foo, type=click.UNPROCESSED, default=True)\n@click.option(\"--bar\", \"ty\", flag_value=Bar, type=click.UNPROCESSED)\ndef main(ty):\n    click.echo(repr(ty))\n\nif __name__ == \"__main__\":\n    main()\n```\n\nWhen run with no arguments using click 8.3.0, this prints `<__main__.Foo object at 0x10bed92b0>`, indicating that `Foo` has been instantiated, which is not what I want.  When using an older version of click, the script outputs `<class '__main__.Foo'>`, which is what I want.\n\nIf the script is passed an explicit `--foo` or `--bar` option, a class is output, indicating that the problem lies with the default handling.\n\nChanging the `default=True` to `default=Foo` does not help.",
+    "merge_sha": "5850ef97230f84c74d0234ab0f30f23b398a6eee",
+    "base_commit": "ae46cfd6bc997804893adc799589248eadcdbc29",
+    "merged_at": "2026-03-01T23:41:05+00:00",
+    "additions": 234,
+    "deletions": 9,
+    "total_lines": 243,
+    "test_files": [
+      "tests/test_defaults.py",
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_defaults.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3152,
+    "pr_title": "Fix handling of options which set both is_flag=False and flag_value=...",
+    "pr_body": "Given that it's >1 month and the original contributor hasn't made changes, I've squashed #3104 and attempted to bring it up to spec so that the one-line fix itself can merge.\nTo preserve some level of attribution to the original author, I squashed those commits and added myself as a co-author on the resulting commit.\n\nThe separate \"cleanup\" commit aims to fix internal doc, presentation in the changelog, and to tidy up the new test.\nHappy to take further action if it's helpful.\n\n- Fix #3084: Correct flag optional value behavior and add comprehensive tests\n- Cleanup changes to fix flag_value bug\n\n<!--\nBefore opening a PR, open a ticket describing the issue or feature the\nPR will address. An issue is not required for fixing typos in\ndocumentation, or other simple non-code changes.\n\nReplace this comment with a description of the change. Describe how it\naddresses the linked ticket.\n-->\n\n<!--\nLink to relevant issues or previous PRs, one per line. Use \"fixes\" to\nautomatically close an issue.\n\nfixes #<issue number>\n-->\n\n<!--\nEnsure each step in CONTRIBUTING.rst is complete, especially the following:\n\n- Add tests that demonstrate the correct behavior of the change. Tests\n  should fail without the change.\n- Add or update relevant docs, in the docs folder and in code.\n- Add an entry in CHANGES.rst summarizing the change and linking to the issue.\n- Add `.. versionchanged::` entries in any relevant code docs.\n-->\n",
+    "issue_number": "3084",
+    "issue_title": "Bug: Optional value not optional anymore",
+    "issue_body": "### Outline\n\nAs stated in [official documentation](https://click.palletsprojects.com/en/stable/options/#optional-value): \n> Setting `is_flag=False, flag_value=value` tells Click that the option can still be passed a value, but if only the flag is given, the value will be `flag_value`.\n\nSince 8.3.0 this doesn't work anymore, instead `SystemExit` with \"Error: Option '--xyz' requires an argument.\" is thrown.\n\n### Replication of bug\n\nExample taken from documentation:\n```python\n@click.command()\n@click.option(\"--name\", is_flag=False, flag_value=\"Flag\", default=\"Default\")\ndef hello(name):\n    click.echo(f\"Hello, {name}!\")\n```\n\n```shell\n$ hello --name\nError: Option '--name' requires an argument.\n```\n\n### Expected behavior\n\nThe code example above should work as\n```shell\n$ hello --name\nHello, Flag!\n```\n\nIt's not even working in the generated documentation anymore: while [documentation up to Sep, 10th](https://web.archive.org/web/20250910222023/https://click.palletsprojects.com/en/stable/options/#optional-value) shows the expected and correct behavior, [current documentation](https://click.palletsprojects.com/en/stable/options/#optional-value) demonstrates the bug.\n\n- Python version: 3.11\n- Click version: 8.3.0\n",
+    "merge_sha": "ebcd548d50662bc8fa4f8b9ec7fe13cb8310bfaa",
+    "base_commit": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
+    "merged_at": "2025-11-20T03:49:38+00:00",
+    "additions": 55,
+    "deletions": 3,
+    "total_lines": 58,
+    "test_files": [
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3090,
+    "pr_title": "Ensure that `type_cast_value` never gets `UNSET`",
+    "pr_body": "In order to ensure that user-defined `type_cast_value` hooks are never\ncalled with a value of `UNSET`, it is necessary to intercept `UNSET`\nvalues and, in the particular cases in which `UNSET` needs special\nhandling, preempt any call to `type_cast_value()`.\n\n`process_value()` is updated to check before calling `type_cast_value`\nand to skip the call entirely if an `UNSET` value is detected. Passing\na value of `None` would not have the same effect for `click.Option`,\nwhich previously had logic which is specific to the `value is UNSET`\ncase, and which cannot be reliably detected if a `None` value is\npassed in.\n\nThis means that `type_cast_value()` is no longer guaranteed to be called\nduring argument processing, but when it is called, it's guaranteed not to\nsee an `UNSET` value. New tests explore this only from the perspective of\nchecking if `UNSET` is ever passed, not in terms of pinning down when/if\nthe hook gets called.\n\nresolves #3069\n\n-----\n\nI think this change is worth considering as a fix for #3069, but I'm not\ncertain that it's good because it seems to trade one kind of incompatibility,\nwhether or not `UNSET` gets passed, for a different one: whether or not\n`type_cast_value()` gets called at all.\n\nIf `type_cast_value()` is supposed to never see an `UNSET` value, and\n`process_value` is \"holding an `UNSET` value, then you might think that all\nwe need is\n\n```python\ntype_cast_value(..., value if value is not UNSET else None)\n```\n\nbut `Option.type_cast_value` throws a wrench in that, since it needs to\nsee the `UNSET` sentinel to properly determine its behavior.\n\nI chose to take the same approach for handling vis-a-vis `multiple` and\n`nargs=-1` in `Parameter`, on the grounds that it seemed \"better aligned\" with\nwhat has to happen in `Option`.\n",
+    "issue_number": "3069",
+    "issue_title": "`Sentinel` is passed to `type_cast_value`",
+    "issue_body": "Starting in version 8.3.0, a `Sentinel` object is passed in to the `type_cast_value` function of the `Parameter` class and its derivatives if no value is supplied.\n\nReproduction:\n\n```python\n# cli_bug.py\nimport click\n\n\nclass CSVOption(click.Option):\n    def type_cast_value(self, ctx, value):\n        if value:\n            return value.split(\",\")\n        return value\n\n\n@click.command(name=\"run\")\n@click.option(\"--csv\", cls=CSVOption)\ndef main(csv):\n    click.echo(f\"{csv!r}\")\n\nif __name__ == \"__main__\":\n    main()\n```\n\n```shell\n$ uv run --with 'click==8.3.0' cli_bug.py\n\nInstalled 1 package in 1ms\nTraceback (most recent call last):\n  File \"/home/coder/workspace/scratch/click-8_3_0-bug/cli_bug.py\", line 17, in <module>\n    main()\n  File \"/home/coder/.cache/uv/archive-v0/9Q5N3REh-YZUOJbO3iHRv/lib/python3.10/site-packages/click/core.py\", line 1462, in __call__\n    return self.main(*args, **kwargs)\n  File \"/home/coder/.cache/uv/archive-v0/9Q5N3REh-YZUOJbO3iHRv/lib/python3.10/site-packages/click/core.py\", line 1382, in main\n    with self.make_context(prog_name, args, **extra) as ctx:\n  File \"/home/coder/.cache/uv/archive-v0/9Q5N3REh-YZUOJbO3iHRv/lib/python3.10/site-packages/click/core.py\", line 1206, in make_context\n    self.parse_args(ctx, args)\n  File \"/home/coder/.cache/uv/archive-v0/9Q5N3REh-YZUOJbO3iHRv/lib/python3.10/site-packages/click/core.py\", line 1217, in parse_args\n    _, args = param.handle_parse_result(ctx, opts, args)\n  File \"/home/coder/.cache/uv/archive-v0/9Q5N3REh-YZUOJbO3iHRv/lib/python3.10/site-packages/click/core.py\", line 2516, in handle_parse_result\n    value = self.process_value(ctx, value)\n  File \"/home/coder/.cache/uv/archive-v0/9Q5N3REh-YZUOJbO3iHRv/lib/python3.10/site-packages/click/core.py\", line 2401, in process_value\n    value = self.type_cast_value(ctx, value)\n  File \"/home/coder/workspace/scratch/click-8_3_0-bug/cli_bug.py\", line 7, in type_cast_value\n    return value.split(\",\")\nAttributeError: 'Sentinel' object has no attribute 'split'\n```\n\n``",
+    "merge_sha": "8d4051e9e57be1bfb5421e3eb5a93b4b42077b0c",
+    "base_commit": "06f52a45782a0bd2cb9aa5f289afb68ac3b2b2e5",
+    "merged_at": "2025-10-09T02:41:28+00:00",
+    "additions": 102,
+    "deletions": 9,
+    "total_lines": 111,
+    "test_files": [
+      "tests/test_arguments.py",
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_arguments.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3079,
+    "pr_title": "Fix default handling to defer `UNSET` normalization",
+    "pr_body": "When options are being parsed, multiple options may evaluate to have defaults of `UNSET`, and some may evaluate to have explicitly set defaults of `None`. The normalization of `UNSET -> None` is now deferred until all options have been parsed, so that it is possible to accurately evaluate and save the first non-UNSET default value.\r\n\r\nA new test exercises this functionality by pointing two flags at the same parameter declaration, and showing that their behavior is not order sensitive when only one of the flags has a default.\r\n\r\nresolves #3071\r\n\r\n---\r\n\r\nThe PR template says to add a note in `CHANGES.rst` for the change, but there's no header for the next release, so I wasn't sure where to put a change note. If a maintainer gives me a pointer in terms of what to do, I'm happy to amend with a change note. :slightly_smiling_face: ",
+    "issue_number": "3071",
+    "issue_title": "`default=True` on feature flags is order-sensitive",
+    "issue_body": "The following code:\n\n```python\nimport click\n\n\n@click.command()\n@click.option(\"--red\", \"color\", flag_value=\"red\")\n@click.option(\"--green\", \"color\", flag_value=\"green\", default=True)\n@click.option(\"--blue\", \"color\", flag_value=\"blue\")\ndef main(color: str) -> None:\n    print(repr(color))\n\n\nif __name__ == \"__main__\":\n    main()\n```\n\nwhen run with no arguments using click 8.2.1 outputs `'green'`, which is what I expect.  If click 8.3.0 is used instead, then it outputs `None` \u2014 but if the `--green` option is moved above the `--red` option in the script, click 8.3.0 will output `'green'`.\n\nI believe that the script should output `'green'` regardless of the declaration order of the options.\n\nEnvironment:\n\n- Python version: 3.13.7\n- Click version: 8.2.1 and 8.3.0",
+    "merge_sha": "27aaed3fe5bcd6adedd6e91de234914af9859cf1",
+    "base_commit": "6a1c0d077311f180b356965914e2de5b9e0fdb44",
+    "merged_at": "2025-09-24T17:07:42+00:00",
+    "additions": 43,
+    "deletions": 5,
+    "total_lines": 48,
+    "test_files": [
+      "tests/test_defaults.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_defaults.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3058,
+    "pr_title": "Forward exception information to resources registered in a context",
+    "pr_body": "Updated `Context.close` and `Context.__exit__` to allow forwarding exceptions to the `__exit__` methods of the resources registered using `Context.with_resource`.\r\n\r\nAdded an extra function to handle both `Context.close` and `Context.__exit__`, called `Context._close_with_exception_info` that accepts all the parameters that `__exit__` and moved the `Content.close` logic there.\r\n\r\nAdded relevant tests.\r\n\r\n- fixes #2447\r\n\r\n",
+    "issue_number": "2447",
+    "issue_title": "Exception information isn't passed through to context.with_resource managed resources",
+    "issue_body": "When writing a simple tool with a bunch of commands updating a database, I was using a context manager in each command that would begin a transaction, and then commit it on success, or rollback on error.\r\n\r\nInitially, I thought I'd be able to avoid some boilerplate on every subcommand by adding the session as a managed resource via ctx.with_resource(context_manager).  However, while this works in the success case, it will also commit the transaction if an unexpected exception occurs, since the exception information doesn't seem to be being passed through to the context manager.\r\n\r\nEg. given the below context manager:\r\n\r\n    class TestContextManager:\r\n        def __enter__(self):\r\n            print(\"ENTER\")\r\n\r\n        def __exit__(self, exc_type, exc_val, traceback):\r\n            print(\"EXIT\", exc_type, exc_val, traceback)\r\n\r\nUsing it in a regular context manager via:\r\n\r\n    with TestContextManager():\r\n        raise Exception()\r\n\r\nwill correctly print the exc_type, exc_val and traceback parameters when an exception occurs.  But using it via:\r\n\r\n    @click.group()\r\n    @click.pass_context\r\n    def cli(ctx):\r\n        ctx.obj = ctx.with_resource(TestContextManager())\r\n\r\nThese will always be `None`, and so any context manager that needs to act differently on the occurrence of an exception vs success will always treat this as success.  (And likewise, try/except blocks will never trigger in function-style ones using the `@contextmanager` decorator.)\r\n\r\nWould it be possible for the exception information to be passed through to managed resources so that context managers that treat success/failure cases differently operate correctly?\r\n\r\nEnvironment:\r\n\r\n- Python version: 3.10.9\r\n- Click version: 8.1.3\r\n",
+    "merge_sha": "36deba8a95a2585de1a2aa4475b7f054f52830ac",
+    "base_commit": "16fe802a3f96c4c8fa3cd382f1a7577fda0c5321",
+    "merged_at": "2025-09-12T17:16:56+00:00",
+    "additions": 151,
+    "deletions": 3,
+    "total_lines": 154,
+    "test_files": [
+      "tests/test_context.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_context.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 3021,
+    "pr_title": "Fix rendering when `prompt_suffix` is empty",
+    "pr_body": "This changes the implementation of the fixes in #1836 and #2093 to address the problem that they created when `click.prompt` or `click.confirm` has a `prompt_suffix` value which is empty.\r\n\r\nThis still fixes the problems reported in #665 and #2092 but does so without modifying the prompt and adding a trailing space.\r\n\r\nPreviously, the problem was solved by trimming all trailing space characters from the prompt and then adding a single trailing space to every prompt. This was only visible if the last character in the prompt wasn't a space character. In those cases a prompt like \"This is my prompt\" would render as \"This is my prompt \". Additionally, in the previous solution, if the `err=True` argument was passed, that final trailing space character that was added would be sent to STDOUT while the rest of the prompt would go to STDERR. This also wasn't very apparent since it was a space character.\r\n\r\nThis different implementation uses the last character of the prompt to work around #665 and #2092 instead of adding a space character. This fixes most of the potentially confusing behavior. It does retain one confusing behavior which is described above, where if you use `err=True` the last character of the prompt is sent to STDOUT instead of STDERR. Previously, this last character sent to STDOUT would always be a space character. Now if the last character of the prompt is not a space character, that final character will go to STDOUT.\r\n\r\nFor example if you call\r\n\r\n```python\r\nclick.prompt(\"bar\", prompt_suffix=\"\", err=True)\r\n```\r\n\r\nThe `ba` will go to STDERR and the `r` will go to STDOUT. Previously `bar` would go to STDERR and an added ` ` would go to STDOUT.\r\n\r\nThis odd behavior, which is already present but just applies to a space character, is worth accepting so that the `prompt_suffix` correctly renders the suffix as it did in version 7.1.2 and prior.\r\n\r\nThis also adds unit tests for cases where `prompt_suffix` is empty.\r\n\r\nThis fixes #3019\r\n\r\n<!--\r\nBefore opening a PR, ",
+    "issue_number": "3019",
+    "issue_title": "click.prompt and click.confirm argument prompt_suffix no longer works when suffix is empty",
+    "issue_body": "After #1836 and #2093 were merged the behavior of the `prompt_suffix` argument in the `click.prompt` and `click.confirm` functions changed.\n\n# Before these changes in click version 7.1.2\n\nPrior to the #1836 and #2093 PRs when an empty `prompt_suffix` was passed, no suffix was applied to the prompt.\n\nHere's how `prompt` used to behave\n\n```python\n>>> import click\n>>> click.prompt(\"test\", prompt_suffix=\"\")\ntestfoo\n'foo'\n>>> click.prompt(\"test\", prompt_suffix=\" \")\ntest foo\n'foo'\n```\n\nNotice that when a `prompt_suffix of `\"\"` is passed, there is no suffix after the prompt text of `test`. This is illustrated by how the text typed by the user (in this case `foo`) displays immediately after the prompt without a space character.\n\n# Current behavior in click 8.0.0 and newer\n\n```python\n>>> import click\n>>> click.prompt(\"test\", prompt_suffix=\"\")\ntest foo\n'foo'\n>>> click.prompt(\"test\", prompt_suffix=\" \")\ntest foo\n'foo'\n```\n\nNotice now that if you tell `prompt` to use no suffix, it still applies a space character suffix.\n\nThis is because the fixes in #1836 and #2093 presumes that the last character of the prompt is a space character. It then [`rstrip`s the space character and adds the space character back in](https://github.com/pallets/click/pull/1836/files#diff-1f88635ce1d1f86bb7f9de29ef053bf8fc628a13530d1d2c6a69d0ad637e32cdR130-R133). This doesn't work if the last character of the prompt is not a space character though.\n\nThis matters because it makes it impossible to do prompts like the following example\n\n# Example\n\n```python\nimport click\nclick.prompt(\"What IP address would you like? : 192.168.1.\", prompt_suffix=\"\")\n```\n\nThis would have the user enter the last octet of an IP and make it clear that they can only set something within the displayed subnet. The problem is that the resulting display looks like this\n\n```\nWhat IP address would you like? : 192.168.1. 123\n```\n\n# Note\n\nThe fixes in these two PRs can't just be reverted because the `readline` behavior that inspired them st",
+    "merge_sha": "8533c966b84783718e74286aa7b098f3ff1e9221",
+    "base_commit": "27aaed3fe5bcd6adedd6e91de234914af9859cf1",
+    "merged_at": "2025-10-02T05:56:42+00:00",
+    "additions": 38,
+    "deletions": 6,
+    "total_lines": 44,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/click/termui.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/termui.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2972,
+    "pr_title": "Don't include envvar in error hint when envvar not configured",
+    "pr_body": "Add a check for if `envvar` is `None` before appending to the error hint text.\r\n\r\nfixes #2971",
+    "issue_number": "2971",
+    "issue_title": "Error hint shows env var when one doesn't exist",
+    "issue_body": "#2696 added the environment variable to the error hint when `show_envvar` is set. However, it does not check to see if an `envvar` exists.\n\nclick-test.py\n```python\nimport click\n\n@click.command()\n@click.option(\"--foo\", envvar=\"FOO\", show_envvar=True, type=click.types.BOOL)\n@click.option(\"--bar\", show_envvar=True, type=click.types.INT)\ndef main(foo: bool, bar: int) -> None:\n    print(f\"{foo=} {bar=}\")\n\nif __name__ == '__main__':\n    main()\n```\n\nExamples of running this file where each argument is invalid. And one example of the help output.\n```\n$ python ./click-test.py --bar aaa\nUsage: click-test.py [OPTIONS]\nTry 'click-test.py --help' for help.\n\nError: Invalid value for '--bar' (env var: 'None'): 'aaa' is not a valid integer.\n$ python ./click-test.py --foo aaa\nUsage: click-test.py [OPTIONS]\nTry 'click-test.py --help' for help.\n\nError: Invalid value for '--foo' (env var: 'FOO'): 'aaa' is not a valid boolean.\n$ python ./click-test.py --help\nUsage: click-test.py [OPTIONS]\n\nOptions:\n  --foo BOOLEAN  [env var: FOO]\n  --bar INTEGER\n  --help         Show this message and exit.\n```\n\nI would expect the error hint for `--bar` to act like the help output by not displaying any information about an environment variable.\n\nEnvironment:\n\n- Python version: 3.10.12\n- Click version: 8.2.1\n",
+    "merge_sha": "0be2bd385064053bb75f92db317de128db729d52",
+    "base_commit": "c88f333de440c5066ff563f784a6561f4713cf78",
+    "merged_at": "2025-07-23T04:29:00+00:00",
+    "additions": 9,
+    "deletions": 1,
+    "total_lines": 10,
+    "test_files": [
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2940,
+    "pr_title": "testing/CliRunner: Fix regression related to EOF introduced in 262bdf0",
+    "pr_body": "Commit 262bdf0 ensured to raise an `EOFError` exception on end of input to simulate tty behavior and avoid blocking prompt during tests when no more input is available.\r\n\r\nHowever the introduced implementation has a side effect when testing a click command having a `File` type option or argument and when it is set to `stdin`: the command ends up with error due to the `Abort` exception being raised when the stdin `EOFError` exception is caught.\r\n\r\nTo prevent this undesirable side effect, prefer to raise the `EOFError` exceptions directly from the prompts functions inside the `CliRunner` class instead of doing it in the method overriding the iterator protcol for the` _NamedTextIOWrapper` class.\r\n\r\nRestore previous implementation of a test broken by changes of 262bdf0.\r\n\r\nFixes #2939.\r\n\r\n<!--\r\nBefore opening a PR, open a ticket describing the issue or feature the\r\nPR will address. An issue is not required for fixing typos in\r\ndocumentation, or other simple non-code changes.\r\n\r\nReplace this comment with a description of the change. Describe how it\r\naddresses the linked ticket.\r\n-->\r\n\r\n<!--\r\nLink to relevant issues or previous PRs, one per line. Use \"fixes\" to\r\nautomatically close an issue.\r\n\r\nfixes #<issue number>\r\n-->\r\n\r\n<!--\r\nEnsure each step in CONTRIBUTING.rst is complete, especially the following:\r\n\r\n- Add tests that demonstrate the correct behavior of the change. Tests\r\n  should fail without the change.\r\n- Add or update relevant docs, in the docs folder and in code.\r\n- Add an entry in CHANGES.rst summarizing the change and linking to the issue.\r\n- Add `.. versionchanged::` entries in any relevant code docs.\r\n-->\r\n",
+    "issue_number": "2939",
+    "issue_title": "Click 8.2.1 CliRunner raises SystemExit(1) when using click.File's stdin support",
+    "issue_body": "In Click 8.2.1, when testing the behavior of a command-line which uses `click.File`'s stdin as an argument, `CliRunner.invoke()` always throws a `SystemExit(1)` with `Aborted !` on stderr.\n\nSeems like a regression introduced by the change in #2934, as this `Aborted!` is generated when the main Click endpoint raises an `EofError`.\n\nReproducer :\n\n```python\n#!/usr/bin/env python3\n\nimport click\nfrom click.testing import CliRunner\n\n\n@click.command()\n@click.argument(\"file_input\", type=click.File(\"r\"))\ndef cli(file_input):\n    for line in file_input.readlines():\n        print(line.rstrip())\n\n\ndef test_cli():\n    result = CliRunner().invoke(cli, [\"-\"], input=\"test\\n\")\n    assert result.exit_code == 0, str(result)\n    assert result.output == \"test\\n\"\n\n\nif __name__ == \"__main__\":\n    cli()\n```\n\n``` shell\nnicolasd@pythagore:~/tmp/repro$ uv venv -p python3.13 venv\nUsing CPython 3.13.3 interpreter at: /usr/bin/python3\nCreating virtual environment at: venv\nActivate with: source venv/bin/activate\nnicolasd@pythagore:~/tmp/repro$ . ./venv/bin/activate\n(venv) nicolasd@pythagore:~/tmp/repro$ uv pip install pytest Click==8.2.1\nResolved 5 packages in 5ms\nInstalled 5 packages in 6ms\n + click==8.2.1\n + iniconfig==2.1.0\n + packaging==25.0\n + pluggy==1.6.0\n + pytest==8.3.5\n(venv) nicolasd@pythagore:~/tmp/repro$ echo foo | python3 test_repro.py -\nfoo\n(venv) nicolasd@pythagore:~/tmp/repro$ pytest test_repro.py \n===================================================================== test session starts =====================================================================\nplatform linux -- Python 3.13.3, pytest-8.3.5, pluggy-1.6.0\nrootdir: /home/nicolasd/tmp/repro\ncollected 1 item                                                                                                                                              \n\ntest_repro.py F                                                                                                                                         [100%]\n\n==================",
+    "merge_sha": "2a0e3ba907927ade6951d5732b775f11b54cb766",
+    "base_commit": "36deba8a95a2585de1a2aa4475b7f054f52830ac",
+    "merged_at": "2025-09-13T04:36:16+00:00",
+    "additions": 11,
+    "deletions": 11,
+    "total_lines": 22,
+    "test_files": [
+      "tests/test_chain.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/testing.py",
+      "tests/test_chain.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2935,
+    "pr_title": "fix shell completion for nested groups",
+    "pr_body": "continues #2907 \r\nfixes #2906",
+    "issue_number": "2906",
+    "issue_title": "Completion for commands in nested groups is broken in Click 8.2.0",
+    "issue_body": "## Summary\n\nIn Click 8.2.0, completion for commands in nested groups doesn't work as expected anymore. Instead of completing command options and/or arguments, completion infinitely repeats the command names for the group.\n\n## Example program\n\nInspired by the example in #2847 \n\nSave the following as `bin/nested` in a virtualenv\n\n```python\n#!/usr/bin/env python\n\n# nested\n\nimport click\n\n\ndef _complete_arg(ctx, _, incomplete):\n    values = [\n        \"foo\",\n        \"bar\",\n        \"foobar\",\n        \"baz\",\n    ]\n    return [v for v in values if v.startswith(incomplete)]\n\n@click.group\ndef main():\n    ...\n\n@main.group\ndef subgroup():\n    ...\n\n@subgroup.command\n@click.option(\"--name\", help=\"Name of something.\")\n@click.argument(\"arg\", shell_complete=_complete_arg)\ndef compile(name: str | None, arg: str) -> None:\n    \"\"\"Test argument completion in nested groups.\"\"\"\n    click.echo(f\"{name=} {arg=}\")\n\n\nif __name__ == \"__main__\":\n    main.main()\n```\n\nRun `eval \"$(_NESTED_COMPLETE=bash_source nested)\"` to setup completion (for bash)\n\n## Completion behavior\n\n|Prefix|8.2.0 completion suggestions (unexpected behavior)|8.1.8 completion suggestions (expected behavior)|\n|-|-|-|\n|`nested`|`subgroup`|`subgroup`|\n|`nested subgroup`|`compile`|`compile`|\n|`nested subgroup compile`|`compile`|`foo     bar     foobar  baz`|\n|`nested subgroup compile f`|none|`foo     foobar`|\n|`nested subgroup compile --`|`--help`|`--name  --help`|\n|`nested subgroup compile --name=n`|`compile`|`foo     bar     foobar  baz`|\n\n## Environment\n\n- Python version: Python 3.12.3\n- Click version: 8.2.0\n\n## Initial debugging\n\nReverting 0ef55fda47bb3d0dece21197d81d8d72a4250e73 for `src/click/shell_completion.py` restores the 8.1.8 completion behavior.\n\nLooking at the change, I believe that the bug is actually caused by a simple statement reordering . IMO https://github.com/pallets/click/blob/af73ce4793bf38edf11a16e959ef0d8a0dbf6c1f/src/click/shell_completion.py#L567-L571 should be the following to preserve the 8.1.8 behavi",
+    "merge_sha": "b7cf06970e40a3144eb963ff34ed7c38934afb40",
+    "base_commit": "884af5c20fdc95c9c7352df35c37273391464fb9",
+    "merged_at": "2025-05-20T20:14:37+00:00",
+    "additions": 33,
+    "deletions": 2,
+    "total_lines": 35,
+    "test_files": [
+      "tests/test_shell_completion.py"
+    ],
+    "source_files": [
+      "src/click/shell_completion.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/shell_completion.py",
+      "tests/test_shell_completion.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2934,
+    "pr_title": "Raise an exception on end of input in CliRunner",
+    "pr_body": "<!--\r\nBefore opening a PR, open a ticket describing the issue or feature the\r\nPR will address. An issue is not required for fixing typos in\r\ndocumentation, or other simple non-code changes.\r\n\r\nReplace this comment with a description of the change. Describe how it\r\naddresses the linked ticket.\r\n-->\r\nWhen end of input is reached in CliRunner, `_NamedTextIOWrapper.readline` continues to return an empty string which does not match the behavior when running the program at the command line (in this case an EOFError is raised which causes an Abort to be raised).\r\n\r\nUsing `next()` instead of `readline` will raise `StopIteration` from `TextIOWrapper`. If we want to perfectly match the behavior of regular input, we could override `__next__` to raise `EOFError` (this will require a type: ignore due to mypy comparing types with `IOBase` instead of `TextIOWrapper`).\r\n\r\nfixes #2787\r\n\r\n<!--\r\nEnsure each step in CONTRIBUTING.rst is complete, especially the following:\r\n\r\n- Add tests that demonstrate the correct behavior of the change. Tests\r\n  should fail without the change.\r\n- Add or update relevant docs, in the docs folder and in code.\r\n- Add an entry in CHANGES.rst summarizing the change and linking to the issue.\r\n- Add `.. versionchanged::` entries in any relevant code docs.\r\n-->\r\n",
+    "issue_number": "2787",
+    "issue_title": "CliRunner and click.prompt doesn't work for testing ",
+    "issue_body": "### Summary\r\n\r\nWhen testing a Click command with `CliRunner`, it appears that `click.prompt` behaves unexpectedly in functional tests, especially when the terminal is not a true TTY. Specifically, when using `CliRunner` to simulate input in tests, `click.prompt` blocks indefinitely if more prompts are expected than input provided, making it impossible to test these commands correctly. This behavior is different from running the same code in a real shell environment, where input ends with EOF and the program gracefully handles the prompt.\r\n\r\n### Minimal Reproducible Example (MRE)\r\n\r\nHere is a minimal reproducible example that demonstrates the issue:\r\n\r\n```python\r\nimport click\r\nfrom click.testing import CliRunner\r\nfrom pytest import fixture\r\n\r\n\r\n@click.command()\r\n@click.option(\"-n\", \"--count\", default=2)\r\ndef main(count):\r\n    sum = 0\r\n    for i in range(count + 1):  # +1 is a bug in the code\r\n        sum += click.prompt(f\"Enter number {i + 1}\", type=int)\r\n    click.echo(f\"Sum: {sum}\")\r\n\r\n\r\n@fixture\r\ndef runner():\r\n    return CliRunner()\r\n\r\n\r\ndef test_program(runner):\r\n    result = runner.invoke(main, args=[\"-n2\"], input=\"1\\n2\")\r\n    assert \"3\" in result.output\r\n    assert result.exit_code == 0\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    main()\r\n```\r\n\r\n### Expected Behavior\r\n\r\nIn this example, there's a bug in the code (the `for` loop runs for `count + 1` iterations). When testing using the `CliRunner`, we expect it to behave similarly to how the program runs in a real shell environment. Specifically, when EOF is reached (input ends), the test should either handle the prompt and output accordingly, or raise an appropriate error that can be captured in a test.\r\n\r\nFor example, when running the test program in a shell script:\r\n\r\n```bash\r\n#!/bin/bash\r\n\r\noutput=$(echo -e \"1\\n2\\n\" | python main.py)\r\n\r\nif [[ \"$output\" == *\"Sum: 3\"* ]]; then\r\n  echo \"Test passed!\"\r\n  exit 0\r\nelse\r\n  echo \"Test failed!\"\r\n  echo \"Expected output: 'Sum: 3'\"\r\n  echo \"Actual output: $output\"\r\n  exit 1\r\nf",
+    "merge_sha": "262bdf02288daf9a37b9e815b44acafd62b5c6fe",
+    "base_commit": "cfa6f4ad3e0078db43f866246b483544afa33ed3",
+    "merged_at": "2025-05-20T23:07:15+00:00",
+    "additions": 27,
+    "deletions": 6,
+    "total_lines": 33,
+    "test_files": [
+      "tests/test_chain.py",
+      "tests/test_termui.py",
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/testing.py",
+      "tests/test_chain.py",
+      "tests/test_termui.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2933,
+    "pr_title": "Flush sys.stderr when CliRunner finalizes",
+    "pr_body": "Add a dedicated finalizer for CliRunner streams to collect up these values, which makes the scope of the `finally` block easy to read and reason about.\n\ncloses #2682\n",
+    "issue_number": "2682",
+    "issue_title": "Revisiting stderr flush in CLIRunner",
+    "issue_body": "This bug is described in detail at https://github.com/pallets/click/issues/2647 and https://github.com/pallets/click/issues/2636.  I've read through those issues and am not convinced the current behavior is accurate or beneficial.\r\n\r\nFrom: https://github.com/pallets/click/issues/2636#issuecomment-1826891936\r\n\r\n> This isn't a bug. When using print in general, you have to flush to be sure all output is sent to stderr. That's one of the reasons Click provides echo instead.\r\n\r\nFrom: https://github.com/pallets/click/issues/2647#issuecomment-1846440749\r\n\r\n> Another way to put it is: you need to explain why your suggested behavior is correct. It's certainly different than current, but that doesn't mean it's more correct.\r\n\r\n> What I know is that stdout is flushed, and stderr isn't. I don't know why that's the case, but I do know that this is the behavior I've encountered all over the place, and if I want stderr to show up at a specific time I need to flush manually. This is what click.echo does automatically. If what I know and click's test runner's current behavior is incorrect, then you need to show me sources that explain why. Otherwise, it would just mean we're hiding the actual behavior of the calls you're making.\r\n\r\nI believe the current behavior of not flushing stderr is wrong because it results in semantics during testing that aren't present during a normal run of the command.  Take:\r\n\r\n```python\r\nimport sys\r\n\r\nimport click\r\nfrom click.testing import CliRunner\r\n\r\n\r\n@click.command()\r\ndef cli():\r\n    print(\"to stdout\")\r\n    print(\"to stderr\", file=sys.stderr)\r\n\r\n\r\ndef test_cli():\r\n    runner = CliRunner(mix_stderr=False)\r\n    result = runner.invoke(cli, (), catch_exceptions=False)\r\n\r\n    assert result.stdout.strip() == \"to stdout\"\r\n    assert result.stderr.strip() == \"to stderr\"\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    cli()\r\n```\r\n\r\n\r\nIf you run this through a normal Python execution, you will __always__ get \"to stdout\" and \"to stderr\" on the console.  If there were time",
+    "merge_sha": "cfa6f4ad3e0078db43f866246b483544afa33ed3",
+    "base_commit": "b7cf06970e40a3144eb963ff34ed7c38934afb40",
+    "merged_at": "2025-05-20T22:22:09+00:00",
+    "additions": 23,
+    "deletions": 0,
+    "total_lines": 23,
+    "test_files": [
+      "tests/test_testing.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/testing.py",
+      "tests/test_testing.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2930,
+    "pr_title": "Fix flag value set when is_flag=True and type is provided",
+    "pr_body": "When setting the value of a flag, check only if `is_flag` is `True` and `flag_value` is not provided when negating the default flag value.\r\n\r\n#2829 introduced a bug by checking if the type of the flag is `None` before setting the value.\r\nSince we still check if `is_flag` is set, objects without a `__bool__` method will not raise an error if `is_flag` is not set.\r\n\r\nfixes #2894\r\nfixes #2897\r\n\r\n<!--\r\nEnsure each step in CONTRIBUTING.rst is complete, especially the following:\r\n\r\n- Add tests that demonstrate the correct behavior of the change. Tests\r\n  should fail without the change.\r\n- Add or update relevant docs, in the docs folder and in code.\r\n- Add an entry in CHANGES.rst summarizing the change and linking to the issue.\r\n- Add `.. versionchanged::` entries in any relevant code docs.\r\n-->\r\n",
+    "issue_number": "2894",
+    "issue_title": "Click 8.2.0 ignores is_flag options that have a type",
+    "issue_body": "Click 8.2.0 ignores the use of options defined with `is_flag` and `type=str`.\n\nOf course, combining `is_flag` and `type=str` does not make sense, but it happened in one of our projects. Click before 8.2.0 ignored `type=str` and processed this as expected for `is_flag`.\n\nClick 8.2.0 does not set a value for such an option.\n\nI could trace this change to PR #2829 - If I install click 8.2.0 and manually undo the change in `core.py` that is done by that PR, it works as before.\n\nTo reproduce:\n\n1. Have a file `main.py` with:\n\n```\nimport click\n\n@click.group(invoke_without_command=True)\n@click.option('-x', '--transpose', type=str, is_flag=True,\n              help='Transpose the output table.')\ndef cli(transpose):\n    print(f\"Debug: transpose={transpose}\")\n    return 0\n```\n\n2. Reproduce with click 8.2.0:\n```\n$ pip install click==8.2.0\n$ python -c \"import main,sys; sys.argv=['cli', '--transpose']; main.cli()\"\nDebug: transpose=None\n```\n\n3. Verify that click 8.2.0 with PR #2829 undone works:\n```\n# perform the undo in core.py (see below)\n$ python -c \"import main,sys; sys.argv=['cli', '--transpose']; main.cli()\"\nDebug: transpose=True\n```\n\n4. Verify that click 8.1.8 works:\n```\n$ pip install click==8.1.8\n$ python -c \"import main,sys; sys.argv=['cli', '--transpose']; main.cli()\"\nDebug: transpose=True\n```\n\nThe \"undo\" of PR #2829 has the following changes in `core.py`, starting at line 2613:\n```\n        # Undo PR 2829: Added the following two lines\n        if flag_value is None:\n            flag_value = not self.default\n        self.type: types.ParamType\n        if is_flag and type is None:\n            # Undo PR 2829: Removed the following two lines\n            # if flag_value is None:\n            #     flag_value = not self.default\n            # Re-guess the type from the flag value instead of the\n            # default.\n            self.type = types.convert_type(None, flag_value)\n```\n\nEnvironment:\n\n- Python version: 3.12.7 on macOS (it happens on all Python versions supported by click",
+    "merge_sha": "884af5c20fdc95c9c7352df35c37273391464fb9",
+    "base_commit": "011b9f9d190c71310264e6c54bae6259f5e38a9f",
+    "merged_at": "2025-05-20T14:55:39+00:00",
+    "additions": 44,
+    "deletions": 2,
+    "total_lines": 46,
+    "test_files": [
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2846,
+    "pr_title": "Fix Zsh completions with colons",
+    "pr_body": "The Zsh completion script uses different primitives to load completion items into Zsh depending on whether a completion item has a description or not.\r\n\r\n  - For items with descriptions, the Zsh `_describe` function is used, which expects item plus description pairs as values, separated by a colon.  In turn, any colon within the item must be escaped.\r\n  - For items without descriptions, the Zsh `compadd` builtin is used, which expects literal items, without escaping.  Actually escaping colons in the item will corrupt the item.\r\n\r\n`click`'s built-in Zsh completion class does not escape colons in the item.  So it only handles the second case correctly, not the first; see e.g. #2703.  This PR fixes this by choosing a suitable serialization, for each item separately, according to the abovementioned escaping requirements.\r\n\r\nSince at its core this is an issue of two systems not agreeing on the format for exchanging data, and since we principally control both systems, we could fix this on either side.  However, because the Zsh completion script is typically already installed in the user's shell, which is both harder to detect within `click` and harder to change or influence, we opt to change the `click` side instead, even if it the serialization needs to be more irregular.\r\n\r\nResolves #2703\r\n\r\n---\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [ ] Add or update relevant docs, in the docs folder and in code.\r\n  - \u201cdocs\u201c presumably not applicable in this case?\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [ ] Add `.. versionchanged::` entries in any relevant code docs.\r\n  - Not applicable in this case?\r\n",
+    "issue_number": "2703",
+    "issue_title": "zsh completion still misbehaving in the presence of `:`",
+    "issue_body": "<!--\r\nThis issue tracker is a tool to address bugs in Click itself. Please use\r\nPallets Discord or Stack Overflow for questions about your own code.\r\n\r\nReplace this comment with a clear outline of what the bug is.\r\n-->\r\n\r\n<!--\r\nDescribe how to replicate the bug.\r\n\r\nInclude a minimal reproducible example that demonstrates the bug.\r\nInclude the full traceback if there was an exception.\r\n-->\r\n\r\nGiven `foo` containing:\r\n\r\n```python\r\n#!/usr/bin/env python3\r\nfrom click.shell_completion import CompletionItem\r\nimport click\r\n\r\nclass Foo(click.ParamType):\r\n    def convert(self, value, param, ctx):\r\n        return value\r\n\r\n    def shell_complete(self, ctx, param, incomplete):\r\n        return [\r\n            CompletionItem(value=value, help=\"adsf\") for value in \r\n            [\"baz:quux\", \"spam:eggs\"]\r\n        ]\r\n\r\n@click.command()\r\n@click.argument(\"foo\", type=Foo())\r\ndef main(foo):\r\n    print(foo)\r\n```\r\n\r\nand running shell completion generation, followed by attempting to complete the command (indicated via `<Tab>`, produces:\r\n\r\n```\r\n\u2299  PATH=$PWD:/Users/Julian/.local/share/virtualenvs/bowtie/bin/:$PATH\r\n\u2299  eval \"$(_FOO_COMPLETE=zsh_source ./foo)\"                                                                                                                                                                                                                                                                         \r\n\u2299  foo <Tab>\r\nbaz   -- quux:adsf\r\nspam  -- eggs:adsf\r\n```\r\n\r\nrather than the expected:\r\n\r\n```\r\nbaz:quux   -- adsf\r\nspam:eggs -- adsf\r\n```\r\n\r\n<!--\r\nDescribe the expected behavior that should have happened but didn't.\r\n-->\r\n\r\nThis seems to be a regression on #1812.\r\n\r\nThe fix mentioned there (of \"fake escaping\" the colons via `.replace(\":\", \"\\\\:\")` seems to work.\r\n\r\nEnvironment:\r\n\r\n- Python version:\r\n\r\n```\r\n\u2299  python --version                                                                                                                                                           ",
+    "merge_sha": "a1235aacb1be55dc66ddcfefbf64dec44b6ab54d",
+    "base_commit": "565f36d5bc4a15d304337b749e113fb4477b1843",
+    "merged_at": "2025-07-21T19:35:04+00:00",
+    "additions": 98,
+    "deletions": 1,
+    "total_lines": 99,
+    "test_files": [
+      "tests/test_shell_completion.py"
+    ],
+    "source_files": [
+      "src/click/shell_completion.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/shell_completion.py",
+      "tests/test_shell_completion.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2840,
+    "pr_title": "Move `--help` option defaults from its class to its decorator",
+    "pr_body": "This is a proposal to fix #2832, which points to a subtle change in behavior of the help option introduced in 8.1.8.\r\n\r\nThe root of the problem is that by deduplicating code in 8.1.8 (see: #2563), I introduced a `HelpOption` class, to centralize the setup necessary to make a standard `Option` behave like an help option.\r\n\r\nIn #2832, a user is relying on a custom class to feed the `@help_option` decorator. This bypass all the custom setup made by `HelpOption`, and produce the discrepancy in behavior between 8.1.7 and 8.1.8.\r\n\r\nThis PR:\r\n- Reverts back to setting up all parameters of the help option in the decorator instead of the `HelpOption` class\r\n- Aligns `@help_option` implementation with the way Click is doing for the others (like `@password_option`, `@version_option`, ...) \r\n- Removes the `click.decorators.HelpOption` class as a consequence\r\n- Adds a complete unit test to check combination of custom class and option names leads to expected results\r\n\r\n\r\nChecklist:\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.",
+    "issue_number": "2832",
+    "issue_title": "Regression: Help option subclassing no longer works with verion 8.1.8 ",
+    "issue_body": "Click 8.18 has a regression wrt. to help with Option subclasses.\r\n\r\nThis was found in this issue originally:\r\n- https://github.com/aboutcode-org/scancode-toolkit/issues/4044\r\n\r\nThis was introduced in this PR by @kdeldycke :wave: :\r\n- https://github.com/pallets/click/pull/2563\r\n\r\nIt breaks code that uses option subclasses. \r\n\r\n\r\n- This code works in 8.1.7 and  8.1.8 with no custom class\r\n```Python\r\nimport click\r\n\r\n@click.command()\r\n@click.help_option(\"-h\", \"--help\")\r\ndef scancode():\r\n    \"\"\"OK in pkg:pypi/click@8.1.8 and pkg:pypi/click@8.1.7\"\"\"\r\n    pass\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    scancode()\r\n```\r\nand then with 8.1.7 and 8.1.8:\r\n```\r\n$ python  works.py --help\r\nUsage: works.py [OPTIONS]\r\n\r\n  Regression in pkg:pypi/click@8.1.8\r\n\r\nOptions:\r\n  -h, --help  Show this message and exit.\r\n```\r\n\r\n\r\n\r\n\r\n- This code works in 8.1.7 and fails in 8.1.8 with a custom class\r\n```Python\r\nimport click\r\n\r\n\r\nclass PluggableCommandLineOption(click.Option):\r\n    pass\r\n\r\n\r\n@click.command()\r\n@click.help_option(\"-h\", \"--help\", cls=PluggableCommandLineOption)\r\ndef scancode():\r\n    \"\"\"Regression in pkg:pypi/click@8.1.8\"\"\"\r\n    pass\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    scancode()\r\n```\r\n\r\nand then with 8.1.7\r\n```\r\n python  failing.py --help\r\nUsage: failing.py [OPTIONS]\r\n\r\n  Regression in pkg:pypi/click@8.1.8\r\n\r\nOptions:\r\n  -h, --help  Show this message and exit.\r\n\r\n\r\n$ python  failing.py -h\r\nUsage: failing.py [OPTIONS]\r\n\r\n  Regression in pkg:pypi/click@8.1.8\r\n\r\nOptions:\r\n  -h, --help  Show this message and exit.\r\n\r\n```\r\n\r\nand then with 8.1.8\r\n```\r\n$ python  failing.py -h\r\nError: Option '-h' requires an argument.\r\n\r\n\r\n$ python  failing.py --help\r\nError: Option '--help' requires an argument.\r\n\r\n\r\n```\r\n\r\n\r\n\r\n- This code works more or less in 8.1.7 and 8.1.8 with custom class and no \"--help\" option\r\n```Python\r\nimport click\r\n\r\n\r\nclass PluggableCommandLineOption(click.Option):\r\n    pass\r\n\r\n\r\n@click.command()\r\n@click.help_option(\"-h\", cls=PluggableCommandLineOption)\r\ndef scancode():\r\n    \"\"\"Reg",
+    "merge_sha": "c9f7d9d8a02f0cf9b24db6210b083e687a5cf020",
+    "base_commit": "0bf333e1b77b4ae0e85d387531b38930fc657f12",
+    "merged_at": "2025-03-18T17:59:13+00:00",
+    "additions": 65,
+    "deletions": 43,
+    "total_lines": 108,
+    "test_files": [
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/__init__.py",
+      "src/click/core.py",
+      "src/click/decorators.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/__init__.py",
+      "src/click/core.py",
+      "src/click/decorators.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2818,
+    "pr_title": "Add CliRunner default `catch_exceptions` parameter",
+    "pr_body": "fixes #2817\r\n\r\nAdd a `catch_exceptions` parameter to `CliRunner`.\r\nIf the `catch_exceptions` parameters from `invoke` is not explicitly set, the value from `CliRunner` is used.\r\n",
+    "issue_number": "2817",
+    "issue_title": "Set the `catch_exceptions` value for the whole runner",
+    "issue_body": "I always pass `catch_exceptions=False` for all my test suites.\r\nIt would be convenient to configure this value once for all in `CLIRunner` for example.\r\n\r\nFor example, we could add a `CLIRunner.catch_exceptions` parameter, and make `invoke` use that value if not directly passed in parameter of `invoke`. Then I would just have to put the runner in a pytest fixture and that would do the thing for me.\r\n\r\nIf that is OK, I can open a PR for this.\r\n\r\nWhat do you think?",
+    "merge_sha": "88328fc8743d43566081d9f17acad5f5552f5a87",
+    "base_commit": "5961d31fb566f089ad468a5b26a32f1ebfa7f63e",
+    "merged_at": "2024-12-19T16:54:32+00:00",
+    "additions": 38,
+    "deletions": 2,
+    "total_lines": 40,
+    "test_files": [
+      "tests/test_testing.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/testing.py",
+      "tests/test_testing.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2816,
+    "pr_title": "show correct auto complete value for nargs option in combination with flag option",
+    "pr_body": "This pull request resolves an issue in the autocompletion logic for options with nargs > 1 when combined with boolean options. Previously, autocompletion would suggest incorrect values, leading to confusion and an inconsistent user experience.\r\n\r\nfixes #2813\r\n\r\n- [X]  Add tests that demonstrate the correct behavior of the change. Tests\r\n        should fail without the change.\r\n- [X]  Add or update relevant docs, in the docs folder and in code.\r\n- [x]  Add an entry in CHANGES.rst summarizing the change and linking to the issue.\r\n",
+    "issue_number": "2813",
+    "issue_title": "_is_incomplete_option incorrectly processes last_option in loop",
+    "issue_body": "The _is_incomplete_option function in the Click library has a logic issue in its loop that sets the last_option variable. The function does not break the loop after assigning last_option, which leads to wrong shell completion.\r\n\r\n\r\n## Replication: \r\nSee https://github.com/msaipraneeth/click-tuple-param\r\n### RCA: \r\nWe can reproduce issue If we have flag option before tuple option\r\n\r\n## Environment:\r\n\r\n- Python version: 3.11\r\n- Click version: 8.1.7\r\n\r\n## Possible solution :\r\n\r\nOnce we identify the last option we have the break the loop in _is_incomplete_option function\r\n\r\n```python .numberLines\r\ndef _is_incomplete_option(ctx: Context, args: t.List[str], param: Parameter) -> bool:\r\n    \"\"\"Determine if the given parameter is an option that needs a value.\r\n\r\n    :param args: List of complete args before the incomplete value.\r\n    :param param: Option object being checked.\r\n    \"\"\"\r\n    if not isinstance(param, Option):\r\n        return False\r\n\r\n    if param.is_flag or param.count:\r\n        return False\r\n\r\n    last_option = None\r\n\r\n    for index, arg in enumerate(reversed(args)):\r\n        if index + 1 > param.nargs:\r\n            break\r\n\r\n        if _start_of_option(ctx, arg):\r\n            last_option = arg\r\n            break  # <-------------------------------------------------- break the loop on finding the option\r\n\r\n    return last_option is not None and last_option in param.opts\r\n\r\n```\r\n\r\n",
+    "merge_sha": "4f936ac1981645488f396953bc59e50445de00b6",
+    "base_commit": "1c68e531ef5e45f6facdb777c720d0f984614b81",
+    "merged_at": "2025-08-07T05:57:15+00:00",
+    "additions": 21,
+    "deletions": 0,
+    "total_lines": 21,
+    "test_files": [
+      "tests/test_shell_completion.py"
+    ],
+    "source_files": [
+      "src/click/shell_completion.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/shell_completion.py",
+      "tests/test_shell_completion.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2800,
+    "pr_title": "Close contexts created during shell completion #2644.",
+    "pr_body": "Includes a test reproducing #2644. Then continues from the work done by @akhil-vempali in #2767 to fix the issue. There was some confusion in the mess of context objects in the implementation that has been fixed in this version.\r\n\r\nResolves #2644.",
+    "issue_number": "2644",
+    "issue_title": "Click doesn't close file options during shell completion",
+    "issue_body": "Click doesn't close file options during shell completion, which causes a resource warning if a program uses a file option.\r\n\r\nFor example, I have group like this:\r\n\r\n```python\r\n@click.group()\r\n@click.option('--config_file',\r\n              default=CONFIG,\r\n              type=click.File(mode='r'),\r\n              help='help')\r\n@click.pass_context\r\ndef cli(ctx, config_file: typing.TextIO):\r\n```\r\n\r\nand I get this warning:\r\n\r\n```\r\n/Users/grzesiek/Library/Caches/pypoetry/virtualenvs/findata-fetcher-3hK6JJJX-py3.12/lib/python3.12/site-packages/click/shell_completion.py:293: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/grzesiek/.config/findata/fetcher.json' mode='r' encoding='UTF-8'>\r\n  completions = self.get_completions(args, incomplete)\r\n```\r\n\r\n## Details\r\n\r\nI don't come with reproduction steps, but I can give something equally valuable, I can explain how this bug comes to be.\r\n\r\nThe issue stems from allocating a context in `core.py` outside of a `with` statement during shell completion. Here's a stack-trace of how that happens:\r\n\r\n```\r\n  File \"/Users/grzesiek/.local/bin/findata-fetcher\", line 8, in <module>\r\n    sys.exit(main())\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/fetcher/tool.py\", line 576, in main\r\n    cli(obj={})\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/core.py\", line 1171, in __call__\r\n    return self.main(*args, **kwargs)\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/core.py\", line 1084, in main\r\n    self._main_shell_completion(extra, prog_name, complete_var)\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/core.py\", line 1165, in _main_shell_completion\r\n    rv = shell_complete(self, ctx_args, prog_name, complete_var,\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/shell_completion.py\", line 49, in shell_compl",
+    "merge_sha": "0ef55fda47bb3d0dece21197d81d8d72a4250e73",
+    "base_commit": "d8763b93021c416549b5f8b4b5497234619410db",
+    "merged_at": "2024-11-03T20:38:31+00:00",
+    "additions": 66,
+    "deletions": 33,
+    "total_lines": 99,
+    "test_files": [
+      "tests/test_shell_completion.py"
+    ],
+    "source_files": [
+      "src/click/core.py",
+      "src/click/shell_completion.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "src/click/shell_completion.py",
+      "tests/test_shell_completion.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2788,
+    "pr_title": "Added functionality to set flag_value correctly when using envvar",
+    "pr_body": "```python\r\n@click.option('--upper', flag_value='upper', envvar='UPPER')\r\ndef cmd(upper):\r\n    click.echo(upper)\r\n    return upper\r\n```\r\n\r\n### Default use\r\nThe expectation of the above code when running `python cmd.py --upper` is to print to stdout `upper` (the flag value). This is default behaviour and works correctly.\r\n\r\n### Environment variable use\r\nWhat is the expectation when we run `UPPER=32 python cmd.py` ?\r\n\r\nThe program should still print to the screen `upper`, because that is the `flag_value` and there exists an env variable defined with the name `UPPER`, yet it actually prints `32`, the value of the environment variable, which i don't believe is intended.\r\n\r\n*I also added a test for this functionality called `test_envvar_flag_value`*\r\nfixes #2746 \r\n",
+    "issue_number": "2746",
+    "issue_title": "`flag_value` is not taken into account with `envvar`",
+    "issue_body": "When using the ~~--debug option~~ `DEBUG` environment variable in the sample command, the debug value is not correctly set (`flag_value`). It is expected to be either `logging.DEBUG` or `None`, but it seems to be getting the integer value directly from the environment variable.\r\n\r\nSample:\r\n\r\n```python\r\nimport logging\r\nimport os\r\nimport sys\r\n\r\nimport click\r\n\r\n\r\n# Works as expected\r\n# sys.argv = ['', '--debug']\r\n\r\n# Does not work as expected\r\n# os.environ['DEBUG'] = '1'\r\n\r\n@click.command()\r\n@click.option('--debug', is_flag=True, flag_value=logging.DEBUG, envvar='DEBUG')\r\ndef sample(debug):\r\n    click.echo(f\"DEBUG: {debug}\")\r\n    assert debug in [logging.DEBUG, None], f\"Invalid debug value: {debug} - expected >{logging.DEBUG}< or None\"\r\n\r\n\r\nif __name__ == '__main__':\r\n    sample()\r\n\r\n```\r\n\r\nThere is no different in using `os.environ` or  `DEBUG=1 python cli.py`.\r\n\r\n`DEBUG=8 python cli.py` prints out: `8`\r\n\r\nEnvironment:\r\n\r\n- Python version: 3.12.4\r\n- Click version: 8.1.7\r\n",
+    "merge_sha": "1787497713fa389435ed732c9b26274c3cdc458d",
+    "base_commit": "380008389b32ca2b7de7c73f670a9eee1562004e",
+    "merged_at": "2024-11-03T14:40:46+00:00",
+    "additions": 25,
+    "deletions": 3,
+    "total_lines": 28,
+    "test_files": [
+      "tests/test_arguments.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_arguments.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2775,
+    "pr_title": "Improve echo_via_pager behaviour in face of errors",
+    "pr_body": "fixes #2674 (echo_via_pager with generators leaves terminal in broken state).\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests\r\n  should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in CHANGES.rst summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n",
+    "issue_number": "2674",
+    "issue_title": "echo_via_pager with generators leaves terminal in broken state",
+    "issue_body": "# Steps to reproduce\r\n\r\nRun the following test case:\r\n```\r\nimport click\r\n\r\ndef output_generator():\r\n    counter = 0\r\n    while True:\r\n        yield \"this is a line of output\\n\"\r\n        if counter == 1024:\r\n            click.echo(\"kaboom\", err=True)\r\n            click.get_current_context().exit(0)\r\n        counter += 1\r\n\r\n@click.command\r\ndef kaboom():\r\n    click.echo_via_pager(output_generator)\r\n\r\nif __name__ == \"__main__\":\r\n    kaboom()\r\n```\r\n\r\nAttempt to use the terminal afterwards\r\n\r\n# Expected result\r\n\r\nA working terminal.\r\n\r\n# Actual behavior\r\n\r\nNewlines and output are obscured.  Commands may be entered, but they are not displayed.\r\n\r\n# Workaround\r\n\r\nRun the `reset` command after the command terminates.\r\n\r\nEnvironment:\r\n\r\nReproducible on OS X and Ubuntu (x86_64):\r\n\r\n```\r\n$ sw_vers\r\nProductName:            macOS\r\nProductVersion:         14.3.1\r\nBuildVersion:           23D60\r\n```\r\n- Python version: 3.11.2\r\n- Click version: 8.1.7\r\n\r\n```\r\n# cat /etc/lsb-release\r\nDISTRIB_ID=Ubuntu\r\nDISTRIB_RELEASE=22.04\r\nDISTRIB_CODENAME=jammy\r\nDISTRIB_DESCRIPTION=\"Ubuntu 22.04.3 LTS\"\r\n```\r\n- Python version: 3.10.12\r\n- Click version: 8.1.7\r\n\r\n",
+    "merge_sha": "3b06e0b75aaa68533c7fbd4f89053309f2e4ed8a",
+    "base_commit": "2cabbe3175026695210fe0bf9b179fd62d52634f",
+    "merged_at": "2024-11-09T00:22:59+00:00",
+    "additions": 198,
+    "deletions": 33,
+    "total_lines": 231,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/click/_termui_impl.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/_termui_impl.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2730,
+    "pr_title": "fix bug in show defaults when using a flag option and a default map",
+    "pr_body": "In latest main, when a flag option is used with `show_default=True` and a `default_map` is passed, `--help` shows the default value in the decorator and not the value in the default map.\r\n\r\nThis PR does two things:\r\n\r\n- Adds unit tests to demonstrate the bug\r\n- Removes the bug from core\r\n\r\nfixes #2632\r\n",
+    "issue_number": "2632",
+    "issue_title": "Flag option with secondary opts: show_default=True does not show value from default_map in \"help\" output",
+    "issue_body": "I'm setting the `default_map` from a config file, and it seems the values from the `default_map` are not correctly shown in the `--help` output if I set `show_default=True` on my option.\r\n\r\nMy Option looks like this:\r\n\r\n```python\r\n@click.option(\r\n    \"--long/--short\",\r\n    \"-l/-s\",\r\n    is_flag=True,\r\n    show_default=True,\r\n    help=\"show additional information like size and creation date\",\r\n)\r\n```\r\n\r\nI initialize the `default_map` with a custom command class that I attach via the `@click.command` decorator like this `@click.command(cls=ConfigAwareCommand)`\r\n\r\n```python\r\nfrom click import Command as _Command\r\n\r\n\r\nclass ConfigAwareCommand(_Command):\r\n    def __init__(self, *args, **kwargs):\r\n        kwargs[\"context_settings\"] = {\r\n            \"default_map\": CONFIG.get_cli_command_defaults(kwargs[\"name\"])\r\n        }\r\n        super().__init__(*args, **kwargs)\r\n\r\n```\r\n\r\nThe `default_map` value is in my example `{'long': True}`. In the `--help` output, the default value is shown like this\r\n\r\n```\r\n  -l, --long / -s, --short        show additional information like size and\r\n                                  creation date  [default: short]\r\n```\r\n\r\nWhen executing the command, the default value from the `default_map` is used correctly (`long` defaults to `True`).\r\n\r\nDuring debugging, I might have found the culprit inside [src/click/core.py](https://github.com/pallets/click/blob/main/src/click/core.py#L2746)\r\n\r\n```python\r\n            elif self.is_bool_flag and self.secondary_opts:\r\n                # For boolean flags that have distinct True/False opts,\r\n                # use the opt without prefix instead of the value.\r\n                default_string = _split_opt(\r\n                    (self.opts if self.default else self.secondary_opts)[0]\r\n                )[1]\r\n```\r\n\r\nAs you can see, `self.default` is used instead of the `default_value` variable that is initialized [further above](https://github.com/pallets/click/blob/main/src/click/core.py#L2720) this code snippet.\r\n\r\nIf I ",
+    "merge_sha": "bc16dbf788861266177661b576291a1b264fb5de",
+    "base_commit": "5b1624bf09947d6f10eaffd63d6fb737dfe7656a",
+    "merged_at": "2024-05-22T21:13:00+00:00",
+    "additions": 28,
+    "deletions": 1,
+    "total_lines": 29,
+    "test_files": [
+      "tests/test_defaults.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_defaults.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2729,
+    "pr_title": "fix color handling in test runner",
+    "pr_body": "When using `CliRunner.invoke()`, the isolation function was not mocking `_compat.should_strip_ansi` \r\nin addition to the `utils.should_strip_ansi`. The `_compat ` version is only called when on Windows machines which is why it was missed. Also changed the `test_testing.py::test_with_color` to no longer skip when on windows. This will ensure that future changes to the `testing.py` modules will not cause a regression back to previous behavior.\r\n\r\nfixes #2705 \r\n\r\nEnsure each step in CONTRIBUTING.rst is complete, especially the following:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests\r\n  should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in CHANGES.rst summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n",
+    "issue_number": "2705",
+    "issue_title": "Setting color=True in runner.invoke on windows strips ansi codes",
+    "issue_body": "I am trying to test that a click command uses colors correctly. I've set the `color=True` argument to `runner.invoke` and this keeps the ansi escape codes as expected on Linux. However, on Windows these are completely stripped, as if `color=False` was set.\r\n\r\nI did see #2606 and #2607, but testing the change there isn't enough to fix this for me. I think the problem is that `color=True` isn't set in the `Context` on Windows and therefore `ctx.color` is still `None` in [`resolve_color_default`](https://github.com/pallets/click/blob/f8857cb03268b5b952b88b2acb3e11d9f0f7b6e4/src/click/globals.py#L62-L65), despite `color=True` being passed to `invoke`.\r\n\r\nEnvironment:\r\n\r\n- Python version: 3.8 - 3.12\r\n- Click version: 8.1.7",
+    "merge_sha": "5b1624bf09947d6f10eaffd63d6fb737dfe7656a",
+    "base_commit": "d3e3852eba45a6f7ce0ae5e02ca49106e228add6",
+    "merged_at": "2024-05-21T23:18:10+00:00",
+    "additions": 4,
+    "deletions": 2,
+    "total_lines": 6,
+    "test_files": [
+      "tests/test_testing.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/testing.py",
+      "tests/test_testing.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2728,
+    "pr_title": "Prevent multiline error message on invalid path",
+    "pr_body": "Fixes an issue where an invalid `click.Path` parameter, which contains a `\\n`, will result in an error that prints out on multiple lines.\r\n\r\nfixes #2697\r\n",
+    "issue_number": "2697",
+    "issue_title": "Broken message about invalid argument value for template \"File ... is a directory\"",
+    "issue_body": "**User Actions**\r\n```sh\r\nmkdir $'my\\ndir'\r\nmy-tool $'my\\ndir'\r\n```\r\n\r\n**Expected Output**\r\n```\r\nInvalid value for 'PATH': File 'my\\ndir' is a directory.\r\n```\r\n\r\n\r\n**Actual Output**\r\n```\r\nInvalid value for 'PATH': File 'my\r\ndir' is a directory.\r\n```\r\n\r\n\r\n**Code**\r\n```python\r\nfrom pathlib import Path\r\nfrom typing import Annotated\r\n\r\nimport typer\r\n\r\n\r\ndef main(path: Annotated[Path, typer.Argument(dir_okay=False)]) -> None:\r\n    pass\r\n\r\n\r\nif __name__ == '__main__':\r\n    typer.run(main)\r\n```\r\n\r\n**Cause**\r\nYou clearly forgot `!r` on [this](https://github.com/pallets/click/blob/f8857cb03268b5b952b88b2acb3e11d9f0f7b6e4/src/click/types.py#L896) line and are using quotes instead.\r\n\r\nJust compare these lines in [click.types](https://github.com/pallets/click/blob/f8857cb03268b5b952b88b2acb3e11d9f0f7b6e4/src/click/types.py#L870-L928):\r\n```python\r\n_(\"{name} {filename!r} does not exist.\").format(\r\n_(\"{name} {filename!r} is a file.\").format(\r\n_(\"{name} '{filename}' is a directory.\").format(\r\n_(\"{name} {filename!r} is not readable.\").format(\r\n_(\"{name} {filename!r} is not writable.\").format(\r\n_(\"{name} {filename!r} is not executable.\").format(\r\n```\r\n",
+    "merge_sha": "c021f05c838c1d0401ebc340d1de9b663c7fb578",
+    "base_commit": "e88c11239971d309744fd3f9139259f64787f45a",
+    "merged_at": "2024-05-21T14:46:21+00:00",
+    "additions": 16,
+    "deletions": 1,
+    "total_lines": 17,
+    "test_files": [
+      "tests/test_types.py"
+    ],
+    "source_files": [
+      "src/click/types.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/types.py",
+      "tests/test_types.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2727,
+    "pr_title": "Add functionality to hide the progress bar Issue #2609",
+    "pr_body": "- Added \"hidden\" argument to click.progressbar to allow users to hide the progressbar output\r\n- Added env to gitignore to match up with the CONTRIBUTING.rst directions\r\n- Added test to verify \"hidden\" argument is behaving\r\n\r\nfixes #2609",
+    "issue_number": "2609",
+    "issue_title": "`progressbar(hide=True)` option for hiding the progress bar",
+    "issue_body": "Often when I use the Click `progressbar` I find myself wanting to conditionally hide it. Sometimes it's because there's another option in play which means I have output to display in place of it - others it's because I added a `--silent` option (as seen in `curl`) for disabling it entirely.\r\n\r\nIt's actually a bit tricky doing this at the moment, due to its use as a context manager.\r\n\r\nWhat I'd really like to be able to do is this:\r\n\r\n```python\r\nhide = True  # or False depending on various things\r\n\r\nwith click.progressbar(items, show_eta=True, hide=hide):\r\n    for item in items:\r\n        process_item(item)\r\n```\r\n",
+    "merge_sha": "fcd85032cff78aa536a6d2b455fb83bfcc02b228",
+    "base_commit": "c326df95e9e3da0425360e030413f6a3ee25fdee",
+    "merged_at": "2024-11-03T13:12:06+00:00",
+    "additions": 36,
+    "deletions": 12,
+    "total_lines": 48,
+    "test_files": [
+      "tests/test_termui.py"
+    ],
+    "source_files": [
+      "src/click/_termui_impl.py",
+      "src/click/termui.py"
+    ],
+    "all_files": [
+      ".gitignore",
+      "CHANGES.rst",
+      "src/click/_termui_impl.py",
+      "src/click/termui.py",
+      "tests/test_termui.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2696,
+    "pr_title": "show env var in error hint",
+    "pr_body": "Here we add the env var to the error hint.\r\n\r\n<!--\r\nLink to relevant issues or previous PRs, one per line. Use \"fixes\" to\r\nautomatically close an issue.\r\n-->\r\n\r\n- fixes #2695\r\n\r\n<!--\r\nEnsure each step in CONTRIBUTING.rst is complete by adding an \"x\" to\r\neach box below.\r\n\r\nIf only docs were changed, these aren't relevant and can be removed.\r\n-->\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2695",
+    "issue_title": "show envvar in error hint",
+    "issue_body": "```py\r\n@click.command()\r\n@click.option('--a', required=True, envvar=\"b\", show_envvar=True)\r\ndef f(a): ...\r\nf()\r\n```\r\nHere I would want the error message to show the env var.",
+    "merge_sha": "1b524bb30d0bd39528369c7029b9296e7663cf19",
+    "base_commit": "0e0c00324a5af35f8995c7ff88df67b0f5594a58",
+    "merged_at": "2024-11-03T12:21:04+00:00",
+    "additions": 26,
+    "deletions": 2,
+    "total_lines": 28,
+    "test_files": [
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2622,
+    "pr_title": "feat: new method for choice fail",
+    "pr_body": "Refactors so the failing happens in a new public method.\r\n\r\n- fixes #2621\r\n- \r\nEnsure each step in CONTRIBUTING.rst is complete by adding an \"x\" to\r\neach box below.\r\n\r\nIf only docs were changed, these aren't relevant and can be removed.\r\n-->\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2621",
+    "issue_title": "Allow customizing fail message for invalid choice in `click.types.Choice`",
+    "issue_body": "Move the fail art of `convert()` in the `Choice` class to a new method `get_invalid_choice_fail_message(self)` so in my subclass of `click.Choice` I can customize the way it shows the failing value for the choice\r\n\r\nSome CLI option choices are multi-part meaning they are separated by some value, like a comma separated list for example. Maybe each section of this value represents a different part of a schema and it is nice to show a custom message about the specific part.\r\n\r\nContrived version:\r\nLet says my choices are `[\"maine::goat\", \"maine::themepark\"]` and I give it \"maine::toast\"`, it'd be nice to say the `maine` part was correct and the `toast` part was not.\r\n\r\n\r\n",
+    "merge_sha": "4271fe283dc9365563aebb369ada8d20eee015a8",
+    "base_commit": "1787497713fa389435ed732c9b26274c3cdc458d",
+    "merged_at": "2024-11-03T14:54:03+00:00",
+    "additions": 23,
+    "deletions": 9,
+    "total_lines": 32,
+    "test_files": [
+      "tests/test_types.py"
+    ],
+    "source_files": [
+      "src/click/types.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/api.rst",
+      "src/click/types.py",
+      "tests/test_types.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2607,
+    "pr_title": "Fix colored output on Windows (#2606)",
+    "pr_body": "The `color` parameter of `echo()` was not passed to the `auto_wrap_for_ansi()` function that is used to wrap a stream with `colorama` on Windows. This PR fixes that. \r\nI did not add an entry to `CHANGES.rst` because there is no `8.1.8dev` version yet\r\n\r\n- fixes #2606 \r\n\r\n\r\nChecklist:\r\n\r\n- [X] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [X] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [X] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [X] Run `pre-commit` hooks and fix any issues.\r\n- [X] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2606",
+    "issue_title": "click.echo does not force colors on Windows with color=True",
+    "issue_body": "Using `click.echo(click.style(\"Foo\", fg=\"red\"), color=True)` on Windows will not print \"Foo\" in red if the output is not a terminal that supports colors, so it seems that `color=True` is ignored on Windows.\r\n\r\nHere is an example code to reproduce the bug:\r\n```\r\nimport click\r\n\r\n\r\ndef main():\r\n    test_txt = \"click_echo.txt\"\r\n    with open(test_txt, \"w\") as f:\r\n        click.secho(\"Without setting color\", file=f, fg=\"red\")\r\n        click.secho(\"With color=False\", file=f, fg=\"red\", color=False)\r\n        click.secho(\"With color=True\", file=f, fg=\"red\", color=True)\r\n\r\n    click.echo(f\"Check the contents of {test_txt}\")\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    main()\r\n```\r\nAfter running it on Linux the third line of `click_echo.txt` will contain the ANSI color codes but on Windows all three lines will be the same (the behavior is the same if `echo` prints on the console and the script output is redirected to a file)\r\n\r\nEnvironment:\r\n\r\n- Python version: 3.9\r\n- Click version: 8.1.7\r\n",
+    "merge_sha": "afc86c748c214939e2293ec00879d85293bcd9fa",
+    "base_commit": "53f14d3ac4791718f259531dec3433e04a6e45ce",
+    "merged_at": "2024-10-26T13:43:32+00:00",
+    "additions": 14,
+    "deletions": 8,
+    "total_lines": 22,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/click/utils.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/utils.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2604,
+    "pr_title": "remove suffixes from generated command name",
+    "pr_body": "When generating a command's name from the function's name, the suffixes `_command`, `_cmd`, `_group`, and `_grp` are removed.\r\n\r\nfixes #2322 ",
+    "issue_number": "2322",
+    "issue_title": "strip \"_command\" suffix when generating command name",
+    "issue_body": "You often want a command to have the same name as a function it is wrapping. However, this will cause a name collision, if your command is going to call `init_data` its function can't also be called `init_data`. So instead it's written as `init_data_command`, and then the command name has to be specified manually `@command(\"init-data\")`. Click should remove a `_command` suffix when generating the command name from the function name.\r\n\r\n```python\r\ndef init_data(external=False):\r\n    ...\r\n\r\n@cli.command\r\n@click.option(\"--external/--internal\")\r\ndef init_data_command(external):\r\n    init_data(external=external)\r\n\r\n```\r\n\r\nCurrently this command would be named `init-data-command`. After the change, it would be `init-data`.",
+    "merge_sha": "9c5e989d52509498ce78a4015ebc7d9408f70c56",
+    "base_commit": "b63ace28d50b53e74b5260f6cb357ccfe5560133",
+    "merged_at": "2023-09-01T21:17:53+00:00",
+    "additions": 46,
+    "deletions": 14,
+    "total_lines": 60,
+    "test_files": [
+      "tests/test_command_decorators.py",
+      "tests/test_commands.py"
+    ],
+    "source_files": [
+      "src/click/decorators.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/decorators.py",
+      "tests/test_command_decorators.py",
+      "tests/test_commands.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2555,
+    "pr_title": "echo doesn't fail with no streams",
+    "pr_body": "When running with `pythonw` on Windows (GUI mode, no console), `sys.stdout` and `stderr` are `None`. This doesn't appear to be documented by Python. In this case, `echo` should return early since there's nowhere to write to. fixes #2415 \r\n\r\n`progressbar` and `pager` also use these, they'll fall back to writing to a temporary `StringIO` since it wasn't clear how to make them exit early.\r\n\r\nPresumably if you actually wanted to see output when using `pythonw` you would do something like `sys.stdout = open(\"output.txt\", \"w\")` at the beginning of your program.",
+    "issue_number": "2415",
+    "issue_title": "Error in click.utils.echo() when console is unavailable",
+    "issue_body": "The `click.utils.echo()` function does not seem to account for the case when the console is not available on Windows, i.e., when running under `pythonw.exe` interpreter instead of the `python.exe` one.\r\n\r\nMinimal example: \r\n\r\n```python\r\n# program.py\r\nimport sys\r\nimport os\r\n\r\ntry:\r\n    import click\r\n    click.utils.echo(\"Hello world\")\r\nexcept Exception:\r\n    import traceback\r\n    error_file = os.path.join(os.path.dirname(__file__), \"error_log.txt\")\r\n    with open(error_file, \"w\") as fp:\r\n        traceback.print_exc(file=fp)\r\n```\r\n\r\nRunning this program with `pythonw.exe program.py` produces the `error_log.txt`:\r\n``` \r\nTraceback (most recent call last):\r\n  File \"C:\\Users\\Rok\\Development\\pyi-click\\program.py\", line 6, in <module>\r\n    click.utils.echo(\"Hello world\")\r\n  File \"C:\\Users\\Rok\\Development\\pyi-click\\venv\\lib\\site-packages\\click\\utils.py\", line 299, in echo\r\n    file.write(out)  # type: ignore\r\nAttributeError: 'NoneType' object has no attribute 'write'\r\n```\r\n\r\nIn contrast, standard `print()` function gracefully handles situations when console is unavailable and `sys.stdout` and `sys.stderr` are `None`.\r\n\r\nThis attempt at retrieving stdout/stderr:\r\nhttps://github.com/pallets/click/blob/c65c6ad18471448c0fcc59ef53088787288c02cc/src/click/utils.py#L250-L254\r\nshould be followed by another `None` check, and if the stream is unavailable, the function should become a no-op (exit immediately).\r\n\r\nEnvironment:\r\n\r\n- OS: Windows\r\n- Python version: any\r\n- Click version: 8.1.3 (and earlier)\r\n",
+    "merge_sha": "549947111c4af2191dd4b245e1de2c25d20c36d6",
+    "base_commit": "9a536eebd958558c2cd24c17fb66fac112f1ac91",
+    "merged_at": "2023-07-06T17:05:33+00:00",
+    "additions": 38,
+    "deletions": 3,
+    "total_lines": 41,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/click/_compat.py",
+      "src/click/_termui_impl.py",
+      "src/click/utils.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/_compat.py",
+      "src/click/_termui_impl.py",
+      "src/click/utils.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2550,
+    "pr_title": "allow `multiple=True` with flags",
+    "pr_body": "#2246 reported that `multiple=True` didn't work with flags since `default=()` was also required. I can't remember the original conversation around that, but instead of setting the default, #2248 made `multiple=True` with flags an error. Comments on the PR, as well as #2292 and #2295 reported that this broke valid uses.\r\n\r\nThis removes the error and instead sets `default=()` if `multiple=True` for flags. This works if the option is a flag due to a secondary token (`-y/-n`), `is_flag=True`, or `flag_value=value`.\r\n\r\nfixes #2246\r\nfixes #2292\r\nfixes #2295",
+    "issue_number": "2246",
+    "issue_title": "Flags with `multiple=True` trigger `TypeError`",
+    "issue_body": "Adding an option with `is_flag=True` and `multiple=True` will trigger a `TypeError` in `Parameter.consume_value()` due to bad default value.\r\n\r\n```py\r\nimport click\r\n\r\n@click.command()\r\n@click.option(\"-v\", is_flag=True, multiple=True)\r\ndef main(v):\r\n    click.echo(v)\r\n\r\nif __name__ == \"__main__\":\r\n    main()\r\n```\r\n\r\nWhen run without the flag, a TypeError is raised:\r\n\r\n```\r\n(venv39) jreese@butterfree ~/scratch \u00bb python foo.py\r\nTraceback (most recent call last):\r\n  File \"/Users/jreese/scratch/foo.py\", line 25, in <module>\r\n    main()\r\n  File \"/Users/jreese/scratch/venv39/lib/python3.9/site-packages/click/core.py\", line 1130, in __call__\r\n    return self.main(*args, **kwargs)\r\n  File \"/Users/jreese/scratch/venv39/lib/python3.9/site-packages/click/core.py\", line 1054, in main\r\n    with self.make_context(prog_name, args, **extra) as ctx:\r\n  File \"/Users/jreese/scratch/venv39/lib/python3.9/site-packages/click/core.py\", line 920, in make_context\r\n    self.parse_args(ctx, args)\r\n  File \"/Users/jreese/scratch/venv39/lib/python3.9/site-packages/click/core.py\", line 1378, in parse_args\r\n    value, args = param.handle_parse_result(ctx, opts, args)\r\n  File \"/Users/jreese/scratch/venv39/lib/python3.9/site-packages/click/core.py\", line 2356, in handle_parse_result\r\n    value, source = self.consume_value(ctx, opts)\r\n  File \"/Users/jreese/scratch/venv39/lib/python3.9/site-packages/click/core.py\", line 2903, in consume_value\r\n    and any(v is _flag_needs_value for v in value)\r\nTypeError: 'bool' object is not iterable\r\n```\r\n\r\nManually setting a better default value, like `default=()`, avoids the type error, but this used to work on 7.x without setting the default value.\r\n\r\nEnvironment:\r\n\r\n- Python version: tested on 3.8.6 and 3.9.3\r\n- Click version: worked on 7.1.2; errors on 8.0.4 and 8.1.2\r\n",
+    "merge_sha": "c77966e092edc9b8835e7327294b9177059fc90e",
+    "base_commit": "d34d31f6dde4350f9508f0327698f851c595d91c",
+    "merged_at": "2023-07-03T16:31:19+00:00",
+    "additions": 29,
+    "deletions": 8,
+    "total_lines": 37,
+    "test_files": [
+      "tests/test_defaults.py",
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_defaults.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2523,
+    "pr_title": "Keep track of `<stderr>` and `<stdout>` mix in `CliRunner` results",
+    "pr_body": "This PR:\r\n- Fixes #2522\r\n- Let `result.stdout` always contain the pure output to `<stdout>`. Never mangle `<stderr>` in it.\r\n- Let `result.stderr` always contain the pure output to `<stderr>`. Never raise an error.\r\n- Update `result.output` to be a perfect copy of what the user is expected to see in its terminal; i.e. produce a mix of `<stdout>` and `<stderr>`, in their natural order.\r\n- Remove the `mix_stderr` parameter from `CliRunner`.\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2522",
+    "issue_title": "`CliRunner`: restrict `mix_stderr` influence to `<output>`; keep `<stderr>` and `<stdout>` stable",
+    "issue_body": "Let's start with the current behaviour of `CliRunner` regarding [its `mix_stderr` option](https://click.palletsprojects.com/en/8.1.x/api/#click.testing.CliRunner).\r\n\r\nHere is a simple CLI:\r\n```python\r\nfrom click import command, echo\r\nfrom click.testing import CliRunner\r\n\r\n\r\n@command()\r\ndef hello():\r\n    echo(\"1 - Hello world\")\r\n    echo(\"2 - Hello error\", err=True)\r\n    echo(\"3 - Good bye world\")\r\n    echo(\"4 - Good bye error\", err=True)\r\n\r\n\r\nif __name__ == \"__main__\":\r\n\r\n    print(\"\\n*** mix_stderr=True (default) ***\\n\")\r\n    runner = CliRunner(mix_stderr=True)\r\n    result = runner.invoke(hello)\r\n    print(f\"--- <stdout> ---\\n{result.stdout}\")\r\n    print(f\"--- <stderr> ---\\n(raises error)\\n\")\r\n    print(f\"--- <output> ---\\n{result.output}\")\r\n\r\n    print(\"\\n*** mix_stderr=False ***\\n\")\r\n    runner = CliRunner(mix_stderr=False)\r\n    result = runner.invoke(hello)\r\n    print(f\"--- <stdout> ---\\n{result.stdout}\")\r\n    print(f\"--- <stderr> ---\\n{result.stderr}\")\r\n    print(f\"--- <output> ---\\n{result.output}\")\r\n\r\n```\r\n\r\nWhen called, the CLI above produces:\r\n```shell-session\r\n$ python ./cli_runner_stderr_test.py\r\n\r\n*** mix_stderr=True (default) ***\r\n\r\n--- <stdout> ---\r\n1 - Hello world\r\n2 - Hello error\r\n3 - Good bye world\r\n4 - Good bye error\r\n\r\n--- <stderr> ---\r\n(raises error)\r\n\r\n--- <output> ---\r\n1 - Hello world\r\n2 - Hello error\r\n3 - Good bye world\r\n4 - Good bye error\r\n\r\n\r\n*** mix_stderr=False ***\r\n\r\n--- <stdout> ---\r\n1 - Hello world\r\n3 - Good bye world\r\n\r\n--- <stderr> ---\r\n2 - Hello error\r\n4 - Good bye error\r\n\r\n--- <output> ---\r\n1 - Hello world\r\n3 - Good bye world\r\n```\r\n\r\nWhat I'd like to propose is to instead have `CliRunner` produce this result:\r\n```shell-session\r\n$ python ./cli_runner_stderr_test.py\r\n\r\n*** mix_stderr=True (default) ***\r\n\r\n--- <stdout> ---\r\n1 - Hello world\r\n3 - Good bye world\r\n\r\n--- <stderr> ---\r\n2 - Hello error\r\n4 - Good bye error\r\n\r\n--- <output> ---\r\n1 - Hello world\r\n2 - Hello error\r\n3 - Good bye world\r\n4 - Good bye error\r\n\r\n\r\n*** mix_stderr=False **",
+    "merge_sha": "0e0c00324a5af35f8995c7ff88df67b0f5594a58",
+    "base_commit": "948d7a707a0abda8ce0a1b39ba87390f11ffcd5e",
+    "merged_at": "2024-11-03T01:52:09+00:00",
+    "additions": 126,
+    "deletions": 70,
+    "total_lines": 196,
+    "test_files": [
+      "tests/test_termui.py",
+      "tests/test_testing.py"
+    ],
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/testing.py",
+      "tests/test_termui.py",
+      "tests/test_testing.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2517,
+    "pr_title": "Split generation of help extra items and rendering",
+    "pr_body": "This:\r\n- fixes #2516.\r\n\r\nThis is a small refactor of [the original `Option.get_help_record()` method](https://github.com/pallets/click/blob/main/src/click/core.py#L2708), splitting it in two to separate the generation of extra items in help screen and their rendering.\r\n\r\nThis PR:\r\n- extracts from `get_help_record()` the [code responsible for extra items generation](https://github.com/pallets/click/blob/b0538dffe889ff5d03934927c31a9b71e5129848/src/click/core.py#L2735-L2792C3), and move it to its own `get_help_extra()` method\r\n- leaves the original `get_help_record()` as-is, but rely on the new `get_help_extra()` method to fetch the extra items to render for the help\r\n- makes the new `get_help_extra()` returns a dictionary of extra items to be rendered, so `get_help_record()` can pick them up to render (and translate) them the way it wants\r\n- augments the original `get_help_record()` unittests to inspect values returned by `get_help_extra()` \r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2516",
+    "issue_title": "Split extra help item computing with help record rendering",
+    "issue_body": "I maintain [Click Extra, a drop-in replacement for Click which adds colorization](https://github.com/kdeldycke/click-extra/tree/main#readme) of the help screen.\r\n\r\nI am currently relying on finicky regular expressions to identify and match the extra items that are displayed at the end of each option's help. These extra items are rendered in square brackets and looks like:\r\n- `[default: None]`\r\n- `[default: (unlimited)]`\r\n- `[env var: COLOR_CLI8_TIME; default: no-time]`\r\n- and a variety of other formats.\r\n\r\nThe problem is that the generation of these extra items are deeply embedded within Click and are impossible to fetch independently.\r\n\r\nThat's why I propose a simple refactor of the `Option.get_help_record()` method, and split it in two:\r\n- a new method to compute the values of these extra items\r\n- keep the original `get_help_record()` as-is, but dedicated to help message rendering only\r\n\r\nI have a PR that is ready at #2517.",
+    "merge_sha": "948d7a707a0abda8ce0a1b39ba87390f11ffcd5e",
+    "base_commit": "a6e0d2936891030f5092c9869c7391104f6721d9",
+    "merged_at": "2024-11-02T23:35:57+00:00",
+    "additions": 63,
+    "deletions": 27,
+    "total_lines": 90,
+    "test_files": [
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py",
+      "src/click/types.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "src/click/types.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2417,
+    "pr_title": "Fix parameterless command with custom class",
+    "pr_body": "<!--\r\nBefore opening a PR, open a ticket describing the issue or feature the\r\nPR will address. Follow the steps in CONTRIBUTING.rst.\r\n\r\nReplace this comment with a description of the change. Describe how it\r\naddresses the linked ticket.\r\n-->\r\n\r\nThis reorders the setting of the `kwargs[\"cls\"]` and `assert (\r\n                len(args) == 1 and not kwargs\r\n            )` to allow parameterless constructors even when `self.command_class` is defined.\r\n\r\n<!--\r\nLink to relevant issues or previous PRs, one per line. Use \"fixes\" to\r\nautomatically close an issue.\r\n-->\r\n\r\n- fixes #2416 \r\n\r\n<!--\r\nEnsure each step in CONTRIBUTING.rst is complete by adding an \"x\" to\r\neach box below.\r\n\r\nIf only docs were changed, these aren't relevant and can be removed.\r\n-->\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2416",
+    "issue_title": "Cannot use parameterless command decorator with custom command_class",
+    "issue_body": "\r\nClick throws an assertion error if you try to use the parameterless command decorator on a group with a command_class defined. The error is due to the command_class being added to kwargs before the assertion for no kwargs.\r\n\r\n\r\n# minimal repro\r\n```\r\nimport click\r\n\r\nclass CustomCommand(click.Command):\r\n    pass\r\n\r\nclass CustomGroup(click.Group):\r\n    command_class = CustomCommand\r\n\r\n@click.group(cls=CustomGroup)\r\ndef grp():\r\n    pass\r\n\r\n@grp.command\r\ndef cli():\r\n    click.echo(\"hello custom command class\")\r\n```\r\n## error\r\n\r\n```\r\newilliamson@ip-192-168-50-39 ~ % python minimal_repro.py\r\nTraceback (most recent call last):\r\n  File \"/Users/ewilliamson/minimal_repro.py\", line 14, in <module>\r\n    def cli():\r\n  File \"/Users/ewilliamson/.pyenv/versions/3.10.7/lib/python3.10/site-packages/click/core.py\", line 1847, in command\r\n    assert (\r\nAssertionError: Use 'command(**kwargs)(callable)' to provide arguments.\r\n```\r\n\r\n## expected\r\nThe `@grp.command` would be successfully parsed the same as without using `CustomGroup`\r\n\r\n<!--\r\nDescribe the expected behavior that should have happened but didn't.\r\n-->\r\n\r\nEnvironment:\r\n\r\n- Python version: `Python 3.10.7`\r\n- Click version: `click==8.1.3`\r\n",
+    "merge_sha": "6ae94287ef5aac3b0dc7c37706548f32e5994d3b",
+    "base_commit": "e4066e1f325088ee42ae7bc0bc6c2e47533ff2c3",
+    "merged_at": "2023-06-30T19:29:14+00:00",
+    "additions": 25,
+    "deletions": 3,
+    "total_lines": 28,
+    "test_files": [
+      "tests/test_command_decorators.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_command_decorators.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2397,
+    "pr_title": "Give a UserWarning when Parameter is overriden by name",
+    "pr_body": "This adds a UserWarning when two parameters on one command have a name conflict. Very interested in thoughts and feedback.\r\n\r\n- fixes #2396 \r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2396",
+    "issue_title": "Issue UserWarning when overriding Parameter name",
+    "issue_body": "When a command is given multiple parameters that use the same name, a UserWarning should be fired to highlight the conflict. Currently, the command will quietly allow one parameter to override the names of another.\r\n\r\n(This is a slightly different problem than https://github.com/pallets/click/issues/1465. In that issue, True and False values were given the same names within a single parameter.)\r\n\r\n**Example of the issue:**\r\n\r\n```python\r\n@click.command()\r\n@click.option(\"-a\", \"--aardvark\", is_flag=True)\r\n@click.option(\"-a\", \"--avocado\", is_flag=True)\r\ndef cli(aardvark: bool = False, avocado: bool = False):\r\n    if aardvark:\r\n        print(\"Animal\")\r\n    if avocado:\r\n        print(\"Fruit\")\r\n```\r\n\r\nIn this scenario, the short-name, `-a`, appears ambiguous. A warning would help the user realize the conflict they've introduced.\r\n\r\nI'll also provide a pull request for consideration.",
+    "merge_sha": "380008389b32ca2b7de7c73f670a9eee1562004e",
+    "base_commit": "fcd85032cff78aa536a6d2b455fb83bfcc02b228",
+    "merged_at": "2024-11-03T14:11:59+00:00",
+    "additions": 73,
+    "deletions": 4,
+    "total_lines": 77,
+    "test_files": [
+      "tests/test_arguments.py",
+      "tests/test_options.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_arguments.py",
+      "tests/test_options.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2380,
+    "pr_title": "Do not suppress EOFError/KeyboardInterrupt when standalone is disabled",
+    "pr_body": "Raise `Abort()` exception in a chain with the original exception.\r\n\r\n<!--\r\nBefore opening a PR, open a ticket describing the issue or feature the\r\nPR will address. Follow the steps in CONTRIBUTING.rst.\r\n\r\nReplace this comment with a description of the change. Describe how it\r\naddresses the linked ticket.\r\n-->\r\n\r\n<!--\r\nLink to relevant issues or previous PRs, one per line. Use \"fixes\" to\r\nautomatically close an issue.\r\n-->\r\n\r\n- fixes #2379 \r\n\r\n<!--\r\nEnsure each step in CONTRIBUTING.rst is complete by adding an \"x\" to\r\neach box below.\r\n\r\nIf only docs were changed, these aren't relevant and can be removed.\r\n-->\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [ ] Add or update relevant docs, in the docs folder and in code.\r\n- [ ] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [ ] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2379",
+    "issue_title": "Unable to see EOFError exception in the traceback with disabled standalone mode",
+    "issue_body": "According to the [docs](https://click.palletsprojects.com/en/8.0.x/exceptions/?highlight=standalone%20mode#what-if-i-don-t-want-that) disabled standalone mode disables exception handling. However, click still suppresses `EOFError` (as well as `KeyboardInterrupt`) exceptions from the stack trace due to the `raise ... from None` construction, see:\r\n\r\nhttps://github.com/pallets/click/blob/0aec1168ac591e159baf6f61026d6ae322c53aaf/src/click/core.py#L1066-L1068\r\n\r\nI'd suggest changing the [line](https://github.com/pallets/click/blob/0aec1168ac591e159baf6f61026d6ae322c53aaf/src/click/core.py#L1068) to `raise Abort() from e`, so that users can see the original exception in the stack trace.\r\n\r\nReal world example. I use asyncio streams that can [raise IncompleteReadError](https://github.com/python/cpython/blob/d03acd7270d66ddb8e987f9743405147ecc15087/Lib/asyncio/exceptions.py#L29) which inherited from `EOFError`, but I can't see the exception in the stack trace even with disabled standalone mode which looks like a bug to me. \r\n\r\n**How to replicate the bug:**\r\n\r\n1. Create the following script:\r\n```python\r\n# t.py\r\nimport click\r\n\r\n\r\n@click.command()\r\ndef cli():\r\n    raise EOFError('I want to see this exception')\r\n\r\n\r\nif __name__ == '__main__':\r\n    cli.main(standalone_mode=False)\r\n```\r\n\r\n2. Run module `python -m t`\r\n\r\n**Actual behavior:**\r\n\r\n```python\r\nTraceback (most recent call last):\r\n  File \"/Users/albert/.pyenv/versions/3.10.4/lib/python3.10/runpy.py\", line 196, in _run_module_as_main\r\n    return _run_code(code, main_globals, None,\r\n  File \"/Users/albert/.pyenv/versions/3.10.4/lib/python3.10/runpy.py\", line 86, in _run_code\r\n    exec(code, run_globals)\r\n  File \"/private/var/folders/l0/lnq1ghps5yqc4vkgszlcz92m0000gp/T/tmp.X1tRYLrm/t.py\", line 10, in <module>\r\n    cli.main(standalone_mode=False)\r\n  File \"/private/var/folders/l0/lnq1ghps5yqc4vkgszlcz92m0000gp/T/tmp.X1tRYLrm/.venv/lib/python3.10/site-packages/click/core.py\", line 1068, in main\r\n    raise Abort() from None\r\nclic",
+    "merge_sha": "e4066e1f325088ee42ae7bc0bc6c2e47533ff2c3",
+    "base_commit": "df9ad4085d60710b507b54c8fc369ee186eb1d64",
+    "merged_at": "2023-06-30T19:19:42+00:00",
+    "additions": 16,
+    "deletions": 2,
+    "total_lines": 18,
+    "test_files": [
+      "tests/test_commands.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_commands.py"
+    ]
+  },
+  {
+    "repo": "pallets/click",
+    "pr_number": 2369,
+    "pr_title": "Don't output spurious lines if the truncated help text is actually empty",
+    "pr_body": "Regression in 92b30e47cb013433190f40d75239c98c77aa9d2d (8.1.0). This change brings back the original logic along with the comment.\r\n\r\nImprove the tests to catch further regressions.\r\n\r\nFixes #2368\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [ ] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "2368",
+    "issue_title": "Spurious empty lines in the help output (regression)",
+    "issue_body": "Click since version 8.1.0 doesn't properly account for a scenario that the callback's docstring can have no \"help text\" part, like so:\r\n\r\n```python\r\n@click.command()\r\ndef callback():\r\n    \"\"\"\r\n    \\f\r\n    More stuff.\r\n    \"\"\"\r\n```\r\nThis results in empty lines in the output:\r\n\r\n```\r\n% python3 test --help\r\nUsage: test [OPTIONS]\r\n\r\n\r\n\r\nOptions:\r\n  --help  Show this message and exit.\r\n```\r\n\r\nBefore 8.1.0:\r\n```\r\n% python3 test --help\r\nUsage: test [OPTIONS]\r\n\r\nOptions:\r\n  --help  Show this message and exit.\r\n```\r\n\r\nEnvironment:\r\n\r\n- Python version: 3.9.2\r\n- Click version: 8.1.3\r\n",
+    "merge_sha": "850bffe0b9db27f52f6f3f0a66eb6df432ce8bcd",
+    "base_commit": "a4f5450a2541e2f2f8cacf57f50435eb78422f99",
+    "merged_at": "2023-06-30T16:43:46+00:00",
+    "additions": 26,
+    "deletions": 16,
+    "total_lines": 42,
+    "test_files": [
+      "tests/test_commands.py",
+      "tests/test_formatting.py"
+    ],
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/click/core.py",
+      "tests/test_commands.py",
+      "tests/test_formatting.py"
+    ]
+  }
+]

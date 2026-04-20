@@ -1,0 +1,19 @@
+{
+  "instance_id": "requests-6458",
+  "repo": "psf/requests",
+  "base_commit": "147c8511ddbfa5e8f71bbf5c18ede0c4ceb3bba4",
+  "merge_sha": "6e5b15d542a4e85945fd72066bb6cecbc3a82191",
+  "pr_number": 6458,
+  "problem_statement": "PR: I knew we missed a step...\n\nGot a bit too far ahead of myself on the release. Running Black over the patch to fix quotes.",
+  "gold_patch": "diff --git a/requests/sessions.py b/requests/sessions.py\nindex dbcf2a7b..df35bfe2 100644\n--- a/requests/sessions.py\n+++ b/requests/sessions.py\n@@ -326,7 +326,7 @@ class SessionRedirectMixin:\n \n         # urllib3 handles proxy authorization for us in the standard adapter.\n         # Avoid appending this to TLS tunneled requests where it may be leaked.\n-        if not scheme.startswith('https') and username and password:\n+        if not scheme.startswith(\"https\") and username and password:\n             headers[\"Proxy-Authorization\"] = _basic_auth_str(username, password)\n \n         return new_proxies\ndiff --git a/tests/test_requests.py b/tests/test_requests.py\nindex b420c44d..5a01f5fb 100644\n--- a/tests/test_requests.py\n+++ b/tests/test_requests.py\n@@ -647,25 +647,26 @@ class TestRequests:\n \n         assert sent_headers.get(\"Proxy-Authorization\") == proxy_auth_value\n \n-\n     @pytest.mark.parametrize(\n         \"url,has_proxy_auth\",\n         (\n-            ('http://example.com', True),\n-            ('https://example.com', False),\n+            (\"http://example.com\", True),\n+            (\"https://example.com\", False),\n         ),\n     )\n-    def test_proxy_authorization_not_appended_to_https_request(self, url, has_proxy_auth):\n+    def test_proxy_authorization_not_appended_to_https_request(\n+        self, url, has_proxy_auth\n+    ):\n         session = requests.Session()\n         proxies = {\n-            'http': 'http://test:pass@localhost:8080',\n-            'https': 'http://test:pass@localhost:8090',\n+            \"http\": \"http://test:pass@localhost:8080\",\n+            \"https\": \"http://test:pass@localhost:8090\",\n         }\n-        req = requests.Request('GET', url)\n+        req = requests.Request(\"GET\", url)\n         prep = req.prepare()\n         session.rebuild_proxies(prep, proxies)\n \n-        assert ('Proxy-Authorization' in prep.headers) is has_proxy_auth\n+        assert (\"Proxy-Authorization\" in prep.headers) is has_proxy_auth\n \n     def test_basicauth_with_netrc(self, httpbin):\n         auth = (\"user\", \"pass\")\n",
+  "image_name": "gcr.io/fleet-compute-489000/swe-task-requests-6458:latest",
+  "eval_script": "#!/bin/bash\nset -e\ncd /repo\npytest tests/test_requests.py -x --tb=short -k \"test_proxy_authorization_not_appended_to_https_request\"\nexit $?\n",
+  "test_paths": [
+    "tests/test_requests.py"
+  ],
+  "source_paths": [
+    "requests/sessions.py"
+  ],
+  "total_lines": 19,
+  "merged_at": "2023-05-22T15:36:23+00:00"
+}

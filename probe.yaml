@@ -1,0 +1,12 @@
+# Minimal SkyPilot probe — run with: sky launch --down probe.yaml
+# --down auto-tears down the cluster after the run completes
+name: probe
+
+resources:
+  cloud: gcp
+  instance_type: n1-standard-1
+
+num_nodes: 1
+
+run: |
+  echo hello world

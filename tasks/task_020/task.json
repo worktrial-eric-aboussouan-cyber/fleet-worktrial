@@ -1,0 +1,18 @@
+{
+  "instance_id": "requests-6336",
+  "repo": "psf/requests",
+  "base_commit": "16a17a3ca7134b0a56c49653165ef37cb6acfece",
+  "merge_sha": "15585909c3dd3014e4083961c8a404709450151c",
+  "pr_number": 6336,
+  "problem_statement": "PR: Support missing SNIMissingWarning in tests\n\nurllib3 2.0 only supports OpenSSL 1.1.1+ which means SNI is mandatory, and removed the warning altogether.",
+  "gold_patch": "diff --git a/tests/__init__.py b/tests/__init__.py\nindex 04385be1..c8561a08 100644\n--- a/tests/__init__.py\n+++ b/tests/__init__.py\n@@ -2,9 +2,13 @@\n \n import warnings\n \n-from urllib3.exceptions import SNIMissingWarning\n+try:\n+    from urllib3.exceptions import SNIMissingWarning\n \n-# urllib3 sets SNIMissingWarning to only go off once,\n-# while this test suite requires it to always fire\n-# so that it occurs during test_requests.test_https_warnings\n-warnings.simplefilter(\"always\", SNIMissingWarning)\n+    # urllib3 1.x sets SNIMissingWarning to only go off once,\n+    # while this test suite requires it to always fire\n+    # so that it occurs during test_requests.test_https_warnings\n+    warnings.simplefilter(\"always\", SNIMissingWarning)\n+except ImportError:\n+    # urllib3 2.0 removed that warning and errors out instead\n+    SNIMissingWarning = None\ndiff --git a/tests/test_requests.py b/tests/test_requests.py\nindex 5b4c3f53..2a5c9b11 100644\n--- a/tests/test_requests.py\n+++ b/tests/test_requests.py\n@@ -48,6 +48,7 @@ from requests.models import PreparedRequest, urlencode\n from requests.sessions import SessionRedirectMixin\n from requests.structures import CaseInsensitiveDict\n \n+from . import SNIMissingWarning\n from .compat import StringIO\n from .utils import override_environ\n \n@@ -974,6 +975,10 @@ class TestRequests:\n         r = requests.get(httpbin(), cert=\".\")\n         assert r.status_code == 200\n \n+    @pytest.mark.skipif(\n+        SNIMissingWarning is None,\n+        reason=\"urllib3 2.0 removed that warning and errors out instead\",\n+    )\n     def test_https_warnings(self, nosan_server):\n         \"\"\"warnings are emitted with requests.get\"\"\"\n         host, port, ca_bundle = nosan_server\n",
+  "image_name": "gcr.io/fleet-compute-489000/swe-task-requests-6336:latest",
+  "eval_script": "#!/bin/bash\nset -e\ncd /repo\npytest tests/__init__.py tests/test_requests.py -x --tb=short\nexit $?\n",
+  "test_paths": [
+    "tests/__init__.py",
+    "tests/test_requests.py"
+  ],
+  "source_paths": [],
+  "total_lines": 19,
+  "merged_at": "2023-01-21T08:44:33+00:00"
+}

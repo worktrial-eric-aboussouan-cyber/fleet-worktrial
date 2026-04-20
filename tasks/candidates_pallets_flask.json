@@ -1,0 +1,639 @@
+[
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5917,
+    "pr_title": "fix provide_automatic_options override",
+    "pr_body": "`OPTIONS` is added correctly whenever `provide_automatic_options` is set. Previously, it was only added if the argument was not passed and was not set as an attribute; it could only be disabled, not enabled.\r\n\r\nAlso cleans up the tests about options. Fixes some other tests that were inadvertently adding duplicate routes.\r\n\r\nfixes #5916 ",
+    "issue_number": "5916",
+    "issue_title": "`provide_automatic_options` is weird",
+    "issue_body": "While dealing with trying to detect duplicate routes in https://github.com/pallets/werkzeug/issues/3105, I ran into an issue with Flask, which adds `OPTIONS` to every single rule by default.\n\nI started looking into Flask's `provide_automatic_options` feature, and it's just weird.\n\n- Why is there a `PROVIDE_AUTOMATIC_OPTIONS` config? What benefit is there to turning `OPTIONS` off at all, let alone configuring it for a given deployment.\n- Flask adds `OPTIONS` to every route, then has a check that runs on dispatching _every_ request to see if the method was `OPTIONS` and `provide_automatic_options` was enabled for the rule. Performing this check for every request seems wasteful, as opposed to adding an actual rule and endpoint so that the routing that's already happening handles it.\n    - But adding a rule is also sort of bad, as it results in a bunch of duplicate rules since Flask has no way to know what other rules have already been added. This can be caught with Werkzeug 3.2, and doesn't cause problems in earlier versions, but it's still annoying.\n- `provide_automatic_options` can be set as an attribute on the view function. There are some other attributes that are barely documented as well, such as `required_methods`. This is presumably mostly for `View` classes, but works on functions too, making type annotations unhelpful.\n- If `PROVIDE_AUTOMATIC_OPTIONS` is disabled (not the default), the logic for the `provide_automatic_options` argument and attribute doesn't work correctly to _enable_ it, it only works for _disabling_.\n- The tests for this were incomplete and had some issues. Some other tests were revealed to be adding duplicate rules as well. \n\nAt a minimum I've fixed the enabling issue. I've also got a change that registers a route and view for options instead of using special dispatch logic. We should also consider deprecating the config.",
+    "merge_sha": "12e95c93b488725f80753f34b2e0d24838ca4646",
+    "base_commit": "d3b78fd18a8d9e224cb9ef58a23cec9b1ffc9ce9",
+    "merged_at": "2026-02-12T21:07:51+00:00",
+    "additions": 96,
+    "deletions": 86,
+    "total_lines": 182,
+    "test_files": [
+      "tests/test_basic.py",
+      "tests/test_blueprints.py",
+      "tests/test_cli.py",
+      "tests/test_views.py"
+    ],
+    "source_files": [
+      "src/flask/sansio/app.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/config.rst",
+      "src/flask/sansio/app.py",
+      "tests/test_basic.py",
+      "tests/test_blueprints.py",
+      "tests/test_cli.py",
+      "tests/test_views.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5818,
+    "pr_title": "pass context through dispatch methods",
+    "pr_body": "The current `AppContext` object is passed through the various request dispatch methods, rather than each method accessing the proxies. closes #5815 \r\n\r\n@pgjones first proposed this in #5229 as a way to speed up dispatch especially for Quart and async views. This PR applies to more methods, and also implements compatibility during a deprecation period.\r\n\r\nDispatch methods now take `ctx: AppContext` as the first parameter. The following `Flask` methods were changed:\r\n\r\n- `update_template_context`\r\n- `handle_http_exception`\r\n- `handle_user_exception`\r\n- `handle_exception`\r\n- `log_exception`\r\n- `dispatch_request`\r\n- `full_dispatch_request`\r\n- `finalize_request`\r\n- `make_default_options_response`\r\n- `preprocess_request`\r\n- `process_response`\r\n- `do_teardown_request`\r\n- `do_teardown_appcontext`\r\n\r\n`url_for` and `make_response` were not changed, as it's much more likely that these are called from user code that only has access to the proxy.\r\n\r\nAn `__init_subclass__` class method is added to detect old signatures on subclasses of `Flask`. The second parameter is inspected (first is self). If it is not annotated, it must be named `ctx`. If it is annotated, it must either be the string or class `AppContext`. If an old signature is detected, the method is wrapped to remove the argument when other `Flask` methods call it during dispatch. The base method is also wrapped to inject the argument so that `super().base_method` from the overridden method will continue to work.\r\n\r\nI did not apply the compat wrapper to every base `Flask` method, only the ones that a subclass overrides. Therefore, if user code is directly calling these internal dispatch methods, they will get a `TypeError`. This is only likely (and unlikely at that) to happen during testing. I did this over concern that the wrapper would be unnecessary and a performance hit for most applications. If we get bug reports we can consider adding the wrapper.",
+    "issue_number": "5815",
+    "issue_title": "pass context internally instead of using contextvars",
+    "issue_body": "Currently, there are a bunch of different methods on the `Flask` class that run to dispatch each request. Many of these access `request` and other context proxies. We should update them to pass the `AppContext` everywhere instead. This is more convenient after #5812 with only one context object instead of two. As @pgjones pointed out in #5229, not having to access the contextvar is a significant speedup to ASGI Quart, although it doesn't appear to affect WSGI Flask as much. Perhaps if we were serving with greenlets and so contexts were switching more, it would be more noticeable in Flask too.\n\nThe obvious problem is that it is a breaking change to the signatures of all these methods. I'm unsure how many methods are affected, but I'm also unsure how many projects are even subclassing `Flask` to override any of the methods. The fact that the methods are public seems unintentional, compared to the much more common ways of configuring and customizing an app.\n\nWe could continue to support both signatures, showing a deprecation warning for the old one, by adding some detection to `Flask.__init__`. This would add some amount of time during app setup, but wouldn't affect runtime performance of the app.\n\n---\n\nAnother idea I had for the future was to have `@route` and other decorators inspect the signature of the decorated function, to allow injecting `request`, `app`, etc. if users would rather use that pattern than import the proxies. Having the request object directly available in all the dispatch methods would make this more straightforward. User code would be able to choose what pattern they want, the current proxy pattern would never be deprecated for user code.\n",
+    "merge_sha": "70d04b5a2620705011e65f79ccfd52caa86f5d6a",
+    "base_commit": "adf363679da2d9a5ddc564bb2da563c7ca083916",
+    "merged_at": "2025-11-17T16:49:53+00:00",
+    "additions": 167,
+    "deletions": 72,
+    "total_lines": 239,
+    "test_files": [
+      "tests/test_reqctx.py",
+      "tests/test_subclassing.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/ctx.py",
+      "src/flask/templating.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/app.py",
+      "src/flask/ctx.py",
+      "src/flask/templating.py",
+      "tests/test_reqctx.py",
+      "tests/test_subclassing.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5797,
+    "pr_title": "push preserved contexts in correct order",
+    "pr_body": "The test client asks the app to append contexts to a stack, in order to re-push them when using `with client`. However, they were being pushed in reverse order, resulting in the oldest context being seen as current. This PR pushes them in the correct order, meaning `session` will be in the correct state of the last response.\r\n\r\nfixes #5786 ",
+    "issue_number": "5786",
+    "issue_title": "Session is not updated on redirect target endpoint in tests",
+    "issue_body": "Hello team.\nDuring writing tests, I noticed a strange session behavior.\n\nI want to verify that after a redirect, the target location sets valid session properties, and it seems like in tests, the session properties when following redirects are not saved/exposed to the test environment.\n\nHere's an example:\n```python\nimport pytest\nfrom flask import Flask, redirect, session\n\n@pytest.fixture\ndef app():\n    app = Flask(__name__)\n    app.debug = True\n    app.secret_key = 'test_secret'  # noqa: S105 \u2013 fake secret key for testing purposes\n\n    @app.get('/redirect')\n    def do_redirect():\n        print(\"Redirecting to target endpoint\", flush=True)\n        session[\"redirected\"] = \"true\"\n        return redirect('/target', 302)\n\n    @app.get('/target')\n    def target():\n        print(\"Target endpoint reached\", flush=True)\n        session['foo'] = 'bar'\n        return 'Target', 200\n\n    return app\n\n@pytest.fixture()\ndef client(app):\n    return app.test_client()\n\ndef test_session(client):\n    with client:\n        response = client.get(\"/redirect\", follow_redirects=True)\n\n        print(f\"Session after a redirect: {session.items()}\", flush=True)\n        assert response.status_code == 200\n        assert response.data == b\"Target\"\n\n        assert session.get(\"redirected\") == \"true\"\n        assert session.get('foo') == 'bar'\n\n        client.get(\"/target\", follow_redirects=True)\n        assert session.get('foo') == 'bar'\n        assert response.data == b\"Target\"\n        print(f\"Session after a direct request: {session.items()}\", flush=True)\n```\n\nThe test fails on the first assertion `assert session.get('foo') == 'bar'`. \nIf I comment it out, the test output is the following:\n\n```\nRedirecting to the target endpoint\nTarget endpoint reached\nSession after a redirect: dict_items([('redirected', 'true')])\nTarget endpoint reached\nSession after a direct request: dict_items([('foo', 'bar'), ('redirected', 'true')])\n```\n\n**IMPORTANT**: The described behavior is not reproduced when running the ap",
+    "merge_sha": "24824ff666e096c4c07d0b75a889088571afe4a6",
+    "base_commit": "5addaf833b2e8c7a616f89dd8ad5a44b07d7c000",
+    "merged_at": "2025-08-18T16:56:39+00:00",
+    "additions": 15,
+    "deletions": 23,
+    "total_lines": 38,
+    "test_files": [
+      "tests/test_testing.py"
+    ],
+    "source_files": [
+      "src/flask/testing.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/testing.py",
+      "tests/test_testing.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5637,
+    "pr_title": "configure and check `request.trusted_hosts`",
+    "pr_body": "Add `TRUSTED_HOSTS` config. In `Flask.create_url_adapter`, which is called when creating a `RequestContext`, set `request.trusted_hosts` to the config. Call `get_host` with the config, and assign it to `request.host` to pre-cache the property.\r\n\r\nI considered making `flask.Request.trusted_hosts` a property, so that setting it would trigger validation again automatically. I'm not confident this difference in behavior from Werkzeug, where only accessing `request.host` triggers validation, would be good. If it's a good idea, it can be done in Werkzeug.\r\n\r\nfixes #5636 ",
+    "issue_number": "5636",
+    "issue_title": "configure and check `request.trusted_hosts`",
+    "issue_body": "If `request.trusted_hosts` is set, it will be checked when accessing `request.host`/`url`/etc. Add `TRUSTED_HOSTS` config, and check it during routing.",
+    "merge_sha": "7b21d43d4c763b874bc86d4c2d69a48ee492dc22",
+    "base_commit": "10bdf61a0f751f3cb000f8f8ac5ac5b4bb535677",
+    "merged_at": "2024-11-13T05:03:23+00:00",
+    "additions": 40,
+    "deletions": 0,
+    "total_lines": 40,
+    "test_files": [
+      "tests/test_request.py"
+    ],
+    "source_files": [
+      "src/flask/app.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/config.rst",
+      "src/flask/app.py",
+      "tests/test_request.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5634,
+    "pr_title": "setting `SERVER_NAME` does not restrict routing for both `subdomain_matching` and `host_matching`",
+    "pr_body": "I wrote a bunch in #5553 about investigating this. Essentially, we need to pass `\"\"` to disable subdomain matching, not `None`. The two tests that had to change were accidentally working because setting `SERVER_NAME` was bypassing `subdomain_matching = False`, and the tests should have been setting it to `True` since they were working with subdomains.\r\n\r\nNow `SERVER_NAME` only affects routing if `subdomain_matching=True`, in which case it correctly limits routing to subdomains under that name.\r\n\r\nfixes #5553 ",
+    "issue_number": "5553",
+    "issue_title": "Revisit SERVER_NAME's impact on routing and external URL generation",
+    "issue_body": "#998 was a discussion regarding the impact the `SERVER_NAME` setting has on an application.  IMO, there was consensus in that issue, including by @mitsuhiko, that `SERVER_NAME` being used both in routing and in URL generation was problematic.  \r\n\r\nThat issue was closed by https://github.com/pallets/flask/pull/2635, which made a change regarding subdomain matching.  However, IMO, it did not address the fundamental problem of `SERVER_NAME` impacting two disparate mechanisms in Flask.\r\n\r\nI found two additional issues since #998 that have attempted to point out the problem with `SERVER_NAME`: #2813, #3465\r\n\r\nIn #2813, a minimal, complete, and verifiable example was requested and I have therefore prepared an [example gist that demonstrates the problem](https://gist.github.com/rsyring/c50a500a5d35787ef45c1ff1e78d8898).\r\n\r\nThe gist's third \"currently impossible\" test demonstrates that it's currently impossible to:\r\n\r\n* Set `SERVER_NAME` so external URL generation works outside a request context with only an app context; and\r\n* Have the app respond properly to multiple host names. \r\n\r\nMy particular use case currently is that I need `SERVER_NAME` set so external URLs will be created accurately in distributed tasks where no web request is present.  Additionally, I need the app to respond to multiple host names 1) the canonical URL the public uses; and 2) the IP address based URL our load balancer uses for health checks.\r\n\r\nIMO, `SERVER_NAME` should be deprecated and two new settings should be created.  One which affects external URL generation and a second that affects routing resolution.\r\n\r\nThe setting for the URL generation could be `CANONICAL_URL` and, because its a URL, it could eliminate the need for `url_for()`'s `_scheme` arg.\r\n\r\nThanks for your consideration.\r\n\r\n- Python version: 3.12\r\n- Flask version: 3.0.3\r\n",
+    "merge_sha": "10bdf61a0f751f3cb000f8f8ac5ac5b4bb535677",
+    "base_commit": "07c7d5730a2685ef2281cc635e289685e5c3d478",
+    "merged_at": "2024-11-12T18:13:39+00:00",
+    "additions": 98,
+    "deletions": 43,
+    "total_lines": 141,
+    "test_files": [
+      "tests/test_basic.py",
+      "tests/test_blueprints.py"
+    ],
+    "source_files": [
+      "src/flask/app.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/config.rst",
+      "src/flask/app.py",
+      "tests/test_basic.py",
+      "tests/test_blueprints.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5630,
+    "pr_title": "update env file precedence",
+    "pr_body": "Precedence is now `os.environ` > `-e path` > `.env` > `.flaskenv`; previously `-e path` was lowest precedence. `load_dotenv` now loads the default files in addition to the given path unless `load_defaults=False` is passed; previously only the given path or the defaults were loaded, not both. `ScriptInfo.load_dotenv_defaults` was added to track the setting between `FlaskGroup` and `_env_file_callback`. `_env_file_callback` only errors if a value was given for the option, so that it handles calling `load_dotenv` for all cases rather than loading defaults in `make_context`.\r\n\r\nfixes #5628 ",
+    "issue_number": "5628",
+    "issue_title": "dotenv file arg should take precedence over default dotenv files",
+    "issue_body": "As pointed out in #5532, `-e file` is loaded after the default `.env` and `.flaskenv` files, which means it won't override env vars that are set by the defaults. It will be a little tricky to track during CLI startup, but I think it should be possible to fix this so that precedence is: `os.environ` > `-e path` > `.env` > `.flaskenv`.",
+    "merge_sha": "7522c4bcdb10449dc919e0ffbdebb92fe66822b5",
+    "base_commit": "ce08bc704e24c01582052f5c544fae181d08386f",
+    "merged_at": "2024-11-07T19:56:27+00:00",
+    "additions": 90,
+    "deletions": 47,
+    "total_lines": 137,
+    "test_files": [
+      "tests/test_cli.py"
+    ],
+    "source_files": [
+      "src/flask/cli.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/cli.py",
+      "tests/test_cli.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5627,
+    "pr_title": "fix example and tutorial compatibility and update metadata",
+    "pr_body": "* In the tutorial, Python 3.12 now requires registering a converter for the timestamp type, rather than providing a default converter.\r\n* The JavaScript example updated to prefer fetch at some point, but the test wasn't updated.\r\n* Add a private classifier.\r\n\r\nfixes #5556 ",
+    "issue_number": "5556",
+    "issue_title": "Test failures in tutorial with python3.12",
+    "issue_body": "The tests runned with `pytest` works with python3.11 and not in 3.12:\r\n\r\nHow to reproduce:\r\n```\r\ngit clone git@github.com:pallets/flask.git\r\ncd flask/examples/tutorial\r\npython3.11 -m venv venv3.11\r\npython3.12 -m venv venv3.12\r\n# install dependencies\r\n# setup db\r\n```\r\nIn both cases, the webservice runs properly with `./venv3.1x/bin/flask --app flaskr run --debug`.\r\n\r\nHowever, running the tests show different results. In `venv3.11`, the 24 tests are green. In `venv3.12` virtualenv, there is 6 failures (and 18 green). The failures are due to a `DeprecationWarning` which becomes an error:\r\n```\r\nDeprecationWarning: The default timestamp converter is deprecated as of Python 3.12; see the sqlite3 documentation for suggested replacement recipes\r\n```\r\n\r\nThe full output is provided at the end of the bug report.\r\n\r\nThe `DeprecationWarning` is documented in the [3.12 release](https://docs.python.org/3/whatsnew/3.12.html): '[default adapters and converters](https://docs.python.org/3/library/sqlite3.html#sqlite3-default-converters) are now deprecated. Instead, use the [Adapter and converter recipes](https://docs.python.org/3/library/sqlite3.html#sqlite3-adapter-converter-recipes) and tailor them to your needs.' Copy-pasting blindly the recipes in `tests/conftest.py`, `flaskr/__init__.py` and `flaskr/db.py` does not fix the errors.\r\n\r\nThe errors can be fixed by adding thoses lines in conftest.py:\r\n```python\r\ndef convert_timestamp(val):\r\n    \"\"\"Convert Unix epoch timestamp to datetime.datetime object.\"\"\"\r\n    return datetime.datetime.strptime(val.decode(\"utf-8\"), \"%Y-%m-%d %H:%M:%S\").replace(tzinfo=datetime.timezone.utc)\r\n\r\nsqlite3.register_converter(\"timestamp\", convert_timestamp)\r\n```\r\n\r\nIt's probably not the best fix but it's a start.\r\n\r\n\r\nPytest output:\r\n\r\n```\r\n(venv3.12) $ ./venv3.12/bin/pytest\r\n========================================= test session starts ==========================================\r\nplatform linux -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0\r\nrootdir: /home/st",
+    "merge_sha": "c62b03bcfd6e6440f8195e02f4678488e16121ac",
+    "base_commit": "96800fb673cb7b2d75476096798e701e3e6d26bc",
+    "merged_at": "2024-11-02T01:06:12+00:00",
+    "additions": 21,
+    "deletions": 5,
+    "total_lines": 26,
+    "test_files": [
+      "examples/javascript/tests/test_js_example.py"
+    ],
+    "source_files": [
+      "examples/tutorial/flaskr/db.py"
+    ],
+    "all_files": [
+      "docs/tutorial/database.rst",
+      "examples/celery/pyproject.toml",
+      "examples/javascript/LICENSE.txt",
+      "examples/javascript/pyproject.toml",
+      "examples/javascript/tests/test_js_example.py",
+      "examples/tutorial/LICENSE.txt",
+      "examples/tutorial/flaskr/db.py",
+      "examples/tutorial/pyproject.toml"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5626,
+    "pr_title": "add config and docs for limits",
+    "pr_body": "Add setter to each property to set per-request limit. If that is set, use it regardless of app context. Otherwise, use the Werkzeug default out of app context, or Flask config in app context.\r\n\r\nfixes #5625 ",
+    "issue_number": "5625",
+    "issue_title": "extend config for Request form memory settings",
+    "issue_body": "Werkzeug provides three settings on `Request` to control form parsing: `max_content_length`, `max_form_memory_size`, and `max_form_parts`. Only `max_content_length` is exposed as a Flask config right now, and the way it's implemented means it can only be set for the whole application, not per-request. Fix all that. Document these in the security page as well as the config page.",
+    "merge_sha": "6f2014d353d514e404c1f40e8f0a24e2bf62b941",
+    "base_commit": "62c56e08c43f5eb174d15dd050591cfba9aed548",
+    "merged_at": "2024-11-01T20:21:36+00:00",
+    "additions": 231,
+    "deletions": 33,
+    "total_lines": 264,
+    "test_files": [
+      "tests/test_basic.py",
+      "tests/test_request.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/wrappers.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/config.rst",
+      "docs/web-security.rst",
+      "src/flask/app.py",
+      "src/flask/wrappers.py",
+      "tests/test_basic.py",
+      "tests/test_request.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5526,
+    "pr_title": "Add encoding parameter to open resource",
+    "pr_body": "- Add encoding parameter to open_resource method and pass it to built-in open function\r\n- Remove skip mark from unittests, that checks this functionality\r\n\r\nThis PR fixes #5504 \r\n",
+    "issue_number": "5504",
+    "issue_title": "allow setting encoding in open_resource()",
+    "issue_body": "This is a duplicate of #1740 &mdash; that may have been closed for lack of a clear rationale, however, and I'd like to suggest it again with the following reasoning.\r\n\r\nThe documentation currently gives this example for using `open_resource()`:\r\n\r\n```python\r\nwith app.open_resource(\"schema.sql\") as f:\r\n    conn.executescript(f.read())\r\n```\r\n\r\nOn Windows, however, this can fail to open a file encoded in UTF-8, which most are these days, and safer code looks like this:\r\n\r\n```python\r\nwith app.open_resource(\"schema.sql\", mode=\"rb\") as f:\r\n   conn.executescript(f.read().decode(\"utf-8\"))  # type: ignore [attr-defined]\r\n```\r\n\r\n(The type comment is needed to prevent mypy from complaining about `f.read()` possibly being a string with no `.decode()` method, as it can't tell that the file was opened in 'rb' mode.)\r\n\r\nIt would be cleaner and more flexible to be able to write:\r\n\r\n```python\r\nwith app.open_resource(\"schema.sql\", encoding=\"utf-8\") as f:\r\n   conn.executescript(f.read())\r\n```\r\n",
+    "merge_sha": "a8956feba1e40105e7bc78fa62ce36c58d1c91e1",
+    "base_commit": "66af0e55ef6631d05c691707da19d0f1c46921ea",
+    "merged_at": "2024-07-11T02:16:46+00:00",
+    "additions": 81,
+    "deletions": 53,
+    "total_lines": 134,
+    "test_files": [
+      "tests/test_helpers.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/blueprints.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/app.py",
+      "src/flask/blueprints.py",
+      "tests/test_helpers.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5499,
+    "pr_title": "add SESSION_COOKIE_PARTITIONED config",
+    "pr_body": "**This pull request is related to Add support for partitioned session cookies** \r\n\r\nfixes #5472\r\n\r\nRegarding the commit [Adding code to handle SESSION_COOKIE_SECURE](https://github.com/pallets/flask/commit/1864dde5d9458ce3ebe7cc5cab8e9b3bccbf64b0) I see that in the test_basic.py in line 20 is using `import flask`, I believe this is the reason I got this error as it's using the package installed via `pip install flask` and not the code contained in /src/flask/\r\n\r\n```\r\nE       AssertionError: assert 'partitioned' in 'session=eyj0zxn0aw5nijo0mn0.zmzhyw.hgj68cffl4hz1avfswp08uya5ya; domain=example.com; secure; path=/; samesite=lax'\r\n```\r\n\r\nI'd like to learn if I'm doing something wrong with this to correct it and modify the PR\r\n\r\n- [x] Test case modified for the behavior of the change\r\n- [x] Updated relevant docs, based on the appearances of SESSION_COOKIE_SECURE\r\n- [x] Added entry to CHANGES.rst\r\n",
+    "issue_number": "5472",
+    "issue_title": "Add support for partitioned session cookies",
+    "issue_body": "Related issue with historical context: https://github.com/pallets/werkzeug/issues/2797\r\n\r\nPartitioned cookies are now supported in Werkzeug: https://github.com/pallets/werkzeug/pull/2855\r\n\r\nIt would be nice to have first-class support for the flask session cookie using the `Partitioned` flag to provide support for Chrome's CHIPS and allow sessions to continue to work within iframes.\r\n\r\nExample usage might be:\r\n\r\n```python\r\napp.config['SESSION_COOKIE_SAMESITE'] = \"None\"\r\napp.config['SESSION_COOKIE_SECURE'] = True\r\napp.config['SESSION_COOKIE_PARTITIONED'] = True # add this?\r\n```\r\n",
+    "merge_sha": "ce08bc704e24c01582052f5c544fae181d08386f",
+    "base_commit": "6f2014d353d514e404c1f40e8f0a24e2bf62b941",
+    "merged_at": "2024-11-01T23:26:38+00:00",
+    "additions": 34,
+    "deletions": 0,
+    "total_lines": 34,
+    "test_files": [
+      "tests/test_basic.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/sessions.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/config.rst",
+      "src/flask/app.py",
+      "src/flask/sessions.py",
+      "tests/test_basic.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5393,
+    "pr_title": "fix super call in list comprehension",
+    "pr_body": "<!--\r\nBefore opening a PR, open a ticket describing the issue or feature the\r\nPR will address. Follow the steps in CONTRIBUTING.rst.\r\n\r\nReplace this comment with a description of the change. Describe how it\r\naddresses the linked ticket.\r\n-->\r\n[python doc super()](https://docs.python.org/3/library/functions.html#super)\r\n> The zero argument form only works inside a class definition, as the compiler fills in the necessary details to correctly retrieve the class being defined, as well as accessing the current instance for ordinary methods.\r\n\r\nList comprehension works in a separate scope, where doesn't have class information. Zero argument `super` call doesn't work in such a scope.\r\n\r\n<!--\r\nLink to relevant issues or previous PRs, one per line. Use \"fixes\" to\r\nautomatically close an issue.\r\n-->\r\n\r\n- fixes #5391 \r\n\r\n<!--\r\nEnsure each step in CONTRIBUTING.rst is complete by adding an \"x\" to\r\neach box below.\r\n\r\nIf only docs were changed, these aren't relevant and can be removed.\r\n-->\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [ ] Add or update relevant docs, in the docs folder and in code.\r\n- [ ] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [ ] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "5391",
+    "issue_title": "Flask 3.0.1 breaks path-separated command line arguments",
+    "issue_body": "In a minimal flask app, running `flask run --extra-files=` or using any other argument that internally uses `SeparatedPathType` results in `TypeError: super(type, obj): obj must be an instance or subtype of type`\r\n\r\n\r\n\r\n1. Create a minimal flask application (follow [the Quickstart](https://flask.palletsprojects.com/en/3.0.x/quickstart/#a-minimal-application)).\r\n2. Install flask==3.0.1 (this bug is not reproducible with 3.0.0 AFAIK)\r\n3. Run `flask run --extra-files=a`\r\n\r\n**Expected Behavior:**\r\nThe server should start up.\r\n\r\n**Actual Behavior:**\r\nThe command raises a `Type Error` and exits with code 1\r\n\r\n<details><summary>Full Traceback</summary>\r\n\r\n```\r\nTraceback (most recent call last):\r\n  File \".../flask-cli-bug/..venv/bin/flask\", line 8, in <module>\r\n    sys.exit(main())\r\n             ^^^^^^\r\n  File \".../flask-cli-bug/..venv/lib/python3.11/site-packages/flask/cli.py\", line 1105, in main\r\n    cli.main()\r\n  File \".../flask-cli-bug/..venv/lib/python3.11/site-packages/click/core.py\", line 1078, in main\r\n    rv = self.invoke(ctx)\r\n         ^^^^^^^^^^^^^^^^\r\n  File \".../flask-cli-bug/..venv/lib/python3.11/site-packages/click/core.py\", line 1686, in invoke\r\n    sub_ctx = cmd.make_context(cmd_name, args, parent=ctx)\r\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \".../flask-cli-bug/..venv/lib/python3.11/site-packages/click/core.py\", line 943, in make_context\r\n    self.parse_args(ctx, args)\r\n  File \".../flask-cli-bug/..venv/lib/python3.11/site-packages/click/core.py\", line 1408, in parse_args\r\n    value, args = param.handle_parse_result(ctx, opts, args)\r\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \".../flask-cli-bug/..venv/lib/python3.11/site-packages/click/core.py\", line 2400, in handle_parse_result\r\n    value = self.process_value(ctx, value)\r\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \".../flask-cli-bug/..venv/lib/python3.11/site-packages/click/core.py\", line 2356, in process_value\r\n    value = self.type_cast_value(ct",
+    "merge_sha": "d7209a957004d4758f32fd8b2f89da11f5fe5718",
+    "base_commit": "3435d2ff1589eb0c1a85cc294a20985910a1a606",
+    "merged_at": "2024-02-03T20:39:33+00:00",
+    "additions": 10,
+    "deletions": 1,
+    "total_lines": 11,
+    "test_files": [
+      "tests/test_cli.py"
+    ],
+    "source_files": [
+      "src/flask/cli.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/cli.py",
+      "tests/test_cli.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5264,
+    "pr_title": "Allow self as an argument to url_for",
+    "pr_body": "This makes the Flask.url_for self argument positional only (Flask supports Python 3.8+) thereby restoring the ability to pass self as a value argument to url_for.\r\n\r\nCloses #5258\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "5258",
+    "issue_title": "TypeError: Flask.url_for() got multiple values for argument 'self'",
+    "issue_body": "[Official documentation](https://flask.palletsprojects.com/en/2.3.x/api/#flask.url_for) doesn't mention any preconditions for values argument, but `self=1` raises an exception.\r\n\r\nCan be replicated with the following test case:\r\n\r\n```python\r\nfrom unittest import TestCase\r\n\r\nfrom flask import Flask, url_for\r\n\r\n\r\nclass UrlForTests(TestCase):\r\n    def setUp(self) -> None:\r\n        self.app = Flask(__name__)\r\n\r\n    def test_with_self_argument(self) -> None:\r\n        with (\r\n            self.app.app_context(),\r\n            self.assertRaisesRegex(\r\n                TypeError, \"got multiple values for argument 'self'\"\r\n            ),\r\n        ):\r\n            url_for(\"doesnotmatter\", self=1)\r\n```\r\n\r\nTraceback example:\r\n\r\n```\r\nTraceback (most recent call last):\r\n  File \"/home/dmitry/git/github.com/minetest/contentdb/tests.py\", line 6, in <module>\r\n    url_for(\"doesnotmatter\", self=1)\r\n  File \"/home/dmitry/.cache/pypoetry/virtualenvs/contentdb-MK2UWkId-py3.10/lib/python3.10/site-packages/flask/helpers.py\", line 256, in url_for\r\n    return current_app.url_for(\r\nTypeError: Flask.url_for() got multiple values for argument 'self'\r\n```\r\n\r\nThe expected behavior is the returned URL has query string like '?self=1'.\r\n\r\nEnvironment:\r\n\r\n- Python version: 3.10.6\r\n- Flask version: 2.3.3\r\n",
+    "merge_sha": "438edcdf01c392619449a6bdbb18f6cf72ef7bb9",
+    "base_commit": "b7c1290528f907c9f41afcdfd33a2227c73e26d3",
+    "merged_at": "2023-09-30T14:25:31+00:00",
+    "additions": 9,
+    "deletions": 0,
+    "total_lines": 9,
+    "test_files": [
+      "tests/test_helpers.py"
+    ],
+    "source_files": [
+      "src/flask/app.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/app.py",
+      "tests/test_helpers.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5063,
+    "pr_title": "show subdomain or host in routes output",
+    "pr_body": "If any route sets `subdomain` (or `host` if `host_matching` is enabled), the `routes` command will show a `Subdomain` or `Host` column. A `domain` sort is also added. This refactors the implementation to hopefully make it easier if we need to extend it again.\r\n\r\ncloses #5004",
+    "issue_number": "5004",
+    "issue_title": "Flask routes to return domain/sub-domains information",
+    "issue_body": "Currently when checking **flask routes** it provides all routes but **it is no way to see which routes are assigned to which subdomain**.\r\n\r\n**Default server name:**\r\nSERVER_NAME: 'test.local'\r\n\r\n**Domains (sub-domains):**\r\ntest.test.local\r\nadmin.test.local\r\ntest.local\r\n\r\n**Adding blueprints:**\r\napp.register_blueprint(admin_blueprint,url_prefix='',subdomain='admin')\r\napp.register_blueprint(test_subdomain_blueprint,url_prefix='',subdomain='test')\r\n\r\n\r\n```\r\n$ flask routes\r\n * Tip: There are .env or .flaskenv files present. Do \"pip install python-dotenv\" to use them.\r\nEndpoint                                                 Methods    Rule\r\n-------------------------------------------------------  ---------  ------------------------------------------------\r\nadmin_blueprint.home                                      GET        /home\r\ntest_subdomain_blueprint.home                             GET        /home\r\nstatic                                                    GET        /static/<path:filename>\r\n...\r\n```\r\n\r\n\r\n**Feature request**\r\nIt will be good to see something like below (that will make more clear which route for which subdomain, because now need to go and check configuration).\r\n**If it is not possible to fix routes**, can you add or tell which method(s) should be used to get below information from flask? \r\n\r\n```\r\n$ flask routes\r\n * Tip: There are .env or .flaskenv files present. Do \"pip install python-dotenv\" to use them.\r\nDomain                Endpoint                                             Methods    Rule\r\n-----------------   ----------------------------------------------------  ----------  ------------------------------------------------\r\nadmin.test.local     admin_blueprint.home                                  GET        /home\r\ntest.test.local      test_subdomain_blueprint.home                         GET        /home\r\ntest.local           static                                                GET        /static/<path:filename>\r\n...\r\n```\r\n",
+    "merge_sha": "6931b252935188744415b301ab2e3d3bd5ee5498",
+    "base_commit": "182ce3dd15dfa3537391c3efaf9c3ff407d134d4",
+    "merged_at": "2023-04-14T16:45:20+00:00",
+    "additions": 69,
+    "deletions": 49,
+    "total_lines": 118,
+    "test_files": [
+      "tests/test_cli.py"
+    ],
+    "source_files": [
+      "src/flask/cli.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/cli.py",
+      "tests/test_cli.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5054,
+    "pr_title": "no cookie domain by default",
+    "pr_body": "`SESSION_COOKIE_DOMAIN` is not set by default, and does not fall back to `SERVER_NAME`.\r\n\r\nBrowsers treat no domain parameter as \"exact match\". They ignore a leading dot, and treat any domain parameter as \"subdomain match\". They allow `localhost` and `127.0.0.1`. Note that `a.localhost` will be treated as if `localhost` were a TLD, which they _do not_ allow, you would need `b.a.localhost` and `c.a.localhost` to observe subdomain matching.\r\n\r\ncloses #5051 ",
+    "issue_number": "5051",
+    "issue_title": "refactor session cookie domain handling",
+    "issue_body": "If `SESSION_COOKIE_DOMAIN` is not set, it currently falls back to `SERVER_NAME`. However, setting a domain is actually _less_ secure than not setting one. When not set, the browser will restrict the cookie to the exact domain. When set, it will allow exact as well as any subdomain.\r\n\r\nIf `SERVER_NAME` is not set, that's fine, but it's likely to be set for other reasons.\r\n\r\nWe should not fall back to `SERVER_NAME`. Either the session is specific to the domain that set it, or it's explicitly configured to be shared.\r\n\r\nWe currently add a leading dot `.` to the domain if the app is at the root path. This was an old way to signal subdomain support, but is not how things work anymore. Modern browsers ignore a leading dot, and only use exact matching if the domain is not set.\r\n\r\nAdditionally, if the domain does not contain a dot `.` (`localhost`) we currently don't set it and show a warning. We also show a warning for IP addresses. This  was apparently a limitation of browsers in 2017, but no longer appears to be an issue.\r\n\r\n#1784 discussed the `SERVER_NAME` fallback before, and #2282 was where I refactored this in 2017.",
+    "merge_sha": "c9a5660cfd0be150b598325697f6f19019af0ef8",
+    "base_commit": "fa0ceb62f26579c3c7d9e18926af3e6f3e6e425c",
+    "merged_at": "2023-04-12T20:10:35+00:00",
+    "additions": 34,
+    "deletions": 125,
+    "total_lines": 159,
+    "test_files": [
+      "tests/test_basic.py"
+    ],
+    "source_files": [
+      "src/flask/helpers.py",
+      "src/flask/sessions.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/config.rst",
+      "src/flask/helpers.py",
+      "src/flask/sessions.py",
+      "tests/test_basic.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 5014,
+    "pr_title": "Require a non empty name for blueprints",
+    "pr_body": "fixes #5010 \r\nValueError is raised if a Blueprint is given an empty name",
+    "issue_number": "5010",
+    "issue_title": "Require a non-empty name for Blueprints",
+    "issue_body": "Things do not work correctly if a Blueprint is given an empty name (e.g. #4944).\r\nIt would be helpful if a `ValueError` was raised when trying to do that.",
+    "merge_sha": "7ed89d3f9d2207c9a607f5dcdce106c0278e1332",
+    "base_commit": "7ee9ceb71e868944a46e1ff00b506772a53a4f1d",
+    "merged_at": "2023-03-11T16:34:56+00:00",
+    "additions": 10,
+    "deletions": 0,
+    "total_lines": 10,
+    "test_files": [
+      "tests/test_blueprints.py"
+    ],
+    "source_files": [
+      "src/flask/blueprints.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/blueprints.py",
+      "tests/test_blueprints.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 4992,
+    "pr_title": "add file mode parameter to handle .toml config files in flask.Config.\u2026",
+    "pr_body": "- fixes #4989 \r\nAdded optional boolean argument \"text\" (False by default).\r\n",
+    "issue_number": "4989",
+    "issue_title": "Add a file mode parameter to flask.Config.from_file()",
+    "issue_body": "Python 3.11 introduced native TOML support with the `tomllib` package. This could work nicely with the `flask.Config.from_file()` method as an easy way to load TOML config files:\r\n\r\n```python\r\napp.config.from_file(\"config.toml\", tomllib.load)\r\n```\r\n\r\nHowever, `tomllib.load()` takes an object readable in binary mode, while `flask.Config.from_file()` opens a file in text mode, resulting in this error:\r\n\r\n```\r\nTypeError: File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`\r\n```\r\n\r\nWe can get around this with a more verbose expression, like loading from a file opened with the built-in `open()` function and passing the `dict` to `app.Config.from_mapping()`:\r\n\r\n```python\r\n# We have to repeat the path joining that from_file() does\r\nwith open(os.path.join(app.config.root_path, \"config.toml\"), \"rb\") as file:\r\n    app.config.from_mapping(tomllib.load(file))\r\n```\r\n\r\nBut adding a file mode parameter to `flask.Config.from_file()` would enable the use of a simpler expression. E.g.:\r\n\r\n```python\r\napp.config.from_file(\"config.toml\", tomllib.load, mode=\"b\")\r\n```\r\n",
+    "merge_sha": "2ad4d8d717dfe1e15b8205a825a5d3a8cb106acc",
+    "base_commit": "4c288bc97ea371817199908d0d9b12de9dae327e",
+    "merged_at": "2023-02-23T19:13:18+00:00",
+    "additions": 23,
+    "deletions": 5,
+    "total_lines": 28,
+    "test_files": [
+      "tests/test_config.py"
+    ],
+    "source_files": [
+      "src/flask/config.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/config.py",
+      "tests/static/config.toml",
+      "tests/test_config.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 4935,
+    "pr_title": "Fix subdomain inheritance for nested blueprints",
+    "pr_body": "This replaces #4856\r\n\r\nChecklist:\r\n\r\n- [x] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.\r\n- [x] Add or update relevant docs, in the docs folder and in code.\r\n- [x] Add an entry in `CHANGES.rst` summarizing the change and linking to the issue.\r\n- [x] Add `.. versionchanged::` entries in any relevant code docs.\r\n- [x] Run `pre-commit` hooks and fix any issues.\r\n- [x] Run `pytest` and `tox`, no tests failed.\r\n",
+    "issue_number": "4834",
+    "issue_title": "Nested blueprints are not respected when mounted on subdomains",
+    "issue_body": "Hello, and thanks for all your work \ud83d\ude4f\ud83c\udffb \r\n\r\nNested blueprints [as described in the docs](https://flask.palletsprojects.com/en/2.2.x/blueprints/#nesting-blueprints) work perfectly fine when using `url_prefix`. However, when mounting the parent blueprint using a subdomain, the child routes are not accessible.\r\n\r\n```python\r\nfrom flask import Flask\r\nfrom flask import Blueprint\r\n\r\napp = Flask(__name__)\r\napp.config[\"SERVER_NAME\"] = \"localhost:5000\"\r\nparent = Blueprint(\"parent\", __name__)\r\nchild = Blueprint(\"child\", __name__)\r\n\r\n@app.route('/')\r\ndef index():\r\n    return \"index\"\r\n\r\n@parent.route('/')\r\ndef parent_index():\r\n    return \"parent\"\r\n\r\n@child.route('/child/')\r\ndef child_index():\r\n    return \"child\"\r\n\r\nparent.register_blueprint(child)\r\napp.register_blueprint(parent, subdomain=\"api\")\r\n\r\n\r\nif __name__ == '__main__':\r\n    app.run(debug=True)\r\n```\r\n\r\nThe index route works as expected:\r\n\r\n```\r\n\u276f http http://localhost:5000/\r\nHTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 5\r\nContent-Type: text/html; charset=utf-8\r\nDate: Tue, 04 Oct 2022 10:44:10 GMT\r\nServer: Werkzeug/2.2.2 Python/3.10.4\r\n\r\nindex\r\n```\r\n\r\nSo does the parent route in the subdomain:\r\n\r\n```\r\n\u276f http http://api.localhost:5000/\r\nHTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 6\r\nContent-Type: text/html; charset=utf-8\r\nDate: Tue, 04 Oct 2022 10:44:06 GMT\r\nServer: Werkzeug/2.2.2 Python/3.10.4\r\n\r\nparent\r\n```\r\n\r\nBut the child responds with a 404:\r\n\r\n```\r\n\u276f http http://api.localhost:5000/child/\r\nHTTP/1.1 404 NOT FOUND\r\nConnection: close\r\nContent-Length: 207\r\nContent-Type: text/html; charset=utf-8\r\nDate: Tue, 04 Oct 2022 10:45:42 GMT\r\nServer: Werkzeug/2.2.2 Python/3.10.4\r\n\r\n<!doctype html>\r\n<html lang=en>\r\n<title>404 Not Found</title>\r\n<h1>Not Found</h1>\r\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>\r\n```\r\n\r\nIf we change the `subdomain=\"api\"` for `url_prefix=\"/api\"` when registering the blueprint however everything works as expecte",
+    "merge_sha": "836866dc19218832cf02f8b04911060ac92bfc0b",
+    "base_commit": "fa1ee7066807c21256e90089731c548b313394d2",
+    "merged_at": "2023-01-04T21:06:36+00:00",
+    "additions": 78,
+    "deletions": 0,
+    "total_lines": 78,
+    "test_files": [
+      "tests/test_blueprints.py"
+    ],
+    "source_files": [
+      "src/flask/blueprints.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/blueprints.rst",
+      "src/flask/blueprints.py",
+      "tests/test_blueprints.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 4722,
+    "pr_title": "deprecate config attributes",
+    "pr_body": "closes #4716 ",
+    "issue_number": "4716",
+    "issue_title": "deprecate most config attributes",
+    "issue_body": "The `Flask` app object has some \"config attributes\", properties that are shortcuts to getting/setting certain `app.config` keys. There doesn't seem to be much consistency to which keys are exposed as attributes, and most of them don't seem useful as attributes.\r\n\r\n* `debug`, `testing`, and `secret_key` These should stay for now, they are shortcuts for common enough situations.\r\n* `session_cookie_name` It's not clear why this is an attribute. None of the other session cookie options are exposed as attributes, and it seems much more common to want to change those.\r\n* `permanent_session_lifetime` I think this is an attribute only so that it doesn't have to be converted from int to timedelta in two places. However, just like the name, this doesn't seem like something that belongs as an attribute more than the other options.\r\n* `send_file_max_age_default` Again this does a conversion from int to timedelta. But it's only used in one place, `get_send_file_max_age`.\r\n* `use_x_sendfile` This only works when behind a correctly configured Apache server, not any other server setup. It's not clear why this should be an attribute, it's a very niche case.\r\n* `env` This is going away with #4714 \r\n* `propagate_exceptions` is only used in `handle_exception`, and is a very internal behavior. This property can't be set, but it does have some logic to fall back to `testing` or `debug`. \r\n* `templates_auto_reload` I added this as part of making setting debug reset the property on the Jinja env. However, setting this property itself doesn't do that. There's no particular reason to expose this as an attribute.",
+    "merge_sha": "cfd5783a984c81828e79641b5d761a56633fa0e8",
+    "base_commit": "98ca00d54532bfdf858fe663f8fb3cc260c2048b",
+    "merged_at": "2022-08-02T00:04:13+00:00",
+    "additions": 154,
+    "deletions": 57,
+    "total_lines": 211,
+    "test_files": [
+      "tests/test_config.py",
+      "tests/test_templating.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/helpers.py",
+      "src/flask/scaffold.py",
+      "src/flask/sessions.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/api.rst",
+      "src/flask/app.py",
+      "src/flask/helpers.py",
+      "src/flask/scaffold.py",
+      "src/flask/sessions.py",
+      "tests/test_config.py",
+      "tests/test_templating.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 4718,
+    "pr_title": "remove `--eager-loader/--lazy-loader` options",
+    "pr_body": "closes #4715 ",
+    "issue_number": "4715",
+    "issue_title": "remove ability to toggle lazy/eager loading",
+    "issue_body": "When the CLI was first introduced, it would always lazily load the application, and then resolve that lazy import the first time the app was needed. For the `run` command, in debug mode, that would be _after_ the server started, so that errors would show up in the debugger and the reloader would work across errors. This meant that errors wouldn't show up immediately when running the command, which was confusing. The `--eager-loading/--lazy-loading` option controlled whether that was disabled/enabled regardless of debug mode.\r\n\r\nLater, this behavior was changed so that the app is always eagerly loaded the first time, and only lazily loaded on reloads. This makes errors show up consistently when running any command, including `run`, while still allowing the reloader to work across errors.\r\n\r\nThere shouldn't be a reason now to control loading. Errors will always be shown immediately in the terminal when a command is run. Lazy loading should always be used within the reloader to handle errors.",
+    "merge_sha": "633f421031c9c18b56177b0d42adcb505b4627b1",
+    "base_commit": "095651be9eec58ddb0c2eb6158318b1c703c67c5",
+    "merged_at": "2022-08-01T17:44:32+00:00",
+    "additions": 31,
+    "deletions": 118,
+    "total_lines": 149,
+    "test_files": [
+      "tests/test_cli.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/cli.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/quickstart.rst",
+      "docs/server.rst",
+      "src/flask/app.py",
+      "src/flask/cli.py",
+      "tests/test_cli.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 4647,
+    "pr_title": "with_appcontext lasts for the lifetime of the click context",
+    "pr_body": "Commands registered under `app.cli` (and `blueprint.cli`) will always have an active app context. This makes it possible to access the app context in command *and parameter* callbacks without requiring the `@with_appcontext` decorator. The app context is pushed during `FlaskGroup.get_command` when the app is loaded to look up custom commands, because at that point the app is known and the command will definitely be part of `app.cli`.\r\n\r\nUses `click.Context.with_resource` to manage `app.app_context` for the lifetime of the Click context instead of only while executing the decorated function. This means that any callbacks under a group decorated with `@with_appcontext` will also have access to the same app context.\r\n\r\n`@AppGroup.command` and `group` still have the `with_appcontext=True` keyword argument, since it's possible to register commands directly with `FlaskGroup.command`, or to register commands with other CLIs that might not push the context automatically like `FlaskGroup` does.\r\n\r\nfixes #2410",
+    "issue_number": "2410",
+    "issue_title": "Flask CLI doesn't support application context in argument callbacks",
+    "issue_body": "I recently converted an old managing script to use Flask's built in CLI instead. I have a table for clients that are identified using a shortname/slug. I thought about using Click's argument callback for this. Given a shortname my function would get an instance of the client from my ORM. The problem is that the application context is not active when the callback is run.\r\n\r\n### Expected Behavior\r\n\r\nSince many scripts will rely on a database connection it makes sense to have the application context be available in arguments.\r\n\r\n```python\r\nimport click\r\nfrom flask import current_app, Flask\r\n\r\napp = Flask(\"demo\")\r\n\r\ndef example_callback(ctx, param, value):\r\n    # Access the application context to trigger an exception\r\n    click.echo(current_app.config)\r\n    return {\"id\": 1, \"shortname\": value}\r\n\r\n@app.cli.command()\r\n@click.argument(\"arg\", callback=example_callback)\r\ndef view(arg):\r\n    click.echo(arg)\r\n```\r\n\r\nI run this using `flask view foobar`.\r\n\r\n### Actual Behavior\r\n\r\n```pytb\r\nTraceback (most recent call last):\r\n  File \"/dev/flask-cli-demo/venv/bin/flask\", line 11, in <module>\r\n    sys.exit(main())\r\n  File \"/dev/flask-cli-demo/venv/local/lib/python2.7/site-packages/flask/cli.py\", line 513, in main\r\n    cli.main(args=args, prog_name=name)\r\n  File \"/dev/flask-cli-demo/venv/local/lib/python2.7/site-packages/flask/cli.py\", line 380, in main\r\n    return AppGroup.main(self, *args, **kwargs)\r\n  File \"/dev/flask-cli-demo/venv/local/lib/python2.7/site-packages/click/core.py\", line 697, in main\r\n    rv = self.invoke(ctx)\r\n  File \"/dev/flask-cli-demo/venv/local/lib/python2.7/site-packages/click/core.py\", line 1064, in invoke\r\n    sub_ctx = cmd.make_context(cmd_name, args, parent=ctx)\r\n  File \"/dev/flask-cli-demo/venv/local/lib/python2.7/site-packages/click/core.py\", line 621, in make_context\r\n    self.parse_args(ctx, args)\r\n  File \"/dev/flask-cli-demo/venv/local/lib/python2.7/site-packages/click/core.py\", line 880, in parse_args\r\n    value, args = param.handle_parse_result(ctx",
+    "merge_sha": "cec5f74110a7369992be1651c24b695d9fe55ab3",
+    "base_commit": "ae547270e935b08d4deada9e28b049ff53debefe",
+    "merged_at": "2022-06-17T18:57:22+00:00",
+    "additions": 65,
+    "deletions": 26,
+    "total_lines": 91,
+    "test_files": [
+      "tests/test_cli.py"
+    ],
+    "source_files": [
+      "examples/tutorial/flaskr/db.py",
+      "src/flask/cli.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "docs/cli.rst",
+      "docs/tutorial/database.rst",
+      "examples/tutorial/flaskr/db.py",
+      "src/flask/cli.py",
+      "tests/test_cli.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 4642,
+    "pr_title": "`FlaskGroup` can be nested",
+    "pr_body": "Move custom behavior out of `FlaskGroup.main` into `__init__` or `make_context` instead. `main` isn't called when invoking subcommands, which would cause a `FlaskGroup` nested in a custom CLI to not get the passed in `create_app` function and other behavior. Now both the `flask.cli.cli`, as well as custom `FlaskGroup` instances, can be nested under a custom CLI.\r\n\r\nfixes #3263 ",
+    "issue_number": "3263",
+    "issue_title": "FlaskGroup does not work when nested in a click.group",
+    "issue_body": "### Expected Behavior\r\nWhen using Flask CLI, I came to the case that we have a group of commands for a big program that uses `click`.\r\n```python\r\n# main group\r\n@click.group()\r\n@click.pass_context\r\ndef my_big_cli_group(ctx):\r\n    pass\r\n\r\n# sub group\r\n@my_big_cli_group.group()\r\n@click.pass_context\r\ndef my_nested_group(ctx):\r\n    pass\r\n\r\n# command for sub group\r\n@my_nested_group.command()\r\n@click.pass_context\r\n@click.option('-s', '--start', is_flag=True)\r\ndef my_command(ctx, start):\r\n    click.echo(start)\r\n```\r\n\r\nThe issue comes when nesting my flask app into the bigger group using `cls=FlaskGroup` and passing my `create_app` factory function.\r\n\r\n```python\r\n# flask app sub group\r\n@my_big_cli_group.group(cls=FlaskGroup, create_app=create_app)\r\n@click.pass_context\r\ndef my_flask_app(ctx):\r\n    pass\r\n```\r\n\r\nAfter running my `setup.py` pointing my entry point to `'my_big_cli = path.to:my_big_cli_group'`, I should expect the app to start once I do:\r\n```bash\r\n$ my_big_cli my_flask_app run\r\n```\r\n\r\n### Actual Behavior\r\nInstead, I get a `flask.cli.NoAppException`. It seems that `create_app` does not get passed on to `Group.group` instances on `click`.\r\n\r\n```pytb\r\nTraceback (most recent call last):\r\n File \u201c/Users/the_user/Desktop/venv/lib/python3.7/site-packages/flask/cli.py\u201d, line 540, in list_commands\r\n   rv.update(info.load_app().cli.list_commands(ctx))\r\n File \u201c/Users/the_user/Desktop/venv/lib/python3.7/site-packages/flask/cli.py\u201d, line 393, in load_app\r\n   \u2018Could not locate a Flask application. You did not provide \u2019\r\nflask.cli.NoAppException: Could not locate a Flask application. You did not provide the \u201cFLASK_APP\u201d environment variable, and a \u201cwsgi.py\u201d or \u201capp.py\u201d module was not found in the current directory.\r\n```\r\n\r\n### Work around\r\nIf I don't nest the flask app into a group but rather make it a new `click.group`, then after changing my `setup.py` to point to this new entry point as well, everything works as expected.\r\n\r\n```python\r\n# flask app group\r\n@click.group(cls=FlaskG",
+    "merge_sha": "fe4003b3c998fde4c9ad8b2340f773f50079ede1",
+    "base_commit": "97298e06fe19298c3ff9d2e0ed9ba70bb3fda2c8",
+    "merged_at": "2022-06-15T21:17:45+00:00",
+    "additions": 53,
+    "deletions": 39,
+    "total_lines": 92,
+    "test_files": [
+      "tests/test_cli.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/cli.py",
+      "src/flask/debughelpers.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/app.py",
+      "src/flask/cli.py",
+      "src/flask/debughelpers.py",
+      "tests/test_cli.py"
+    ]
+  },
+  {
+    "repo": "pallets/flask",
+    "pr_number": 4621,
+    "pr_title": "deprecate before_first_request",
+    "pr_body": "Add deprecation notices to `Flask.before_first_request`, `Blueprint.before_app_first_request`, and `Flask.before_first_request_funcs`. For now, inline `try_trigger_before_first_request_functions` to avoid a method call on every subsequent request.\r\n\r\ncloses #4605 ",
+    "issue_number": "4605",
+    "issue_title": "deprecate `before_first_request`",
+    "issue_body": "While reviewing the consistent use of `setupmethod` for #4571 and #4577, I'm realizing that `before_first_request` should probably be deprecated then removed.\r\n\r\n* There's no example use cases in the docs.\r\n* From examples I've seen on Stack Overflow and around the web, it seems to be (mis)used as a setup method, to do something \"before the application starts\".\r\n* Configuration should be done before _running_ the application, during the actual setup phase. Preferably, it should be done in a factory function.\r\n* It incurs a function call before _every_ request, for something that only happens once. This can be inlined to only incur an `if` check, but it's not ideal.\r\n* It runs before the first request for every _instance_, which is every or almost every time for many process worker implementations, and only once for the dev server (the only thread worker I'm aware of). The `threading.Lock` is not useful for an eventual ASGI implementation.",
+    "merge_sha": "aab1d9935e17e40104a28c89d4c669f7ab3cc579",
+    "base_commit": "7a2d5fb6df1f2c066b94dd88686137353ada9cc6",
+    "merged_at": "2022-06-06T17:11:00+00:00",
+    "additions": 66,
+    "deletions": 33,
+    "total_lines": 99,
+    "test_files": [
+      "tests/test_async.py",
+      "tests/test_basic.py",
+      "tests/test_blueprints.py"
+    ],
+    "source_files": [
+      "src/flask/app.py",
+      "src/flask/blueprints.py"
+    ],
+    "all_files": [
+      "CHANGES.rst",
+      "src/flask/app.py",
+      "src/flask/blueprints.py",
+      "tests/test_async.py",
+      "tests/test_basic.py",
+      "tests/test_blueprints.py"
+    ]
+  }
+]

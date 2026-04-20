@@ -1,0 +1,17 @@
+{
+  "instance_id": "requests-7305",
+  "repo": "psf/requests",
+  "base_commit": "bc04dfd6dad4cb02cd92f5daa81eb562d280a761",
+  "merge_sha": "389eea58dfb2f2ee096421a812e3af29c0298951",
+  "pr_number": 7305,
+  "problem_statement": "PR: Cleanup extracted file after extract_zipped_path test\n\nWith the changes in 66d21cb07bd6255b1280291c4fafb71803cdb3b7 we now create a new extracted file every test run which can clutter the tmp directory. This becomes a problem when running the test suite repeatedly locally. This PR will now enforce cleanup when the test finishes regardless of success.",
+  "gold_patch": "diff --git a/pyproject.toml b/pyproject.toml\nindex dcde263d..dcb537c2 100644\n--- a/pyproject.toml\n+++ b/pyproject.toml\n@@ -53,11 +53,11 @@ security = []\n socks = [\"PySocks>=1.5.6, !=1.5.7\"]\n use_chardet_on_py3 = [\"chardet>=3.0.2,<8\"]\n test = [\n+    \"requests[socks]\",\n     \"pytest-httpbin==2.1.0\",\n     \"pytest-cov\",\n     \"pytest-mock\",\n     \"pytest-xdist\",\n-    \"PySocks>=1.5.6, !=1.5.7\",\n     \"pytest>=3\"\n ]\n \ndiff --git a/tests/test_utils.py b/tests/test_utils.py\nindex c477c408..31ba00c9 100644\n--- a/tests/test_utils.py\n+++ b/tests/test_utils.py\n@@ -361,9 +361,12 @@ class TestExtractZippedPaths:\n         zipped_path = os.path.join(zipped_py.strpath, name.lstrip(r\"\\/\"))\n         extracted_path = extract_zipped_paths(zipped_path)\n \n-        assert extracted_path != zipped_path\n-        assert os.path.exists(extracted_path)\n-        assert filecmp.cmp(extracted_path, __file__)\n+        try:\n+            assert extracted_path != zipped_path\n+            assert os.path.exists(extracted_path)\n+            assert filecmp.cmp(extracted_path, __file__)\n+        finally:\n+            os.remove(extracted_path)\n \n     def test_invalid_unc_path(self):\n         path = r\"\\\\localhost\\invalid\\location\"\n",
+  "image_name": "gcr.io/fleet-compute-489000/swe-task-requests-7305:latest",
+  "eval_script": "#!/bin/bash\nset -e\ncd /repo\npytest tests/test_utils.py -x --tb=short\nexit $?\n",
+  "test_paths": [
+    "tests/test_utils.py"
+  ],
+  "source_paths": [],
+  "total_lines": 9,
+  "merged_at": "2026-03-30T15:21:39+00:00"
+}

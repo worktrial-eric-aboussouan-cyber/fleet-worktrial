@@ -1,0 +1,638 @@
+[
+  {
+    "repo": "psf/requests",
+    "pr_number": 7328,
+    "pr_title": "Prevent Response self-reference in redirect history",
+    "pr_body": "This PR should address #6295, avoiding the unnecessary addition of the current response in its own redirect history. Ideally, we should remove intermediate `.history` assignment entirely, as `Session.send()` overwrites it on the final response anyway. The intermediary behavior introduces a number of issues both in intuitiveness and a reference explosion delaying the objects being properly cleaned up after use.\r\n\r\nThat's unfortunately a breaking change we'll have to wait on, but this should fix the immediate issue for now.",
+    "issue_number": "6295",
+    "issue_title": "Endless history: the history contains a self-reference",
+    "issue_body": "The history of a requests contains a self-reference to the history owner. The history will be endless.\r\n\r\n## Expected Result\r\nIf I traverse recursive the complete history of a requests, this will be a finally graph.\r\nThe history of a request is a tree without cycles. \r\n\r\n```\r\nR1 (history: 2)\r\n     R2 (no history)\r\n     R3 (no history)\r\n```\r\n\r\n## Actual Result\r\nIf I traverse recursive the complete history of a requests, the program breaks with recursive error. `RecursionError: maximum recursion depth exceeded while calling a Python object`\r\nThe history contains a self-reference to the history owner.\r\n\r\nThe history of a request is a graph with a cycle.\r\n\r\n```\r\nR1 (history: 2)\r\n     R2 (no history)\r\n          R3 (history: 1)\r\n               R3 (history: 1)\r\n                    R3 (history: 1)\r\n                         R3 (history: 1)\r\n                              R3 (history: 1)\r\n                                   ....\r\n```\r\n```\r\nid=140537834271072 history=2\r\n\tindex=0 id=140537834079136\r\n\tindex=1 id=140537834080960\r\nid=140537834079136 history=0\r\nid=140537834080960 history=1\r\n\tindex=0 id=140537834080960\r\nid=140537834080960 history=1\r\n\tindex=0 id=140537834080960\r\nid=140537834080960 history=1\r\n\tindex=0 id=140537834080960\r\nid=140537834080960 history=1\r\n\tindex=0 id=140537834080960\r\n\r\n....\r\n\r\n\r\nid=140537834080960 history=1\r\n\tindex=0 id=140537834080960\r\nid=140537834080960 history=1\r\n\tindex=0 id=140537834080960\r\nTraceback (most recent call last):\r\n  File \"/Users/andreas/PycharmProjects/cce/main.py\", line 12, in <module>\r\n    history(requests.get('https://coord.info/GC8T8E8'))\r\n  File \"/Users/andreas/PycharmProjects/cce/main.py\", line 9, in history\r\n    history(item)\r\n  File \"/Users/andreas/PycharmProjects/cce/main.py\", line 9, in history\r\n    history(item)\r\n  File \"/Users/andreas/PycharmProjects/cce/main.py\", line 9, in history\r\n    history(item)\r\n  [Previous line repeated 993 more times]\r\n  File \"/Users/andreas/PycharmProjects/cce/main.py\", line 5, in history\r\n    print(f\"id",
+    "merge_sha": "ef439eb779c1eba7cbdeeeb302b11e1e061b4b7d",
+    "base_commit": "cbce031327be4f1b4b5fd041ff4dcaa8efa2ce53",
+    "merged_at": "2026-04-05T15:31:02+00:00",
+    "additions": 9,
+    "deletions": 2,
+    "total_lines": 11,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "src/requests/sessions.py"
+    ],
+    "all_files": [
+      "src/requests/sessions.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 7309,
+    "pr_title": "Fix malformed value parsing for Content-Type",
+    "pr_body": "This PR addresses https://github.com/psf/requests/issues/6646 by cleaning up `_parse_content_type_header`. Instead of setting a default that we can't use in practice, we now skip value assignment completely if the value is malformed. Every RFC from 1521 to 9110 is clear that an `=` is required for a valid parameter. If it doesn't exist, we need to ignore it.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "f0198e6dfc431a2293dc16e1b1e8fcddc910a7f3",
+    "base_commit": "7407309c8a8a73aa2f4337184025d440bbedab7a",
+    "merged_at": "2026-03-30T15:27:35+00:00",
+    "additions": 10,
+    "deletions": 13,
+    "total_lines": 23,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/requests/utils.py"
+    ],
+    "all_files": [
+      "src/requests/utils.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 7308,
+    "pr_title": "Fix cosmetic header validity parsing regex",
+    "pr_body": "Credit to @ParzivalHack for reporting this through our security channel. This PR fixes what is now a cosmetic guard for header validity. It was originally introduced before the standard library handled line folding in http.client to protect older versions of Python. Now it serves as a cleaner error layer for callers of Requests.\r\n\r\nThis PR moves the end of regex from `$` to `\\Z` to capture any end-of-line LF characters. Those are explicitly ignored by `$` for convenience and our tests missed it. This change ensures our error is raised uniformly and we don't have standard library error messages sneaking though.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "bc7dd0fc4d56e808bcdd85ac2d797b3107c89259",
+    "base_commit": "7407309c8a8a73aa2f4337184025d440bbedab7a",
+    "merged_at": "2026-03-30T15:24:49+00:00",
+    "additions": 9,
+    "deletions": 4,
+    "total_lines": 13,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "src/requests/_internal_utils.py"
+    ],
+    "all_files": [
+      "src/requests/_internal_utils.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 7305,
+    "pr_title": "Cleanup extracted file after extract_zipped_path test",
+    "pr_body": "With the changes in 66d21cb07bd6255b1280291c4fafb71803cdb3b7 we now create a new extracted file every test run which can clutter the tmp directory. This becomes a problem when running the test suite repeatedly locally. This PR will now enforce cleanup when the test finishes regardless of success.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "389eea58dfb2f2ee096421a812e3af29c0298951",
+    "base_commit": "bc04dfd6dad4cb02cd92f5daa81eb562d280a761",
+    "merged_at": "2026-03-30T15:21:39+00:00",
+    "additions": 6,
+    "deletions": 3,
+    "total_lines": 9,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [],
+    "all_files": [
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 7205,
+    "pr_title": "Fix empty netrc entry usage",
+    "pr_body": "Prior to Python 3.11, a netrc entry without a username, account, or password entry was treated as malformed and raised a `NetrcParseError` disabling usage. For 3.11+, it now returns an empty tuple `('', '' ,'')` instead. That results in Requests sending an empty entry (`:`) for the value to encode in an Authorization header.\r\n\r\nThis PR brings Requests back to its intended behavior of ignoring these profiles. Anyone who may have some use case for this, we did not to intend to support this behavior. If you need it going forward, you can pass `auth=('', '')` with your request.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "47914226c2968802f2cdee3f6f0f6e06e4472f64",
+    "base_commit": "1b40fdd004bfc8ba5301bcf8a6908264e9b6b877",
+    "merged_at": "2026-02-13T02:07:05+00:00",
+    "additions": 11,
+    "deletions": 1,
+    "total_lines": 12,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/requests/utils.py"
+    ],
+    "all_files": [
+      "src/requests/utils.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 7190,
+    "pr_title": "Fix CI and build failures",
+    "pr_body": "This PR makes two changes to address the current build failures. The first is addressing a number of CI linting tools that are broken.\r\n\r\nWe could update those tools individually, but this PR proposes we move everything to Ruff so we're no longer having to manage them independently. I don't feel strongly about the move, but it seems prudent from a dependency management standpoint.\r\n\r\nThe other change is dropping support for pypy-3.10. It appears active work on the pypy 3.10 release stopped in July of last year. We're not able to compile our dependencies anymore due to their reliance on pyo3-ffi which is no longer compatible. For that reason, we'll remove it from the regular test suite.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "f8bec2f7ca9d7c03981a12ff8866a9b3923f1699",
+    "base_commit": "70298332899f25826e35e42f8d83425124f755a5",
+    "merged_at": "2026-01-30T21:10:28+00:00",
+    "additions": 73,
+    "deletions": 72,
+    "total_lines": 145,
+    "test_files": [
+      "tests/test_lowlevel.py",
+      "tests/test_requests.py",
+      "tests/test_testserver.py"
+    ],
+    "source_files": [
+      "setup.py",
+      "src/requests/__init__.py",
+      "src/requests/_internal_utils.py",
+      "src/requests/adapters.py",
+      "src/requests/auth.py",
+      "src/requests/certs.py",
+      "src/requests/exceptions.py",
+      "src/requests/help.py",
+      "src/requests/hooks.py",
+      "src/requests/models.py",
+      "src/requests/sessions.py",
+      "src/requests/utils.py"
+    ],
+    "all_files": [
+      ".github/workflows/run-tests.yml",
+      ".pre-commit-config.yaml",
+      "pyproject.toml",
+      "setup.cfg",
+      "setup.py",
+      "src/requests/__init__.py",
+      "src/requests/_internal_utils.py",
+      "src/requests/adapters.py",
+      "src/requests/auth.py",
+      "src/requests/certs.py",
+      "src/requests/exceptions.py",
+      "src/requests/help.py",
+      "src/requests/hooks.py",
+      "src/requests/models.py",
+      "src/requests/sessions.py",
+      "src/requests/utils.py",
+      "tests/test_lowlevel.py",
+      "tests/test_requests.py",
+      "tests/test_testserver.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6963,
+    "pr_title": "fix CVE 2024 47081: manual url parsing leads to netloc credentials leak",
+    "pr_body": "https://seclists.org/fulldisclosure/2025/Jun/2\r\n\r\nHonestly I have no idea why this lib used `netloc` + manual parsing instead of `hostname` as I can see references to `hostname` as early as from [the python 2.6 docs](https://docs.python.org/2.6/library/urlparse.html).",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "5b4b64c3467fd7a3c03f91ee641aaa348b6bed3b",
+    "base_commit": "7bc45877a86192af77645e156eb3744f95b47dae",
+    "merged_at": "2025-06-05T14:55:33+00:00",
+    "additions": 20,
+    "deletions": 8,
+    "total_lines": 28,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/requests/utils.py"
+    ],
+    "all_files": [
+      "src/requests/utils.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6962,
+    "pr_title": "test: Add new test to check netrc auth leak",
+    "pr_body": "This patch uses the \"hostname\" attribute from the parsed url to get the host, instead of trying to calculate the host from netloc that can produce errors when \"http://username:password@domain.com\" format is used.\r\n\r\nThis should fix the security issue reported here: [CVE-2024-47081: Netrc credential leak in PSF requests library](\r\nhttps://seclists.org/oss-sec/2025/q2/204)",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "7bc45877a86192af77645e156eb3744f95b47dae",
+    "base_commit": "96ba401c1296ab1dda74a2365ef36d88f7d144ef",
+    "merged_at": "2025-06-05T11:21:47+00:00",
+    "additions": 31,
+    "deletions": 0,
+    "total_lines": 31,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [],
+    "all_files": [
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6936,
+    "pr_title": "test: add two more tests exercising the adapter",
+    "pr_body": "This PR adds two test cases for `Session.mount()` to cover the documentation's recommendation about trailing slashes in prefixes (see #6935). \r\n\r\nThe first test `test_session_get_adapter_prefix_with_trailing_slash` verifies that prefixes with a trailing / (e.g., https://example.com/) match only the intended hostname. \r\n\r\nThe second test `test_session_get_adapter_prefix_without_trailing_slash` verifies that prefixes without a trailing / (e.g., https://example.com) match both the intended hostname and extended hostnames (e.g., https://example.com.other.com), as warned in the docs. \r\n\r\nTogether, these tests ensure the longest prefix match behavior is well-documented and stable.",
+    "issue_number": "6935",
+    "issue_title": "tests: add trailing slashes to mount to match docs recommendation?",
+    "issue_body": "I was digging into the docs and noticed this:\n> The adapter will be chosen based on a longest prefix match. Be mindful prefixes such as http://localhost will also match http://localhost.other.com or http://localhost@other.com. It\u2019s recommended to terminate full hostnames with a /.\n\n[link](https://requests.readthedocs.io/en/latest/user/advanced/)\n\nWhile checking out some tests that uses the `Session.mount()`, I saw that a few don\u2019t follow this recommendation. For example, in test_session_get_adapter_prefix_matching  (https://github.com/psf/requests/blob/main/tests/test_requests.py#L1620):\n\n```python\nprefix = \"https://example.com\"  # no trailing slash\nmore_specific_prefix = prefix + \"/some/path\"  # no trailing slash\n...\ns.mount(prefix, prefix_adapter)\ns.mount(more_specific_prefix, more_specific_prefix_adapter)\n```\n\nI know that the tests work great and do their job, but adding trailing slashes (e.g., https://example.com/ and https://example.com/some/path/) would align them with the docs and make the prefixes more precise.\n\nHere are the tests I noticed:\n- test_transport_adapter_ordering\n- test_session_get_adapter_prefix_matching\n- test_session_get_adapter_prefix_matching_mixed_case\n- test_session_get_adapter_prefix_matching_is_case_insensitive\n\nWould it be worth opening a PR to update these to include trailing slashes? The tests would stay the same, just following the docs best practice.",
+    "merge_sha": "c65c780849563c891f35ffc98d3198b71011c012",
+    "base_commit": "4ce9520a1cfa2e91abe5a923498f49e1fdb2e4ee",
+    "merged_at": "2025-05-03T16:39:14+00:00",
+    "additions": 26,
+    "deletions": 0,
+    "total_lines": 26,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [],
+    "all_files": [
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6757,
+    "pr_title": "Test on urllib3 1.26.x",
+    "pr_body": "First step to address #6734. We'll enable testing on urllib3 1.26.x which was lost when we moved the pin to support 2.x. These will fail for now until the underlying issue is addressed, but this is to ensure we're catching any future breakages.",
+    "issue_number": "6734",
+    "issue_title": "requests 2.32.3 & urllib3 1.26.18 issue with unicode put",
+    "issue_body": "I'm building requests 2.32.3 in Fedora Linux and I have a problem with `test_unicode_header_name` - the test hangs.\r\n\r\nIt's reproducible - when I use urllib3 at least 2.0.2, the code works fine, with urllib3 1.26.18, it hangs waiting for a response.\r\n\r\n## Expected Result\r\n\r\nOlder urllib3 is still allowed (`urllib3>=1.21.1,<3`) so it should work.\r\n\r\n## Actual Result\r\n\r\nThe call to `requests.put` hangs and if killed, the stacktrace is:\r\n\r\n```\r\nTraceback (most recent call last):\r\n  File \"<string>\", line 1, in <module>\r\n  File \"/home/lbalhar/Software/requests/src/requests/api.py\", line 130, in put\r\n    return request(\"put\", url, data=data, **kwargs)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/home/lbalhar/Software/requests/src/requests/api.py\", line 59, in request\r\n    return session.request(method=method, url=url, **kwargs)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/home/lbalhar/Software/requests/src/requests/sessions.py\", line 589, in request\r\n    resp = self.send(prep, **send_kwargs)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/home/lbalhar/Software/requests/src/requests/sessions.py\", line 703, in send\r\n    r = adapter.send(request, **kwargs)\r\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/home/lbalhar/Software/requests/src/requests/adapters.py\", line 667, in send\r\n    resp = conn.urlopen(\r\n           ^^^^^^^^^^^^^\r\n  File \"/home/lbalhar/.virtualenvs/requests/lib/python3.12/site-packages/urllib3/connectionpool.py\", line 715, in urlopen\r\n    httplib_response = self._make_request(\r\n                       ^^^^^^^^^^^^^^^^^^^\r\n  File \"/home/lbalhar/.virtualenvs/requests/lib/python3.12/site-packages/urllib3/connectionpool.py\", line 467, in _make_request\r\n    six.raise_from(e, None)\r\n  File \"<string>\", line 3, in raise_from\r\n  File \"/home/lbalhar/.virtualenvs/requests/lib/python3.12/site-packages/urllib3/connectionpool.py\", line 462, in _make_request\r\n    httplib_response = conn.getresponse()\r\n                     ",
+    "merge_sha": "79b74ef704dc0d804937c0d015c5e9c3b02b79bd",
+    "base_commit": "0e322af87745eff34caffe4df68456ebc20d9068",
+    "merged_at": "2024-07-30T01:44:14+00:00",
+    "additions": 60,
+    "deletions": 18,
+    "total_lines": 78,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "src/requests/compat.py",
+      "src/requests/utils.py"
+    ],
+    "all_files": [
+      ".github/workflows/run-tests.yml",
+      "src/requests/compat.py",
+      "src/requests/utils.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6655,
+    "pr_title": "Use TLS settings in selecting connection pool",
+    "pr_body": "Previously, if someone made a request with `verify=False` then made a request where they expected verification to be enabled to the same host, they would potentially reuse a connection where TLS had not been verified.\r\n\r\nThis fixes that issue.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "a58d7f2ffb4d00b46dca2d70a3932a0b37e22fac",
+    "base_commit": "eea3bbf9ac635f465ee6c9903dc57c677952dafd",
+    "merged_at": "2024-03-11T11:21:59+00:00",
+    "additions": 65,
+    "deletions": 2,
+    "total_lines": 67,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "src/requests/adapters.py"
+    ],
+    "all_files": [
+      "src/requests/adapters.py",
+      "tests/test_requests.py",
+      "tox.ini"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6644,
+    "pr_title": "Trim excess leading path separators",
+    "pr_body": "A URL with excess leading / (path-separator)s would cause urllib3 to attempt to reparse the request-uri as a full URI with a host and port. This bypasses that logic in ConnectionPool.urlopen by replacing these leading /s with just a single /.\r\n\r\nCloses #6643",
+    "issue_number": "6643",
+    "issue_title": "Leading slash in uri followed by column fails",
+    "issue_body": "Leading slash in uri followed by column fails.\r\n\r\n## Expected Result\r\n\r\n```python\r\nrequests.get('http://127.0.0.1:10000//v:h')\r\n<Response [200]>\r\n```\r\n\r\n## Actual Result\r\n\r\n```python\r\nTraceback (most recent call last):\r\n  File \"/usr/local/lib/python3.11/site-packages/urllib3/util/url.py\", line 425, in parse_url\r\n    host, port = _HOST_PORT_RE.match(host_port).groups()  # type: ignore[union-attr]\r\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\nAttributeError: 'NoneType' object has no attribute 'groups'\r\n\r\nThe above exception was the direct cause of the following exception:\r\n\r\nTraceback (most recent call last):\r\n  File \"<stdin>\", line 1, in <module>\r\n  File \"/usr/local/lib/python3.11/site-packages/requests/api.py\", line 73, in get\r\n    return request(\"get\", url, params=params, **kwargs)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/site-packages/requests/api.py\", line 59, in request\r\n    return session.request(method=method, url=url, **kwargs)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/site-packages/requests/sessions.py\", line 589, in request\r\n    resp = self.send(prep, **send_kwargs)\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/site-packages/requests/sessions.py\", line 703, in send\r\n    r = adapter.send(request, **kwargs)\r\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/site-packages/requests/adapters.py\", line 486, in send\r\n    resp = conn.urlopen(\r\n           ^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/site-packages/urllib3/connectionpool.py\", line 711, in urlopen\r\n    parsed_url = parse_url(url)\r\n                 ^^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/site-packages/urllib3/util/url.py\", line 451, in parse_url\r\n    raise LocationParseError(source_url) from e\r\nurllib3.exceptions.LocationParseError: Failed to parse: //v:h\r\n```\r\n\r\n## Reproduction Steps\r\n\r\n```python\r\nimport requests\r\nreq",
+    "merge_sha": "3587a5f869ea7ae2ba6b20d281d810b65aa2418e",
+    "base_commit": "382fc2c0c6c0ef0874bc65bc1175f97c073e5086",
+    "merged_at": "2024-02-23T00:49:42+00:00",
+    "additions": 11,
+    "deletions": 0,
+    "total_lines": 11,
+    "test_files": [
+      "tests/test_adapters.py"
+    ],
+    "source_files": [
+      "src/requests/adapters.py"
+    ],
+    "all_files": [
+      "src/requests/adapters.py",
+      "tests/test_adapters.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6629,
+    "pr_title": "Fix #6628 - JSONDecodeError are not deserializable",
+    "pr_body": "See issue #6628 for full bug-report\r\n\r\n-----\r\n\r\nrequests.exceptions.JSONDecodeError are not deserializable: calling `pickle.dumps` followed by `pickle.loads` will trigger an error.\r\n\r\nThis is particularly a problem in a process pool, as an attempt to decode json on an invalid json document will result in the entire process pool crashing.\r\n\r\nThis is due to the MRO of the `requests.exceptions.JSONDecodeError` class: the `__reduce__` method called when pickling an instance is not the one from the JSON library parent: two out of three args expected for instantiation will be dropped, and the instance can't be deserialised.\r\n\r\nBy specifying in the class which parent `__reduce__` method should be called, the bug is fixed as all args are carried over in the resulting pickled bytes.",
+    "issue_number": "6628",
+    "issue_title": "[BUG] JSONDecodeError can't be deserialized - invalid JSON raises a BrokenProcessPool and crashes the entire process pool",
+    "issue_body": "Hi all,\r\n\r\nI've stumbled upon a bug in the `requests` library, and have a proposal for a fix.\r\n\r\nIn short: I have a process pool running tasks in parallel, that are among other things doing queries to third-party APIs. One third-party returns an invalid JSON document as response in case of error.\r\n\r\nHowever, instead of just having a JSONDecodeError as the result of my job, the entire process pool crashes due to a BrokenProcessPool error with the following stack trace:\r\n\r\n```\r\nTraceback (most recent call last):\r\n  File \"/usr/local/lib/python3.11/concurrent/futures/process.py\", line 424, in wait_result_broken_or_wakeup\r\n    result_item = result_reader.recv()\r\n                  ^^^^^^^^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/multiprocessing/connection.py\", line 251, in recv\r\n    return _ForkingPickler.loads(buf.getbuffer())\r\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"/usr/local/lib/python3.11/site-packages/requests/exceptions.py\", line 41, in __init__\r\n    CompatJSONDecodeError.__init__(self, *args)\r\nTypeError: JSONDecodeError.__init__() missing 2 required positional arguments: 'doc' and 'pos'\r\n```\r\n\r\nSo I'm in a situation where receiving one invalid JSON as response is interrupting all my ongoing tasks because the entire process pool is crashing, and no more tasks can be submitted until the process pool recovered.\r\n\r\n## Origin of the bug + Fix\r\n\r\nAfter investigation, this is because the `requests.exception.JSONDecodeError` instances can't be deserialized once they've been serialized via `pickle`. So when the main process is trying to deserialize the error returned by the child process, the main process is crashing with to the error above.\r\n\r\nI think this bug has been around for a while, I've found old tickets from different projects mentioning issues that are looking similar: https://github.com/celery/celery/issues/5712\r\n\r\nI've pinpointed the bug to the following class: https://github.com/psf/requests/blob/main/src/requests/exceptions.py#L31\r\n\r",
+    "merge_sha": "382fc2c0c6c0ef0874bc65bc1175f97c073e5086",
+    "base_commit": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+    "merged_at": "2024-02-22T20:27:37+00:00",
+    "additions": 20,
+    "deletions": 0,
+    "total_lines": 20,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "src/requests/exceptions.py"
+    ],
+    "all_files": [
+      "src/requests/exceptions.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6592,
+    "pr_title": "\"TOO_EARLY\" type definition for status code 425",
+    "pr_body": "Addressing issue #6584:\r\n- Added \"too_early\" to type definition of status code 425\r\n- Added tests for retrieving 425 when querying type definitions\r\n- In accordance with RFC 4918 and 8470.\r\n",
+    "issue_number": "6584",
+    "issue_title": "Status Code 425 named incorrectly",
+    "issue_body": "HTTP status code 425 is defined as \"too early\". While the defining RFC defines the code in the context of TLS, I regularly find APIs that use this status code to indicate to a client that an asynchronous job that has been started is still being processed, so the result can not yet be provided.\r\n\r\nrequests.status_codes however doesn't know the reason \"too early\", and instead calls 425 \"unordered_collection\" and \"unordered\". I believe, this is a bug.\r\n\r\nThe defendent: https://github.com/psf/requests/blob/main/src/requests/status_codes.py#L82\r\n\r\nI call to the witness stand:\r\n* https://datatracker.ietf.org/doc/html/rfc8470\r\n* https://http.cat/425\r\n* https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#4xx_client_errors\r\n\r\n## Expected Result\r\n>>> requests.codes.get(\"TOO_EARLY\")\r\n425\r\n## Actual Result\r\n>>> requests.codes.get(\"TOO_EARLY\")\r\n\r\n## Reproduction Steps\r\n\r\n```python\r\nimport requests\r\n```\r\n\r\n## System Information\r\n\r\n    $ python -m requests.help\r\n\r\n```json\r\n{\r\n  \"chardet\": {\r\n    \"version\": null\r\n  },\r\n  \"charset_normalizer\": {\r\n    \"version\": \"3.3.0\"\r\n  },\r\n  \"cryptography\": {\r\n    \"version\": \"\"\r\n  },\r\n  \"idna\": {\r\n    \"version\": \"3.4\"\r\n  },\r\n  \"implementation\": {\r\n    \"name\": \"CPython\",\r\n    \"version\": \"3.11.6\"\r\n  },\r\n  \"platform\": {\r\n    \"release\": \"6.6.1-arch1-1\",\r\n    \"system\": \"Linux\"\r\n  },\r\n  \"pyOpenSSL\": {\r\n    \"openssl_version\": \"\",\r\n    \"version\": null\r\n  },\r\n  \"requests\": {\r\n    \"version\": \"2.31.0\"\r\n  },\r\n  \"system_ssl\": {\r\n    \"version\": \"30100040\"\r\n  },\r\n  \"urllib3\": {\r\n    \"version\": \"2.0.7\"\r\n  },\r\n  \"using_charset_normalizer\": true,\r\n  \"using_pyopenssl\": false\r\n}\r\n\r\n```\r\n",
+    "merge_sha": "3b5978fc5d1c121d70e83ddf59379cf36418b4ce",
+    "base_commit": "0b4d494192de489701d3a2e32acef8fb5d3f042e",
+    "merged_at": "2023-12-16T20:24:03+00:00",
+    "additions": 16,
+    "deletions": 1,
+    "total_lines": 17,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "src/requests/status_codes.py"
+    ],
+    "all_files": [
+      "src/requests/status_codes.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6589,
+    "pr_title": "Enhance `super_len` to count encoded bytes for str",
+    "pr_body": "This is a possible fix for issue #6586.\r\n\r\nI am not at all confident that this is an appropriate change for Requests. All of the unit tests pass locally for me (specifically `make ci`).",
+    "issue_number": "6586",
+    "issue_title": "The Content-Length header for string `data` counts Unicode characters in the string when it should count encoded bytes",
+    "issue_body": "A call like this:\r\n\r\n```python\r\nresponse = requests.post(\"https://example.com\", data=\"\ud83d\udc4d\ud83d\udc4e\")\r\n```\r\n\r\nauto sets the `Content-Length` header in the request to `2` when it should be `8`.\r\n\r\nI hit this issue was making a request with a JSON body to a service I own (running behind AWS API Gateway) and having the service complain that there was no closing brace `}` in the JSON body. I was passing the JSON body into requests as a string to the `data` argument. It turns out that API Gateway ignores any body bytes beyond the `Content-Length` in the request. Turning up detailed logging on API Gateway, I can see the request headers and realized the value in the `Content-Length` header didn't match the number of bytes in the body.\r\n\r\nA quick workaround is to encode the string into bytes before passing it into Requests.\r\n\r\nThis produces a Content-Length header with the correct value of `8`:\r\n\r\n```python\r\nresponse = requests.post(\"https://example.com\", data=\"\ud83d\udc4d\ud83d\udc4e\".encode(\"utf-8\"))\r\n```\r\n\r\n## Expected Result\r\n\r\nOn a server receiving a POST from Requests, I expect the `Content-Length` header value to match the number of bytes in the body of the request. See [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.content-length).\r\n\r\n## Actual Result\r\n\r\nIn the specific case where Request's `data` argument is set as a string containing characters which encode into multi-byte UTF-8, the value in the `Content-Length` header is incorrect. Requests appears to be counting the number of Unicode characters in the string instead of the number of bytes that will be sent to the server.\r\n\r\n## Reproduction Steps\r\n\r\n```python\r\n>>> import requests\r\n>>> thumbs_up_down = \"\ud83d\udc4d\ud83d\udc4e\"\r\n>>> len(thumbs_up_down)\r\n2\r\n>>> len(thumbs_up_down.encode())\r\n8\r\n>>> pending_request = requests.Request(\"POST\", \"https://example.com\", data=thumbs_up_down)\r\n>>> prepared_request = pending_request.prepare()\r\n>>> prepared_request.headers\r\n{'Content-Length': '2'}\r\n```\r\n\r\nI opened a pull request, #6587, that adds a failing unit test th",
+    "merge_sha": "b8be93a721792deeadd2f498b8f77cf610e7765f",
+    "base_commit": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+    "merged_at": "2024-02-23T00:53:25+00:00",
+    "additions": 20,
+    "deletions": 0,
+    "total_lines": 20,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "src/requests/utils.py"
+    ],
+    "all_files": [
+      "src/requests/utils.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6587,
+    "pr_title": "Unit test for string containing multi-byte UTF-8 #6586",
+    "pr_body": "There are two tests here. One demonstrating existing, correct behavior for `data=bytes`, and another, failing, test for the case where `data=string` and the string contains multi-byte UTF-8.",
+    "issue_number": "6586",
+    "issue_title": "The Content-Length header for string `data` counts Unicode characters in the string when it should count encoded bytes",
+    "issue_body": "A call like this:\r\n\r\n```python\r\nresponse = requests.post(\"https://example.com\", data=\"\ud83d\udc4d\ud83d\udc4e\")\r\n```\r\n\r\nauto sets the `Content-Length` header in the request to `2` when it should be `8`.\r\n\r\nI hit this issue was making a request with a JSON body to a service I own (running behind AWS API Gateway) and having the service complain that there was no closing brace `}` in the JSON body. I was passing the JSON body into requests as a string to the `data` argument. It turns out that API Gateway ignores any body bytes beyond the `Content-Length` in the request. Turning up detailed logging on API Gateway, I can see the request headers and realized the value in the `Content-Length` header didn't match the number of bytes in the body.\r\n\r\nA quick workaround is to encode the string into bytes before passing it into Requests.\r\n\r\nThis produces a Content-Length header with the correct value of `8`:\r\n\r\n```python\r\nresponse = requests.post(\"https://example.com\", data=\"\ud83d\udc4d\ud83d\udc4e\".encode(\"utf-8\"))\r\n```\r\n\r\n## Expected Result\r\n\r\nOn a server receiving a POST from Requests, I expect the `Content-Length` header value to match the number of bytes in the body of the request. See [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.content-length).\r\n\r\n## Actual Result\r\n\r\nIn the specific case where Request's `data` argument is set as a string containing characters which encode into multi-byte UTF-8, the value in the `Content-Length` header is incorrect. Requests appears to be counting the number of Unicode characters in the string instead of the number of bytes that will be sent to the server.\r\n\r\n## Reproduction Steps\r\n\r\n```python\r\n>>> import requests\r\n>>> thumbs_up_down = \"\ud83d\udc4d\ud83d\udc4e\"\r\n>>> len(thumbs_up_down)\r\n2\r\n>>> len(thumbs_up_down.encode())\r\n8\r\n>>> pending_request = requests.Request(\"POST\", \"https://example.com\", data=thumbs_up_down)\r\n>>> prepared_request = pending_request.prepare()\r\n>>> prepared_request.headers\r\n{'Content-Length': '2'}\r\n```\r\n\r\nI opened a pull request, #6587, that adds a failing unit test th",
+    "merge_sha": "f6707042d8b18d2a3737380bf58ff020872fb07b",
+    "base_commit": "0b4d494192de489701d3a2e32acef8fb5d3f042e",
+    "merged_at": "2024-02-23T00:53:27+00:00",
+    "additions": 17,
+    "deletions": 0,
+    "total_lines": 17,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [],
+    "all_files": [
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6505,
+    "pr_title": "Remove pytest-mock requirement",
+    "pr_body": "We missed removing `pytest-mock` in the Python 2.7 deprecation. Since we're not using any specialized functionality in `pytest-mock` and `mock` is available in the standard library through `unittest`, let's prefer that.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "005571d1180835eb5266a3fdbdbe8fdae57d90c2",
+    "base_commit": "678fca84238e311ffba758d90879d4b870030498",
+    "merged_at": "2023-08-13T23:08:21+00:00",
+    "additions": 28,
+    "deletions": 27,
+    "total_lines": 55,
+    "test_files": [
+      "tests/test_help.py",
+      "tests/test_requests.py",
+      "tests/test_utils.py"
+    ],
+    "source_files": [],
+    "all_files": [
+      "requirements-dev.txt",
+      "tests/test_help.py",
+      "tests/test_requests.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6498,
+    "pr_title": "Pre commit update",
+    "pr_body": "Same vein as #6497, make sure we have pre-commit relatively up to date. The update to black made some minor formatting changes but they're all reasonable.",
+    "issue_number": "6497",
+    "issue_title": "Pin GHA workflows and add dependabot",
+    "issue_body": "Running tests for #6496 I noticed we have a bunch of warnings for out of date actions. I've moved us to pins and added a dependabot config to run weekly to make sure we stay relatively up to date. I took a note from the urllib3 team and disabled PRs for patch updates to minimize noise.",
+    "merge_sha": "8112fcc7beb15e1cdc66180c10a3290174866828",
+    "base_commit": "aa4cc78627bcf8ff87b73422ec06748d833c7a15",
+    "merged_at": "2023-08-12T19:03:11+00:00",
+    "additions": 9,
+    "deletions": 29,
+    "total_lines": 38,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "requests/adapters.py",
+      "requests/auth.py",
+      "requests/models.py",
+      "requests/sessions.py",
+      "requests/utils.py"
+    ],
+    "all_files": [
+      ".pre-commit-config.yaml",
+      "requests/adapters.py",
+      "requests/auth.py",
+      "requests/models.py",
+      "requests/sessions.py",
+      "requests/utils.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6458,
+    "pr_title": "I knew we missed a step...",
+    "pr_body": "Got a bit too far ahead of myself on the release. Running Black over the patch to fix quotes.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "6e5b15d542a4e85945fd72066bb6cecbc3a82191",
+    "base_commit": "147c8511ddbfa5e8f71bbf5c18ede0c4ceb3bba4",
+    "merged_at": "2023-05-22T15:36:23+00:00",
+    "additions": 10,
+    "deletions": 9,
+    "total_lines": 19,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "requests/sessions.py"
+    ],
+    "all_files": [
+      "requests/sessions.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6356,
+    "pr_title": "Allow str/bytes subclasses to be used as header parts",
+    "pr_body": "Closes https://github.com/psf/requests/issues/6159 Adapted from https://github.com/nateprewitt/requests/commit/66fcc9c88cf5a53e85322305f41006032744cbe3 but also supports mixed type tuples.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "7f694b79e114c06fac5ec06019cada5a61e5570f",
+    "base_commit": "e90852d20c9bc44c465e55234c01432711627d94",
+    "merged_at": "2023-03-03T20:39:03+00:00",
+    "additions": 48,
+    "deletions": 13,
+    "total_lines": 61,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "requests/_internal_utils.py",
+      "requests/utils.py"
+    ],
+    "all_files": [
+      "requests/_internal_utils.py",
+      "requests/utils.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6336,
+    "pr_title": "Support missing SNIMissingWarning in tests",
+    "pr_body": "urllib3 2.0 only supports OpenSSL 1.1.1+ which means SNI is mandatory, and removed the warning altogether.",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "15585909c3dd3014e4083961c8a404709450151c",
+    "base_commit": "16a17a3ca7134b0a56c49653165ef37cb6acfece",
+    "merged_at": "2023-01-21T08:44:33+00:00",
+    "additions": 14,
+    "deletions": 5,
+    "total_lines": 19,
+    "test_files": [
+      "tests/__init__.py",
+      "tests/test_requests.py"
+    ],
+    "source_files": [],
+    "all_files": [
+      "tests/__init__.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6302,
+    "pr_title": "Fix the proxy_bypass_registry function all returning true in some cases.",
+    "pr_body": "With the context code,i think we should avoid this situation with empty strings,thx!",
+    "issue_number": null,
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "8dd3b26bf59808de24fd654699f592abf6de581e",
+    "base_commit": "eeafb6ab3a54ab01cbf864d452ea30f5fdb67ce8",
+    "merged_at": "2024-03-18T21:38:17+00:00",
+    "additions": 34,
+    "deletions": 0,
+    "total_lines": 34,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "src/requests/utils.py"
+    ],
+    "all_files": [
+      "src/requests/utils.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6154,
+    "pr_title": "Add validation for header name",
+    "pr_body": "Following up on #6083, this refactors our header validation function from 2.11.0 to consider the header name. We'd originally avoided adding header name validation because we wanted to limit the change scope to header splitting with new lines. Since then the standard library has made similar changes to ours and now raises a ValueError in `http.client`. This gives us inconsistent errors depending on which portion of the header you provide a bad value.\r\n\r\n```python\r\n>>> requests.get(\"https://httpbin.org/get\", headers={\":bad\": \"header\"})\r\nTraceback (most recent call last):\r\n  File \"<stdin>\", line 1, in <module>\r\n  File \"/Users/nateprewitt/Work/OpenSource/requests/requests/api.py\", line 73, in get\r\n    return request(\"get\", url, params=params, **kwargs)\r\n  File \"/Users/nateprewitt/Work/OpenSource/requests/requests/api.py\", line 59, in request\r\n    return session.request(method=method, url=url, **kwargs)\r\n  File \"/Users/nateprewitt/Work/OpenSource/requests/requests/sessions.py\", line 587, in request\r\n    resp = self.send(prep, **send_kwargs)\r\n  File \"/Users/nateprewitt/Work/OpenSource/requests/requests/sessions.py\", line 701, in send\r\n    r = adapter.send(request, **kwargs)\r\n  File \"/Users/nateprewitt/Work/OpenSource/requests/requests/adapters.py\", line 489, in send\r\n    resp = conn.urlopen(\r\n  File \"/Users/nateprewitt/Work/OpenSource/urllib3/src/urllib3/connectionpool.py\", line 727, in urlopen\r\n    httplib_response = self._make_request(\r\n  File \"/Users/nateprewitt/Work/OpenSource/urllib3/src/urllib3/connectionpool.py\", line 433, in _make_request\r\n    conn.request(method, url, **httplib_request_kw)\r\n  File \"/Users/nateprewitt/Work/OpenSource/urllib3/src/urllib3/connection.py\", line 309, in request\r\n    super().request(method, url, body=body, headers=headers)\r\n  File \"/Users/nateprewitt/.pyenv/versions/3.10.4/lib/python3.10/http/client.py\", line 1282, in request\r\n    self._send_request(method, url, body, headers, encode_chunked)\r\n  File \"/Users/nateprewitt/.pyenv/versions",
+    "issue_number": "6083",
+    "issue_title": "ValueError is raised instead of InvalidHeader",
+    "issue_body": "When using an invalid header name it is not checked in the `requests.utils.check_header_validity` function, only the value is checked.\r\n\r\nThis causes the underline HTTPConnection to fail when trying to write the header on `ValueError`, seems like that it is checked against:\r\n`_is_legal_header_name = re.compile(rb'[^:\\s][^:\\r\\n]*').fullmatch`\r\n\r\nThe expected exception, in this case, will be `InvalidHeader`\r\n\r\n```python\r\nimport requests\r\nrequests.get(\"https://www.google.com\", headers={\":bad\": \"header\"})\r\n```\r\n\r\n## System Information\r\n\r\n    $ python -m requests.help\r\n\r\n```json\r\n{\r\n  \"chardet\": {\r\n    \"version\": null\r\n  },\r\n  \"charset_normalizer\": {\r\n    \"version\": \"2.0.12\"\r\n  },\r\n  \"cryptography\": {\r\n    \"version\": \"\"\r\n  },\r\n  \"idna\": {\r\n    \"version\": \"3.3\"\r\n  },\r\n  \"implementation\": {\r\n    \"name\": \"CPython\",\r\n    \"version\": \"3.9.10\"\r\n  },\r\n  \"platform\": {\r\n    \"release\": \"5.4.0-1068-aws\",\r\n    \"system\": \"Linux\"\r\n  },\r\n  \"pyOpenSSL\": {\r\n    \"openssl_version\": \"\",\r\n    \"version\": null\r\n  },\r\n  \"requests\": {\r\n    \"version\": \"2.27.1\"\r\n  },\r\n  \"system_ssl\": {\r\n    \"version\": \"1010100f\"\r\n  },\r\n  \"urllib3\": {\r\n    \"version\": \"1.26.8\"\r\n  },\r\n  \"using_charset_normalizer\": true,\r\n  \"using_pyopenssl\": false\r\n}\r\n```\r\n",
+    "merge_sha": "e36f34597ca96c40dbb81d63a8fe9ac0860b8dc3",
+    "base_commit": "0f358eabe6f8e4c472a5030d9cd513965868bd6c",
+    "merged_at": "2022-06-08T18:03:56+00:00",
+    "additions": 72,
+    "deletions": 62,
+    "total_lines": 134,
+    "test_files": [
+      "tests/test_requests.py"
+    ],
+    "source_files": [
+      "requests/_internal_utils.py",
+      "requests/utils.py"
+    ],
+    "all_files": [
+      "requests/_internal_utils.py",
+      "requests/utils.py",
+      "tests/test_requests.py"
+    ]
+  },
+  {
+    "repo": "psf/requests",
+    "pr_number": 6149,
+    "pr_title": "Tolerate bad registry entries in Windows proxy settings",
+    "pr_body": "This PR will address #6104. Requests will now handle bad registry entries more gracefully when checking proxy settings from the host. When invalid entries are encountered, the ProxyEnabled setting will be ignored as if they didn't exist rather than throwing an exception.",
+    "issue_number": "6104",
+    "issue_title": "ValueError when calling requests.get on windows systems.",
+    "issue_body": "<!-- Summary. -->\r\nUsing windows I'm getting a ValueError in utils.py file telling that it's failing to parse to int ''. It's because the registry query is returning empty string instead of '0' or '1'.\r\n## Expected Result\r\nThe request be successful\r\n\r\n## Actual Result\r\nFile ...\\site-packages\\requests\\utils.py, line 68, in proxy_bypass_registry proxyEnable = int(winreg.QueryValueEx(internetSettings,\r\nValueError: invalid literal for int() with base 10: ''\r\n\r\n## Reproduction Steps\r\n\r\n```python\r\nimport requests\r\nurl = 'https://api.github.com/events'\r\nr = requests.get(url)\r\n```\r\n\r\nHere is the StackOverflow question of more people complaining about this issue and my answer with a solution for the problem\r\n\r\nhttps://stackoverflow.com/a/71770718/2726538\r\n\r\n<!-- This command is only available on Requests v2.16.4 and greater. Otherwise,\r\nplease provide some basic information about your system (Python version,\r\noperating system, &c). -->\r\n",
+    "merge_sha": "210095fd08f790a1ce640354a91c1a264a291360",
+    "base_commit": "a5e7169e759817ca309f8271c3c4fa79393a22f5",
+    "merged_at": "2022-06-01T17:36:26+00:00",
+    "additions": 34,
+    "deletions": 1,
+    "total_lines": 35,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "requests/utils.py"
+    ],
+    "all_files": [
+      "requests/utils.py",
+      "tests/test_utils.py"
+    ]
+  }
+]

@@ -1,0 +1,401 @@
+[
+  {
+    "repo": "encode/httpx",
+    "pr_number": 3412,
+    "pr_title": "Handle empty zstd responses",
+    "pr_body": "Closes #3411.",
+    "issue_number": "3411",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "47f4a96ffaaaa07dca1614409549b5d7a6e7af49",
+    "base_commit": "189fc4bcbe5f314128775dec66a616ac9a31ad48",
+    "merged_at": "2024-11-22T11:42:51+00:00",
+    "additions": 26,
+    "deletions": 5,
+    "total_lines": 31,
+    "test_files": [
+      "tests/test_decoders.py"
+    ],
+    "source_files": [
+      "httpx/__version__.py",
+      "httpx/_decoders.py"
+    ],
+    "all_files": [
+      "CHANGELOG.md",
+      "README.md",
+      "httpx/__version__.py",
+      "httpx/_decoders.py",
+      "tests/test_decoders.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 3187,
+    "pr_title": "Resolve queryparam quoting",
+    "pr_body": "* Percent-encoding in `params={}` should match browser form behavior. (Always percent-encode.)\r\n* Percent-encoding in `url={}` should match browser URL bar behavior. (Percent-encode, preserving existing escape sequences.)\r\n\r\nCloses #3135.\r\nCloses #3140.",
+    "issue_number": "3135",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "a7092af2fda78d92daaad7627e4cf0cf5e94b019",
+    "base_commit": "be56b747350008b7b0456242691919f9086c0f32",
+    "merged_at": "2024-05-03T00:09:08+00:00",
+    "additions": 55,
+    "deletions": 32,
+    "total_lines": 87,
+    "test_files": [
+      "tests/models/test_url.py"
+    ],
+    "source_files": [
+      "httpx/_urlparse.py"
+    ],
+    "all_files": [
+      "httpx/_urlparse.py",
+      "tests/models/test_url.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2999,
+    "pr_title": "Ensure that ASGI 'raw_path' does not include query component of URL.",
+    "pr_body": "Closes #2810.\r\n\r\nUpdate the ASGI transport to ensure that `raw_path` does not include the query component.\r\n\r\nThe spec was originally a little ambiguous here, and it might(?) have made sense for it to include the query portion, since that way around it'd be a direct representation of the HTTP/1.1 target byte string that was received on the wire. But the spec's been clarified since, and we're not matching that correctly at the moment. Let's fix that! \u263a\ufe0f",
+    "issue_number": "2810",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "90538a3b4610ba49ce16c997bcfdb9101f9503be",
+    "base_commit": "f8981f3d124f9b8db9073fd5c8afa11acb55a738",
+    "merged_at": "2023-12-11T15:45:20+00:00",
+    "additions": 15,
+    "deletions": 1,
+    "total_lines": 16,
+    "test_files": [
+      "tests/test_asgi.py"
+    ],
+    "source_files": [
+      "httpx/_transports/asgi.py"
+    ],
+    "all_files": [
+      "CHANGELOG.md",
+      "httpx/_transports/asgi.py",
+      "tests/test_asgi.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2701,
+    "pr_title": "Fix for gen-delims escaping behaviour in path/query/fragment",
+    "pr_body": "Fix which gen-delims need to be escaped for path/query/fragment components in URL.\r\n\r\n* `path` now allows `: / [ ] @` instead of `: @ /`\r\n* `query` now allows `: / [ ] @ ?` instead of `/ ?`\r\n* `fragment` now allows `: / [ ] @ ? #` instead of `/ ?`\r\n\r\nCloses #2694",
+    "issue_number": "2694",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "ee432c0d3098375df258b6d5844e7569080b2369",
+    "base_commit": "df5dbc05580a4c3225e70153729e2a306d67a472",
+    "merged_at": "2023-05-09T13:20:12+00:00",
+    "additions": 40,
+    "deletions": 3,
+    "total_lines": 43,
+    "test_files": [
+      "tests/test_urlparse.py"
+    ],
+    "source_files": [
+      "httpx/_urlparse.py"
+    ],
+    "all_files": [
+      "httpx/_urlparse.py",
+      "tests/test_urlparse.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2671,
+    "pr_title": "Fix optional percent encoding behaviour.",
+    "pr_body": "Closes #2670\r\n\r\n- [x] Tests for failing optional percent encoding.\r\n- [x] Fix for failing optional percent encoding.",
+    "issue_number": "2670",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "9ae170a936df39f42a6ddf8eb2c27026e20bea7e",
+    "base_commit": "15d09a3bbc20372cd87e48f17f7c9381c8220a0f",
+    "merged_at": "2023-04-19T12:21:42+00:00",
+    "additions": 40,
+    "deletions": 6,
+    "total_lines": 46,
+    "test_files": [
+      "tests/test_urlparse.py"
+    ],
+    "source_files": [
+      "httpx/_urlparse.py"
+    ],
+    "all_files": [
+      "httpx/_urlparse.py",
+      "tests/test_urlparse.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2659,
+    "pr_title": "fix: NO_PROXY should support IPv4, IPv6 and localhost",
+    "pr_body": "Closes #2660 \r\n\r\nThe `get_environment_proxies` function in **_utils.py** is responsible for parsing and mounting proxy info from system environment.\r\n\r\nhttps://github.com/encode/httpx/blob/4b5a92e88e03443c2619f0905d756b159f9f0222/httpx/_utils.py#L229-L264\r\n\r\nFor env `no_proxy`, according to [CURLOPT_NOPROXY explained](https://curl.se/libcurl/c/CURLOPT_NOPROXY.html), it should support domains, IPv4, IPv6 and the `localhost`. However, current `get_environment_proxies` function implementation only supports domains correctly as it always adds wildcard `*` in front of the `hostname`. \r\n\r\nI encountered error when my environment `no_proxy` includes IPv6 address like `::1`. It is wrongly transformed into `all://*::1` and causes urlparse error since the _urlparse.py parses the `:1` as port.\r\n\r\n![image](https://user-images.githubusercontent.com/26450272/232004919-042f07ff-dd55-4c3c-9e49-91d69c5cf3d6.png)\r\n\r\nTo fix this issue, I looked into this repo and suggest handling the `no_proxy` hostnames as domains, IPv4, IPv6 and the `localhost` seperately. I have updated the `get_environment_proxies` function in **_utils.py** and tested it.\r\n\r\nReplies and discussions are welcomed!\r\n",
+    "issue_number": "2660",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "15d09a3bbc20372cd87e48f17f7c9381c8220a0f",
+    "base_commit": "7d7c4f15b8784e4a550d974139acfa64193b32c2",
+    "merged_at": "2023-04-19T12:14:37+00:00",
+    "additions": 33,
+    "deletions": 1,
+    "total_lines": 34,
+    "test_files": [
+      "tests/test_utils.py"
+    ],
+    "source_files": [
+      "httpx/_utils.py"
+    ],
+    "all_files": [
+      "httpx/_utils.py",
+      "tests/test_utils.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2547,
+    "pr_title": "Use standard logging style",
+    "pr_body": "Closes #2042\r\n\r\nThis proposal drops some of our customised logging handling to replace it with a more standard setup.\r\n\r\nIn particular, we would...\r\n\r\n* Drop our custom `TRACE` level logging. Instead use `INFO` for logging requests, and `DEBUG` for logging the SSL config.\r\n* Drop our custom auto-logging setup, previously enabled via `HTTPX_LOG_LEVEL`.\r\n\r\nThis would then give us a more standard setup.\r\n\r\nFor example, logging at INFO level...\r\n\r\n```python\r\nimport logging\r\nimport httpx\r\n\r\nlogging.basicConfig(\r\n    format=\"%(levelname)s [%(asctime)s] %(name)s - %(message)s\",\r\n    datefmt=\"%Y-%m-%d %H:%M:%S\",\r\n    level=logging.INFO\r\n)\r\n\r\nhttpx.get('https://www.example.com')\r\n```\r\n\r\nOutput:\r\n\r\n```\r\nINFO [2023-01-05 15:25:26] httpx - HTTP Request: GET https://www.example.com \"HTTP/1.1 200 OK\"\r\n```\r\n\r\nOr logging at DEBUG level...\r\n\r\n```python\r\nimport logging\r\nimport httpx\r\n\r\nlogging.basicConfig(\r\n    format=\"%(levelname)s [%(asctime)s] %(name)s - %(message)s\",\r\n    datefmt=\"%Y-%m-%d %H:%M:%S\",\r\n    level=logging.DEBUG\r\n)\r\n\r\nhttpx.get('https://www.example.com')\r\n```\r\n\r\nOutput:\r\n\r\n```\r\nDEBUG [2023-01-05 15:26:12] httpx - load_ssl_context verify=True cert=None trust_env=True http2=False\r\nDEBUG [2023-01-05 15:26:12] httpx - load_verify_locations cafile='/Users/tomchristie/GitHub/encode/httpx/venv/lib/python3.10/site-packages/certifi/cacert.pem'\r\nINFO [2023-01-05 15:26:13] httpx - HTTP Request: GET https://www.example.com \"HTTP/1.1 200 OK\"\r\n```\r\n\r\nI'd suggest that alongside this we'd also add `DEBUG` level logging into `httpcore`, at the points where we currently have `trace` extension.\r\n\r\nOnce we've done that you'd be able to have debug logging for both `httpcore` and `httpx`...\r\n\r\n```python\r\nimport logging\r\nimport httpx\r\n\r\nlogging.basicConfig(\r\n    format=\"%(levelname)s [%(asctime)s] %(name)s - %(message)s\",\r\n    datefmt=\"%Y-%m-%d %H:%M:%S\",\r\n    level=logging.DEBUG\r\n)\r\n\r\nhttpx.get('https://www.example.com')\r\n```\r\n\r\nOutput:\r\n\r\n```\r\nDEBUG [2023-01-05 15:34:30] httpx - load_ssl",
+    "issue_number": "2042",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "f1157dbc4102ac8e227a0a0bb12a877f592eff58",
+    "base_commit": "85c5898d8e48011ab7b660fe8aac58910e45c84b",
+    "merged_at": "2023-03-20T11:30:11+00:00",
+    "additions": 163,
+    "deletions": 186,
+    "total_lines": 349,
+    "test_files": [
+      "tests/test_utils.py",
+      "tests/utils.py"
+    ],
+    "source_files": [
+      "httpx/_client.py",
+      "httpx/_config.py",
+      "httpx/_utils.py"
+    ],
+    "all_files": [
+      "docs/environment_variables.md",
+      "docs/logging.md",
+      "httpx/_client.py",
+      "httpx/_config.py",
+      "httpx/_utils.py",
+      "mkdocs.yml",
+      "tests/test_utils.py",
+      "tests/utils.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2523,
+    "pr_title": "Raise `TypeError` on invalid query params.",
+    "pr_body": "Prompted by #2515. (Doesn't presume any particular resolution to that case.)\r\n\r\nCloses #746 - we don't support bytes (or other unexpected types) as QueryParam values. Let's raise a clear error, rather than coercing an unexpected `str` value.\r\n\r\nBefore this change...\r\n\r\n```python\r\n>>> httpx.URL(\"http://www.example.com/\", params={\"query\": b\"abc\"})\r\nURL('http://www.example.com/?query=b%27abc%27')\r\n```\r\n\r\nAfter this change...\r\n\r\n```python\r\n>>> httpx.URL(\"http://www.example.com/\", params={\"query\": b\"abc\"})\r\nTypeError: Expected str, int, float, bool, or None. Got <class 'bytes'>.\r\n```",
+    "issue_number": "746",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "4cbf13ece2e584b45b935df0a0c670e1863c4569",
+    "base_commit": "10a3b68a71d6cb16b170dec4efe2ec1ae197d65f",
+    "merged_at": "2022-12-30T20:56:48+00:00",
+    "additions": 12,
+    "deletions": 1,
+    "total_lines": 13,
+    "test_files": [
+      "tests/models/test_queryparams.py"
+    ],
+    "source_files": [
+      "httpx/_utils.py"
+    ],
+    "all_files": [
+      "httpx/_utils.py",
+      "tests/models/test_queryparams.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2495,
+    "pr_title": "Raise TypeError if content is passed a 'dict' instance.",
+    "pr_body": "Closes #2491",
+    "issue_number": "2491",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "a8dd079be7028b2bf4cdbbbc3a6793a5f78ecc85",
+    "base_commit": "563a1031f5bd37445d2fdbf622ba5cab926207c9",
+    "merged_at": "2022-12-11T19:12:09+00:00",
+    "additions": 8,
+    "deletions": 1,
+    "total_lines": 9,
+    "test_files": [
+      "tests/test_content.py"
+    ],
+    "source_files": [
+      "httpx/_content.py"
+    ],
+    "all_files": [
+      "httpx/_content.py",
+      "tests/test_content.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2481,
+    "pr_title": "Add back in URL.raw with NamedTuple",
+    "pr_body": "Closes #2462 with a basic test, happy to add tests for more scenarios\r\n",
+    "issue_number": "2462",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "40a0da093b423ca37feee2b85df7c3f0ce3cc96c",
+    "base_commit": "933551c51985375423ca60a880210aef34f1c620",
+    "merged_at": "2022-12-02T16:20:05+00:00",
+    "additions": 37,
+    "deletions": 1,
+    "total_lines": 38,
+    "test_files": [
+      "tests/models/test_url.py"
+    ],
+    "source_files": [
+      "httpx/_types.py",
+      "httpx/_urls.py"
+    ],
+    "all_files": [
+      "httpx/_types.py",
+      "httpx/_urls.py",
+      "tests/models/test_url.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2423,
+    "pr_title": "Change LineDecoder to match stdlib splitlines, resulting in significant speed up",
+    "pr_body": "Closes #2422\r\n\r\nLeading to enormous speedups when doing things such as Response(...).iter_lines()\r\n",
+    "issue_number": "2422",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "85c5898d8e48011ab7b660fe8aac58910e45c84b",
+    "base_commit": "e486fbceea7a933baa4b52852681f9c6ac80ac96",
+    "merged_at": "2023-03-16T14:29:15+00:00",
+    "additions": 57,
+    "deletions": 67,
+    "total_lines": 124,
+    "test_files": [
+      "tests/models/test_responses.py",
+      "tests/test_decoders.py"
+    ],
+    "source_files": [
+      "httpx/_decoders.py"
+    ],
+    "all_files": [
+      "httpx/_decoders.py",
+      "tests/models/test_responses.py",
+      "tests/test_decoders.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2400,
+    "pr_title": "Allow str content for multipart upload files",
+    "pr_body": "Closes #2069.\r\n\r\nAllow `str` for simple multipart uploads...\r\n\r\n```python\r\nhttpx.post(url, files={\"upload\": \"some content\"})\r\n```\r\n\r\nHowever we (continue to) explicitly disallow `io.StringIO` and files opened in text mode, since we can't upfront determine their byte-length.\r\n\r\nI think this is probably a pretty okay middle-ground, supporting the simple text-use-case, while enforcing bytes for the file-like cases. Not a breaking change, since we're *expanding* our supported cases here.\r\n\r\n---\r\n\r\n**Edit**: This change enforces the constraint that upload files must be opened in binary mode. That's [the right thing to do](https://github.com/encode/httpx/pull/2400#issuecomment-1321927646) but I'm unclear why I hadn't called it out explicitly in this description.",
+    "issue_number": "2069",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "0ebe9259aca97baf4cadf112b0aa47152bec426c",
+    "base_commit": "770d4f2254acd5f4c67eaf25634f70ec1640c443",
+    "merged_at": "2022-10-06T16:53:51+00:00",
+    "additions": 33,
+    "deletions": 8,
+    "total_lines": 41,
+    "test_files": [
+      "tests/test_multipart.py"
+    ],
+    "source_files": [
+      "httpx/_multipart.py",
+      "httpx/_types.py"
+    ],
+    "all_files": [
+      "httpx/_multipart.py",
+      "httpx/_types.py",
+      "tests/test_multipart.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2382,
+    "pr_title": "Streaming multipart support",
+    "pr_body": "Closes #2249\r\n\r\nSomething we're not currently handling here, that'd also need updating is how we handle non-rewindable cases.\r\n\r\nIf the file instance is a non-seekable `IOBase` then we ought to raise a `StreamConsumed` error if we attempt to read from the file more than once. This occurs if we attempt to upload a streaming multipart file, but then get a redirect. Everything's fine if we've got a rewindable file instance, but if we've got a non-rewindable case then we need to error out, since we can't repeat the upload at that point.\r\n\r\n---\r\n\r\n**Edit**: My description of this ticket wasn't really sufficient, so...\r\n\r\nIf we have a multipart file upload but cannot determine it's length, then used chunked transfer encoding, instead of reading the entirety of the file into memory in order to determine the `Content-Length`.",
+    "issue_number": "2249",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "b97c0594a59a9a5e62e9930fe9a783be79d8cc6e",
+    "base_commit": "af56476a8c4b35a0b27e165a7fccae08b307e32c",
+    "merged_at": "2022-12-12T16:14:57+00:00",
+    "additions": 33,
+    "deletions": 25,
+    "total_lines": 58,
+    "test_files": [
+      "tests/test_multipart.py"
+    ],
+    "source_files": [
+      "httpx/_multipart.py"
+    ],
+    "all_files": [
+      "httpx/_multipart.py",
+      "tests/test_multipart.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2354,
+    "pr_title": "Fix empty query params",
+    "pr_body": "Closes #2331\r\n\r\nWe might also want to distinguish between `q=` and `q` at some point, but that's a more complex conversation.",
+    "issue_number": "2331",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "d5900cd40ec85e47800e21e77bc684b9f65325ed",
+    "base_commit": "3eee17e69e43f74df2c9bfaa442da2feac81363c",
+    "merged_at": "2022-09-02T13:24:45+00:00",
+    "additions": 12,
+    "deletions": 1,
+    "total_lines": 13,
+    "test_files": [
+      "tests/models/test_queryparams.py"
+    ],
+    "source_files": [
+      "httpx/_urls.py"
+    ],
+    "all_files": [
+      "httpx/_urls.py",
+      "tests/models/test_queryparams.py"
+    ]
+  },
+  {
+    "repo": "encode/httpx",
+    "pr_number": 2278,
+    "pr_title": "allow setting an explicit multipart boundary via headers",
+    "pr_body": "Closes #2235 ",
+    "issue_number": "2235",
+    "issue_title": "",
+    "issue_body": "",
+    "merge_sha": "1526048c9417ac3c715592cbc9b5947d5779824e",
+    "base_commit": "2434e650eeeedd0652ab73c02bcb09417edc7914",
+    "merged_at": "2022-08-15T15:20:07+00:00",
+    "additions": 80,
+    "deletions": 2,
+    "total_lines": 82,
+    "test_files": [
+      "tests/test_multipart.py"
+    ],
+    "source_files": [
+      "httpx/_content.py",
+      "httpx/_models.py",
+      "httpx/_multipart.py"
+    ],
+    "all_files": [
+      "httpx/_content.py",
+      "httpx/_models.py",
+      "httpx/_multipart.py",
+      "tests/test_multipart.py"
+    ]
+  }
+]
