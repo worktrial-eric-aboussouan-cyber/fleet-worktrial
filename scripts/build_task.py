@@ -22,29 +22,44 @@ REPO_TEMPLATE = {
 }
 
 
-def get_gold_patch(repo: str, base_commit: str, merge_sha: str) -> str:
-    """Clone repo into a temp dir and compute the gold diff."""
+def get_gold_patch_and_repo(repo: str, base_commit: str, merge_sha: str) -> tuple[str, str]:
+    """Clone repo into a temp dir, compute gold diff, and return (diff, repo_path)."""
     clone_url = f"https://github.com/{repo}.git"
-    with tempfile.TemporaryDirectory() as tmp:
-        subprocess.run(
-            ["git", "clone", "--quiet", "--no-tags", clone_url, tmp],
-            check=True, capture_output=True,
-        )
-        result = subprocess.run(
-            ["git", "diff", f"{base_commit}..{merge_sha}"],
-            cwd=tmp, capture_output=True, text=True, check=True,
-        )
-        return result.stdout
+    tmp = tempfile.mkdtemp()
+    subprocess.run(
+        ["git", "clone", "--quiet", "--no-tags", clone_url, tmp],
+        check=True, capture_output=True,
+    )
+    result = subprocess.run(
+        ["git", "diff", f"{base_commit}..{merge_sha}"],
+        cwd=tmp, capture_output=True, text=True, check=True,
+    )
+    return result.stdout, tmp
 
 
-def extract_new_test_names(gold_patch: str) -> list[str]:
-    """Extract test function names added by the patch (lines starting with +)."""
+def extract_new_test_names(gold_patch: str, repo_path: str, base_commit: str) -> list[str]:
+    """Extract test function names added by the patch and verify they are new."""
     names = []
+    # Find added test functions
+    added_names = []
     for line in gold_patch.splitlines():
         if line.startswith("+") and "def test_" in line:
             m = re.search(r"def (test_\w+)", line)
             if m:
-                names.append(m.group(1))
+                added_names.append(m.group(1))
+    
+    # Verify they didn't exist at base_commit
+    for name in added_names:
+        # Check all files in the patch for this name at base_commit
+        # More robust: find which file the name was added to
+        # For now, a simpler check: does the name appear in ANY file at base_commit?
+        # Better: use git grep at base_commit
+        res = subprocess.run(
+            ["git", "grep", "-q", f"def {name}", base_commit],
+            cwd=repo_path, capture_output=True
+        )
+        if res.returncode != 0: # Not found at base
+            names.append(name)
     return names
 
 
@@ -79,13 +94,20 @@ def materialize(candidate: dict, task_index: int) -> Path:
     task_dir = TASKS_DIR / f"task_{task_index:03d}"
     task_dir.mkdir(parents=True, exist_ok=True)
 
-    # Gold patch
-    print(f"  Computing gold patch for {instance_id}...", flush=True)
+    # Gold patch and repo for verification
+    print(f"  Computing gold patch and verifying tests for {instance_id}...", flush=True)
+    repo_path = None
     try:
-        gold_patch = get_gold_patch(repo, base_commit, merge_sha)
+        gold_patch, repo_path = get_gold_patch_and_repo(repo, base_commit, merge_sha)
+        test_names = extract_new_test_names(gold_patch, repo_path, base_commit)
     except subprocess.CalledProcessError as e:
-        print(f"  ERROR getting patch: {e.stderr}", flush=True)
+        print(f"  ERROR getting patch or verifying tests: {e.stderr}", flush=True)
         gold_patch = ""
+        test_names = []
+    finally:
+        if repo_path:
+            import shutil
+            shutil.rmtree(repo_path, ignore_errors=True)
 
     # Dockerfile
     template_name = REPO_TEMPLATE[repo]
@@ -95,7 +117,6 @@ def materialize(candidate: dict, task_index: int) -> Path:
 
     # eval_script.sh — run only new tests added by the PR if we can find them
     test_paths = " ".join(candidate["test_files"])
-    test_names = extract_new_test_names(gold_patch)
     if test_names:
         test_filter = " or ".join(test_names)
         eval_script = f"""#!/bin/bash
