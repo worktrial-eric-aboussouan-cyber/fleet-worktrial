@@ -1,0 +1,147 @@
+--- Check 1 @ Mon Apr 20 17:27:16 EDT 2026 ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                RESOURCES                                STATUS  AUTOSTOP  LAUNCHED     
+sky-bc93-fleet  GCP (us-east1-b)     1x(gpus=L4:4, g2-standard-48, ...)       INIT    -         11 secs ago  
+sky-e52a-fleet  GCP (us-east1-d)     1x(gpus=L4:4, g2-standard-48, ...)       UP      -         12 mins ago  
+sky-6e06-fleet  GCP (us-central1-a)  1x(cpus=1, mem=3.8, n1-standard-1, ...)  INIT    -         4 hrs ago    
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+[33mTailing logs of the last job on cluster 'sky-bc93-fleet'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'sky-bc93-fleet' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start sky-bc93-fleet[0m[0m
+--- Check 2 @ Mon Apr 20 17:30:20 EDT 2026 ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                RESOURCES                                STATUS  AUTOSTOP  LAUNCHED     
+sky-bc93-fleet  GCP (us-west1-b)     1x(gpus=L4:4, g2-standard-48, ...)       INIT    -         1 min ago    
+sky-e52a-fleet  GCP (us-east1-d)     1x(gpus=L4:4, g2-standard-48, ...)       UP      -         15 mins ago  
+sky-6e06-fleet  GCP (us-central1-a)  1x(cpus=1, mem=3.8, n1-standard-1, ...)  INIT    -         4 hrs ago    
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+[33mTailing logs of the last job on cluster 'sky-bc93-fleet'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'sky-bc93-fleet' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start sky-bc93-fleet[0m[0m
+--- Check 3 @ Mon Apr 20 17:33:23 EDT 2026 ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                RESOURCES                                STATUS  AUTOSTOP  LAUNCHED     
+sky-bc93-fleet  GCP (us-west1-c)     1x(gpus=L4:4, g2-standard-48, ...)       INIT    -         1 min ago    
+sky-e52a-fleet  GCP (us-east1-d)     1x(gpus=L4:4, g2-standard-48, ...)       UP      -         18 mins ago  
+sky-6e06-fleet  GCP (us-central1-a)  1x(cpus=1, mem=3.8, n1-standard-1, ...)  INIT    -         4 hrs ago    
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+[33mTailing logs of the last job on cluster 'sky-bc93-fleet'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'sky-bc93-fleet' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start sky-bc93-fleet[0m[0m
+--- Check 4 @ Mon Apr 20 17:36:26 EDT 2026 ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                RESOURCES                                STATUS  AUTOSTOP  LAUNCHED     
+sky-bc93-fleet  GCP (asia-south1-c)  1x(gpus=L4:4, g2-standard-48, ...)       INIT    -         30 secs ago  
+sky-e52a-fleet  GCP (us-east1-d)     1x(gpus=L4:4, g2-standard-48, ...)       UP      -         21 mins ago  
+sky-6e06-fleet  GCP (us-central1-a)  1x(cpus=1, mem=3.8, n1-standard-1, ...)  INIT    -         4 hrs ago    
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+[33mTailing logs of the last job on cluster 'sky-bc93-fleet'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'sky-bc93-fleet' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start sky-bc93-fleet[0m[0m
+--- Check 5 @ Mon Apr 20 17:39:29 EDT 2026 ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                RESOURCES                                STATUS  AUTOSTOP  LAUNCHED     
+sky-bc93-fleet  GCP (asia-south1-c)  1x(gpus=L4:4, g2-standard-48, ...)       UP      -         27 secs ago  
+sky-e52a-fleet  GCP (us-east1-d)     1x(gpus=L4:4, g2-standard-48, ...)       UP      -         24 mins ago  
+sky-6e06-fleet  GCP (us-central1-a)  1x(cpus=1, mem=3.8, n1-standard-1, ...)  INIT    -         4 hrs ago    
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+[33mTailing logs of the last job on cluster 'sky-bc93-fleet'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+--- Check 6 @ Mon Apr 20 17:42:37 EDT 2026 ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                RESOURCES                                STATUS  AUTOSTOP  LAUNCHED     
+sky-bc93-fleet  GCP (asia-south1-c)  1x(gpus=L4:4, g2-standard-48, ...)       UP      -         3 mins ago   
+sky-e52a-fleet  GCP (us-east1-d)     1x(gpus=L4:4, g2-standard-48, ...)       UP      -         27 mins ago  
+sky-6e06-fleet  GCP (us-central1-a)  1x(cpus=1, mem=3.8, n1-standard-1, ...)  INIT    -         4 hrs ago    
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+[36m(setup pid=6385)[0m  + xxhash==3.6.0
+[36m(setup pid=6385)[0m  + yarl==1.22.0
+[36m(setup pid=6385)[0m  + zipp==3.23.0
+[36m(setup pid=6385)[0m  + zstandard==0.25.0
+[36m(setup pid=6385)[0m Preparing training dataset: data/train.parquet
+[36m(setup pid=6385)[0m Downloading data/train.parquet...
+[36m(setup pid=6385)[0m Traceback (most recent call last):
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 403, in hf_raise_for_status
+[36m(setup pid=6385)[0m     response.raise_for_status()
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/requests/models.py", line 1026, in raise_for_status
+[36m(setup pid=6385)[0m     raise HTTPError(http_error_msg, response=self)
+[36m(setup pid=6385)[0m requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://huggingface.co/api/datasets/data/train.parquet/revision/main
+[36m(setup pid=6385)[0m 
+[36m(setup pid=6385)[0m The above exception was the direct cause of the following exception:
+[36m(setup pid=6385)[0m 
+[36m(setup pid=6385)[0m Traceback (most recent call last):
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/examples/harbor/prepare_harbor_dataset.py", line 157, in <module>
+[36m(setup pid=6385)[0m     prepare(args.dataset, args.output_dir)
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/examples/harbor/prepare_harbor_dataset.py", line 116, in prepare
+[36m(setup pid=6385)[0m     snapshot_dir = Path(snapshot_download(repo_id=dataset_name, repo_type="dataset"))
+[36m(setup pid=6385)[0m                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+[36m(setup pid=6385)[0m     return fn(*args, **kwargs)
+[36m(setup pid=6385)[0m            ^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 245, in snapshot_download
+[36m(setup pid=6385)[0m     raise api_call_error
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 165, in snapshot_download
+[36m(setup pid=6385)[0m     repo_info = api.repo_info(repo_id=repo_id, repo_type=repo_type, revision=revision)
+[36m(setup pid=6385)[0m                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+[36m(setup pid=6385)[0m     return fn(*args, **kwargs)
+[36m(setup pid=6385)[0m            ^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2867, in repo_info
+[36m(setup pid=6385)[0m     return method(
+[36m(setup pid=6385)[0m            ^^^^^^^
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+[36m(setup pid=6385)[0m     return fn(*args, **kwargs)
+[36m(setup pid=6385)[0m            ^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2731, in dataset_info
+[36m(setup pid=6385)[0m     hf_raise_for_status(r)
+[36m(setup pid=6385)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 453, in hf_raise_for_status
+[36m(setup pid=6385)[0m     raise _format(RepositoryNotFoundError, message, response) from e
+[36m(setup pid=6385)[0m huggingface_hub.errors.RepositoryNotFoundError: 401 Client Error. (Request ID: Root=1-69e69dbf-42e19006146f0ddc6721c3ec;3e3ee8b9-35ae-4679-aa1f-5419fc34bb3e)
+[36m(setup pid=6385)[0m 
+[36m(setup pid=6385)[0m Repository Not Found for url: https://huggingface.co/api/datasets/data/train.parquet/revision/main.
+[36m(setup pid=6385)[0m Please make sure you specified the correct `repo_id` and `repo_type`.
+[36m(setup pid=6385)[0m If you are trying to access a private or gated repo, make sure you are authenticated. For more details, see https://huggingface.co/docs/huggingface_hub/authentication
+[36m(setup pid=6385)[0m Invalid username or password.
+ERROR: [31mJob 1's setup failed. Failed workers: (pid=6385, returncode=1). See error logs above for more details.[0m
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+CRITICAL_ERROR: [36m(setup pid=6385)[0m Traceback (most recent call last):

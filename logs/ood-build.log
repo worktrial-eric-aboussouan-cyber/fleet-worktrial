@@ -1,0 +1,33 @@
+/Users/fleet/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+>>> Building django__django-10097
+>>> Building astropy__astropy-12907
+>>> Building matplotlib__matplotlib-13989
+>>> Building mwaskom__seaborn-3069
+>>> Building pydata__xarray-2905
+>>> Building pylint-dev__pylint-4551
+>>> Building pytest-dev__pytest-10051
+>>> Building scikit-learn__scikit-learn-10297
+>>> Building sphinx-doc__sphinx-10323
+>>> Building sympy__sympy-11618
+>>> Building astropy__astropy-13033
+>>> Building matplotlib__matplotlib-14623
+>>> Building mwaskom__seaborn-3187
+>>> Building pydata__xarray-3095
+>>> Building pylint-dev__pylint-4604
+>>> Building pytest-dev__pytest-10081
+>>> Building scikit-learn__scikit-learn-10844
+>>> Building sphinx-doc__sphinx-10435
+>>> Building sympy__sympy-12096
+>>> Building astropy__astropy-13236
+>>> Building matplotlib__matplotlib-20488
+>>> Building scikit-learn__scikit-learn-10908
+>>> Building sphinx-doc__sphinx-10449
+>>> Building sympy__sympy-12419
+>>> Building astropy__astropy-13398
+>>> Building matplotlib__matplotlib-20676
+>>> Building pydata__xarray-3151
+>>> Building pylint-dev__pylint-4661
+>>> Building pytest-dev__pytest-10356
+>>> Building scikit-learn__scikit-learn-11310

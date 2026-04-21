@@ -1,0 +1,483 @@
+[33mTailing logs of the last job on cluster 'sky-e52a-fleet'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+[36m(setup pid=6021)[0m Validating environment variables...
+[36m(setup pid=6021)[0m Environment validation passed
+[36m(setup pid=6021)[0m Downloading cpython-3.12.13-linux-x86_64-gnu (download) (32.9MiB)
+[36m(setup pid=6021)[0m  Downloaded cpython-3.12.13-linux-x86_64-gnu (download)
+[36m(setup pid=6021)[0m Using CPython 3.12.13
+[36m(setup pid=6021)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=6021)[0m  + pip==26.0.1
+[36m(setup pid=6021)[0m Activate with: source .venv/bin/activate
+[36m(setup pid=6021)[0m Resolved 395 packages in 2ms
+[36m(setup pid=6021)[0m    Building skyrl-gym @ file:///home/gcpuser/sky_workdir/skyrl-train/skyrl-gym
+[36m(setup pid=6021)[0m    Updating https://github.com/laude-institute/harbor (8c040e1bb010201fd3c75bee3dede2407b9f57cd)
+[36m(setup pid=6021)[0m    Building skyrl-train @ file:///home/gcpuser/sky_workdir/skyrl-train
+[36m(setup pid=6021)[0m Downloading pycountry (7.7MiB)
+[36m(setup pid=6021)[0m Downloading grpcio (6.4MiB)
+[36m(setup pid=6021)[0m Downloading tensorboard-data-server (6.3MiB)
+[36m(setup pid=6021)[0m Downloading sympy (6.0MiB)
+[36m(setup pid=6021)[0m Downloading zstandard (5.3MiB)
+[36m(setup pid=6021)[0m Downloading tensorboard (5.3MiB)
+[36m(setup pid=6021)[0m Downloading cryptography (4.3MiB)
+[36m(setup pid=6021)[0m Downloading numba (3.7MiB)
+[36m(setup pid=6021)[0m Downloading uvloop (4.2MiB)
+[36m(setup pid=6021)[0m Downloading hf-transfer (3.4MiB)
+[36m(setup pid=6021)[0m Downloading hf-xet (3.2MiB)
+[36m(setup pid=6021)[0m Downloading torch (859.1MiB)
+[36m(setup pid=6021)[0m Downloading pillow (6.7MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cudnn-cu12 (674.0MiB)
+[36m(setup pid=6021)[0m Downloading pyarrow (45.4MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cusolver-cu12 (255.1MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cusparse-cu12 (274.9MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cublas-cu12 (566.8MiB)
+[36m(setup pid=6021)[0m Downloading opencv-python-headless (57.6MiB)
+[36m(setup pid=6021)[0m Downloading polars-runtime-32 (43.6MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-nvjitlink-cu12 (37.4MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cuda-cupti-cu12 (9.8MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-curand-cu12 (60.7MiB)
+[36m(setup pid=6021)[0m Downloading botocore (13.7MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cufft-cu12 (184.2MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cuda-nvrtc-cu12 (84.0MiB)
+[36m(setup pid=6021)[0m Downloading transformers (11.4MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-nccl-cu12 (307.4MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cusparselt-cu12 (273.9MiB)
+[36m(setup pid=6021)[0m Downloading vllm (452.9MiB)
+[36m(setup pid=6021)[0m Downloading flashinfer-python (6.7MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-cutlass-dsl-libs-base (70.9MiB)
+[36m(setup pid=6021)[0m Downloading litellm (13.9MiB)
+[36m(setup pid=6021)[0m Downloading llvmlite (40.4MiB)
+[36m(setup pid=6021)[0m Downloading obstore (3.6MiB)
+[36m(setup pid=6021)[0m Downloading xgrammar (8.5MiB)
+[36m(setup pid=6021)[0m Downloading pandas (10.4MiB)
+[36m(setup pid=6021)[0m Downloading mistral-common (6.2MiB)
+[36m(setup pid=6021)[0m Downloading numpy (15.8MiB)
+[36m(setup pid=6021)[0m Downloading ray (68.0MiB)
+[36m(setup pid=6021)[0m Downloading wandb (24.1MiB)
+[36m(setup pid=6021)[0m Downloading triton (162.6MiB)
+[36m(setup pid=6021)[0m Downloading scipy (33.4MiB)
+[36m(setup pid=6021)[0m Downloading cupy-cuda12x (128.4MiB)
+[36m(setup pid=6021)[0m Downloading claude-agent-sdk (66.9MiB)
+[36m(setup pid=6021)[0m Downloading debugpy (4.8MiB)
+[36m(setup pid=6021)[0m Downloading cuda-bindings (15.4MiB)
+[36m(setup pid=6021)[0m Downloading nvidia-nvshmem-cu12 (118.9MiB)
+[36m(setup pid=6021)[0m Downloading torchvision (7.7MiB)
+[36m(setup pid=6021)[0m Downloading flashinfer-jit-cache (1.0GiB)
+[36m(setup pid=6021)[0m     Updated https://github.com/laude-institute/harbor (8c040e1bb010201fd3c75bee3dede2407b9f57cd)
+[36m(setup pid=6021)[0m    Building harbor @ git+https://github.com/laude-institute/harbor@8c040e1bb010201fd3c75bee3dede2407b9f57cd
+[36m(setup pid=6021)[0m  Downloaded torchvision
+[36m(setup pid=6021)[0m Downloading tokenizers (3.1MiB)
+[36m(setup pid=6021)[0m  Downloaded hf-xet
+[36m(setup pid=6021)[0m Downloading llguidance (2.9MiB)
+[36m(setup pid=6021)[0m  Downloaded hf-transfer
+[36m(setup pid=6021)[0m Downloading openai-harmony (2.8MiB)
+[36m(setup pid=6021)[0m  Downloaded obstore
+[36m(setup pid=6021)[0m Downloading outlines-core (2.2MiB)
+[36m(setup pid=6021)[0m  Downloaded uvloop
+[36m(setup pid=6021)[0m Downloading nvidia-cudnn-frontend (2.1MiB)
+[36m(setup pid=6021)[0m  Downloaded numba
+[36m(setup pid=6021)[0m Downloading pydantic-core (2.0MiB)
+[36m(setup pid=6021)[0m  Downloaded cryptography
+[36m(setup pid=6021)[0m Downloading pyroaring (2.0MiB)
+[36m(setup pid=6021)[0m  Downloaded tokenizers
+[36m(setup pid=6021)[0m Downloading networkx (2.0MiB)
+[36m(setup pid=6021)[0m  Downloaded tensorboard
+[36m(setup pid=6021)[0m Downloading torchaudio (2.0MiB)
+[36m(setup pid=6021)[0m  Downloaded zstandard
+[36m(setup pid=6021)[0m Downloading apache-tvm-ffi (1.9MiB)
+[36m(setup pid=6021)[0m  Downloaded debugpy
+[36m(setup pid=6021)[0m Downloading kubernetes (1.9MiB)
+[36m(setup pid=6021)[0m  Downloaded outlines-core
+[36m(setup pid=6021)[0m Downloading aiohttp (1.7MiB)
+[36m(setup pid=6021)[0m  Downloaded llguidance
+[36m(setup pid=6021)[0m Downloading sentencepiece (1.3MiB)
+[36m(setup pid=6021)[0m  Downloaded tensorboard-data-server
+[36m(setup pid=6021)[0m  Downloaded openai-harmony
+[36m(setup pid=6021)[0m Downloading pygments (1.2MiB)
+[36m(setup pid=6021)[0m  Downloaded mistral-common
+[36m(setup pid=6021)[0m Downloading nvidia-cufile-cu12 (1.1MiB)
+[36m(setup pid=6021)[0m Downloading tiktoken (1.1MiB)
+[36m(setup pid=6021)[0m  Downloaded pydantic-core
+[36m(setup pid=6021)[0m Downloading openai (1.1MiB)
+[36m(setup pid=6021)[0m  Downloaded pyroaring
+[36m(setup pid=6021)[0m  Downloaded nvidia-cudnn-frontend
+[36m(setup pid=6021)[0m Downloading setuptools (1.0MiB)
+[36m(setup pid=6021)[0m  Downloaded grpcio
+[36m(setup pid=6021)[0m  Downloaded pillow
+[36m(setup pid=6021)[0m  Downloaded networkx
+[36m(setup pid=6021)[0m  Downloaded sympy
+[36m(setup pid=6021)[0m  Downloaded torchaudio
+[36m(setup pid=6021)[0m  Downloaded apache-tvm-ffi
+[36m(setup pid=6021)[0m  Downloaded sentencepiece
+[36m(setup pid=6021)[0m  Downloaded tiktoken
+[36m(setup pid=6021)[0m  Downloaded pycountry
+[36m(setup pid=6021)[0m  Downloaded nvidia-cufile-cu12
+[36m(setup pid=6021)[0m  Downloaded pygments
+[36m(setup pid=6021)[0m  Downloaded aiohttp
+[36m(setup pid=6021)[0m  Downloaded xgrammar
+[36m(setup pid=6021)[0m  Downloaded setuptools
+[36m(setup pid=6021)[0m  Downloaded flashinfer-python
+[36m(setup pid=6021)[0m  Downloaded nvidia-cuda-cupti-cu12
+[36m(setup pid=6021)[0m  Downloaded kubernetes
+[36m(setup pid=6021)[0m  Downloaded openai
+[36m(setup pid=6021)[0m    Building func-timeout==4.3.5
+[36m(setup pid=6021)[0m  Downloaded transformers
+[36m(setup pid=6021)[0m    Building antlr4-python3-runtime==4.9.3
+[36m(setup pid=6021)[0m  Downloaded botocore
+[36m(setup pid=6021)[0m  Downloaded pandas
+[36m(setup pid=6021)[0m       Built harbor @ git+https://github.com/laude-institute/harbor@8c040e1bb010201fd3c75bee3dede2407b9f57cd
+[36m(setup pid=6021)[0m  Downloaded cuda-bindings
+[36m(setup pid=6021)[0m  Downloaded numpy
+[36m(setup pid=6021)[0m  Downloaded litellm
+[36m(setup pid=6021)[0m       Built func-timeout==4.3.5
+[36m(setup pid=6021)[0m       Built antlr4-python3-runtime==4.9.3
+[36m(setup pid=6021)[0m       Built skyrl-gym @ file:///home/gcpuser/sky_workdir/skyrl-train/skyrl-gym
+[36m(setup pid=6021)[0m       Built skyrl-train @ file:///home/gcpuser/sky_workdir/skyrl-train
+[36m(setup pid=6021)[0m  Downloaded flashinfer-jit-cache
+[36m(setup pid=6021)[0m  Downloaded wandb
+[36m(setup pid=6021)[0m  Downloaded scipy
+[36m(setup pid=6021)[0m  Downloaded nvidia-nvjitlink-cu12
+[36m(setup pid=6021)[0m  Downloaded llvmlite
+[36m(setup pid=6021)[0m  Downloaded polars-runtime-32
+[36m(setup pid=6021)[0m  Downloaded opencv-python-headless
+[36m(setup pid=6021)[0m  Downloaded pyarrow
+[36m(setup pid=6021)[0m  Downloaded nvidia-curand-cu12
+[36m(setup pid=6021)[0m  Downloaded claude-agent-sdk
+[36m(setup pid=6021)[0m  Downloaded nvidia-cutlass-dsl-libs-base
+[36m(setup pid=6021)[0m  Downloaded nvidia-cuda-nvrtc-cu12
+[36m(setup pid=6021)[0m  Downloaded ray
+[36m(setup pid=6021)[0m  Downloaded nvidia-nvshmem-cu12
+[36m(setup pid=6021)[0m  Downloaded cupy-cuda12x
+[36m(setup pid=6021)[0m    Building flash-attn==2.8.3
+[36m(setup pid=6021)[0m  Downloaded triton
+[36m(setup pid=6021)[0m  Downloaded nvidia-cufft-cu12
+[36m(setup pid=6021)[0m  Downloaded nvidia-cusolver-cu12
+[36m(setup pid=6021)[0m  Downloaded nvidia-cusparselt-cu12
+[36m(setup pid=6021)[0m  Downloaded nvidia-cusparse-cu12
+[36m(setup pid=6021)[0m  Downloaded nvidia-nccl-cu12
+[36m(setup pid=6021)[0m  Downloaded nvidia-cudnn-cu12
+[36m(setup pid=6021)[0m  Downloaded torch
+[36m(setup pid=6021)[0m  Downloaded nvidia-cublas-cu12
+[36m(setup pid=6021)[0m  Downloaded vllm
+[36m(setup pid=6021)[0m       Built flash-attn==2.8.3
+[36m(setup pid=6021)[0m Prepared 272 packages in 1m 45s
+[36m(setup pid=6021)[0m Installed 272 packages in 610ms
+[36m(setup pid=6021)[0m  + absl-py==2.4.0
+[36m(setup pid=6021)[0m  + accelerate==1.12.0
+[36m(setup pid=6021)[0m  + aiobotocore==2.26.0
+[36m(setup pid=6021)[0m  + aiofiles==24.1.0
+[36m(setup pid=6021)[0m  + aiohappyeyeballs==2.6.1
+[36m(setup pid=6021)[0m  + aiohttp==3.13.3
+[36m(setup pid=6021)[0m  + aiohttp-retry==2.9.1
+[36m(setup pid=6021)[0m  + aioitertools==0.13.0
+[36m(setup pid=6021)[0m  + aiosignal==1.4.0
+[36m(setup pid=6021)[0m  + annotated-doc==0.0.4
+[36m(setup pid=6021)[0m  + annotated-types==0.7.0
+[36m(setup pid=6021)[0m  + anthropic==0.71.0
+[36m(setup pid=6021)[0m  + antlr4-python3-runtime==4.9.3
+[36m(setup pid=6021)[0m  + anyio==4.12.1
+[36m(setup pid=6021)[0m  + apache-tvm-ffi==0.1.8.post2
+[36m(setup pid=6021)[0m  + astor==0.8.1
+[36m(setup pid=6021)[0m  + attrs==25.4.0
+[36m(setup pid=6021)[0m  + blake3==1.0.8
+[36m(setup pid=6021)[0m  + botocore==1.41.5
+[36m(setup pid=6021)[0m  + bracex==2.6
+[36m(setup pid=6021)[0m  + cachetools==6.2.6
+[36m(setup pid=6021)[0m  + cbor2==5.8.0
+[36m(setup pid=6021)[0m  + certifi==2026.1.4
+[36m(setup pid=6021)[0m  + cffi==2.0.0
+[36m(setup pid=6021)[0m  + charset-normalizer==3.4.4
+[36m(setup pid=6021)[0m  + claude-agent-sdk==0.1.37
+[36m(setup pid=6021)[0m  + click==8.3.1
+[36m(setup pid=6021)[0m  + cloudpickle==3.1.2
+[36m(setup pid=6021)[0m  + compressed-tensors==0.12.2
+[36m(setup pid=6021)[0m  + cryptography==46.0.5
+[36m(setup pid=6021)[0m  + cuda-bindings==13.1.1
+[36m(setup pid=6021)[0m  + cuda-pathfinder==1.3.4
+[36m(setup pid=6021)[0m  + cuda-python==13.1.1
+[36m(setup pid=6021)[0m  + cupy-cuda12x==14.0.0
+[36m(setup pid=6021)[0m  + datasets==4.5.0
+[36m(setup pid=6021)[0m  + daytona==0.143.0
+[36m(setup pid=6021)[0m  + daytona-api-client==0.143.0
+[36m(setup pid=6021)[0m  + daytona-api-client-async==0.143.0
+[36m(setup pid=6021)[0m  + daytona-toolbox-api-client==0.143.0
+[36m(setup pid=6021)[0m  + daytona-toolbox-api-client-async==0.143.0
+[36m(setup pid=6021)[0m  + debugpy==1.8.0
+[36m(setup pid=6021)[0m  + deprecated==1.3.1
+[36m(setup pid=6021)[0m  + deprecation==2.1.0
+[36m(setup pid=6021)[0m  + depyf==0.20.0
+[36m(setup pid=6021)[0m  + dill==0.4.0
+[36m(setup pid=6021)[0m  + dirhash==0.5.0
+[36m(setup pid=6021)[0m  + diskcache==5.6.3
+[36m(setup pid=6021)[0m  + distro==1.9.0
+[36m(setup pid=6021)[0m  + dnspython==2.8.0
+[36m(setup pid=6021)[0m  + dockerfile-parse==2.0.1
+[36m(setup pid=6021)[0m  + docstring-parser==0.17.0
+[36m(setup pid=6021)[0m  + durationpy==0.10
+[36m(setup pid=6021)[0m  + e2b==2.13.2
+[36m(setup pid=6021)[0m  + einops==0.8.2
+[36m(setup pid=6021)[0m  + email-validator==2.3.0
+[36m(setup pid=6021)[0m  + environs==14.5.0
+[36m(setup pid=6021)[0m  + fastapi==0.129.0
+[36m(setup pid=6021)[0m  + fastapi-cli==0.0.23
+[36m(setup pid=6021)[0m  + fastapi-cloud-cli==0.13.0
+[36m(setup pid=6021)[0m  + fastar==0.8.0
+[36m(setup pid=6021)[0m  + fastuuid==0.14.0
+[36m(setup pid=6021)[0m  + filelock==3.24.2
+[36m(setup pid=6021)[0m  + flash-attn==2.8.3
+[36m(setup pid=6021)[0m  + flashinfer-jit-cache==0.5.3+cu128
+[36m(setup pid=6021)[0m  + flashinfer-python==0.5.3
+[36m(setup pid=6021)[0m  + frozenlist==1.8.0
+[36m(setup pid=6021)[0m  + fsspec==2025.10.0
+[36m(setup pid=6021)[0m  + func-timeout==4.3.5
+[36m(setup pid=6021)[0m  + gguf==0.17.1
+[36m(setup pid=6021)[0m  + gitdb==4.0.12
+[36m(setup pid=6021)[0m  + gitpython==3.1.46
+[36m(setup pid=6021)[0m  + googleapis-common-protos==1.72.0
+[36m(setup pid=6021)[0m  + grpcio==1.78.0
+[36m(setup pid=6021)[0m  + grpclib==0.4.9
+[36m(setup pid=6021)[0m  + h11==0.16.0
+[36m(setup pid=6021)[0m  + h2==4.3.0
+[36m(setup pid=6021)[0m  + harbor==0.1.44 (from git+https://github.com/laude-institute/harbor@8c040e1bb010201fd3c75bee3dede2407b9f57cd)
+[36m(setup pid=6021)[0m  + hf-transfer==0.1.9
+[36m(setup pid=6021)[0m  + hf-xet==1.2.0
+[36m(setup pid=6021)[0m  + hpack==4.1.0
+[36m(setup pid=6021)[0m  + httpcore==1.0.9
+[36m(setup pid=6021)[0m  + httptools==0.7.1
+[36m(setup pid=6021)[0m  + httpx==0.28.1
+[36m(setup pid=6021)[0m  + httpx-sse==0.4.3
+[36m(setup pid=6021)[0m  + huggingface-hub==0.36.2
+[36m(setup pid=6021)[0m  + hydra-core==1.3.2
+[36m(setup pid=6021)[0m  + hyperframe==6.1.0
+[36m(setup pid=6021)[0m  + idna==3.11
+[36m(setup pid=6021)[0m  + ijson==3.4.0.post0
+[36m(setup pid=6021)[0m  + importlib-metadata==8.7.1
+[36m(setup pid=6021)[0m  + interegular==0.3.3
+[36m(setup pid=6021)[0m  + jaxtyping==0.3.9
+[36m(setup pid=6021)[0m  + jinja2==3.1.6
+[36m(setup pid=6021)[0m  + jiter==0.13.0
+[36m(setup pid=6021)[0m  + jmespath==1.1.0
+[36m(setup pid=6021)[0m  + jsonschema==4.26.0
+[36m(setup pid=6021)[0m  + jsonschema-specifications==2025.9.1
+[36m(setup pid=6021)[0m  + kubernetes==35.0.0
+[36m(setup pid=6021)[0m  + lark==1.2.2
+[36m(setup pid=6021)[0m  + litellm==1.81.13
+[36m(setup pid=6021)[0m  + llguidance==1.3.0
+[36m(setup pid=6021)[0m  + llvmlite==0.44.0
+[36m(setup pid=6021)[0m  + lm-format-enforcer==0.11.3
+[36m(setup pid=6021)[0m  + loguru==0.7.3
+[36m(setup pid=6021)[0m  + markdown==3.10.2
+[36m(setup pid=6021)[0m  + markdown-it-py==4.0.0
+[36m(setup pid=6021)[0m  + markupsafe==3.0.3
+[36m(setup pid=6021)[0m  + marshmallow==4.2.2
+[36m(setup pid=6021)[0m  + mcp==1.26.0
+[36m(setup pid=6021)[0m  + mdurl==0.1.2
+[36m(setup pid=6021)[0m  + mistral-common==1.9.1
+[36m(setup pid=6021)[0m  + mmh3==5.2.0
+[36m(setup pid=6021)[0m  + modal==1.3.3
+[36m(setup pid=6021)[0m  + model-hosting-container-standards==0.1.13
+[36m(setup pid=6021)[0m  + mpmath==1.3.0
+[36m(setup pid=6021)[0m  + msgpack==1.1.2
+[36m(setup pid=6021)[0m  + msgspec==0.20.0
+[36m(setup pid=6021)[0m  + multidict==6.7.1
+[36m(setup pid=6021)[0m  + multipart==1.3.0
+[36m(setup pid=6021)[0m  + multiprocess==0.70.18
+[36m(setup pid=6021)[0m  + networkx==3.6.1
+[36m(setup pid=6021)[0m  + ninja==1.13.0
+[36m(setup pid=6021)[0m  + numba==0.61.2
+[36m(setup pid=6021)[0m  + numpy==2.2.6
+[36m(setup pid=6021)[0m  + nvidia-cublas-cu12==12.8.4.1
+[36m(setup pid=6021)[0m  + nvidia-cuda-cupti-cu12==12.8.90
+[36m(setup pid=6021)[0m  + nvidia-cuda-nvrtc-cu12==12.8.93
+[36m(setup pid=6021)[0m  + nvidia-cuda-runtime-cu12==12.8.90
+[36m(setup pid=6021)[0m  + nvidia-cudnn-cu12==9.10.2.21
+[36m(setup pid=6021)[0m  + nvidia-cudnn-frontend==1.18.0
+[36m(setup pid=6021)[0m  + nvidia-cufft-cu12==11.3.3.83
+[36m(setup pid=6021)[0m  + nvidia-cufile-cu12==1.13.1.3
+[36m(setup pid=6021)[0m  + nvidia-curand-cu12==10.3.9.90
+[36m(setup pid=6021)[0m  + nvidia-cusolver-cu12==11.7.3.90
+[36m(setup pid=6021)[0m  + nvidia-cusparse-cu12==12.5.8.93
+[36m(setup pid=6021)[0m  + nvidia-cusparselt-cu12==0.7.1
+[36m(setup pid=6021)[0m  + nvidia-cutlass-dsl==4.4.0
+[36m(setup pid=6021)[0m  + nvidia-cutlass-dsl-libs-base==4.4.0
+[36m(setup pid=6021)[0m  + nvidia-ml-py==13.590.48
+[36m(setup pid=6021)[0m  + nvidia-nccl-cu12==2.27.5
+[36m(setup pid=6021)[0m  + nvidia-nvjitlink-cu12==12.8.93
+[36m(setup pid=6021)[0m  + nvidia-nvshmem-cu12==3.3.20
+[36m(setup pid=6021)[0m  + nvidia-nvtx-cu12==12.8.90
+[36m(setup pid=6021)[0m  + oauthlib==3.3.1
+[36m(setup pid=6021)[0m  + obstore==0.8.2
+[36m(setup pid=6021)[0m  + omegaconf==2.3.0
+[36m(setup pid=6021)[0m  + openai==2.21.0
+[36m(setup pid=6021)[0m  + openai-harmony==0.0.8
+[36m(setup pid=6021)[0m  + opencv-python-headless==4.13.0.92
+[36m(setup pid=6021)[0m  + opentelemetry-api==1.39.1
+[36m(setup pid=6021)[0m  + opentelemetry-exporter-otlp-proto-common==1.39.1
+[36m(setup pid=6021)[0m  + opentelemetry-exporter-otlp-proto-http==1.39.1
+[36m(setup pid=6021)[0m  + opentelemetry-instrumentation==0.60b1
+[36m(setup pid=6021)[0m  + opentelemetry-instrumentation-aiohttp-client==0.60b1
+[36m(setup pid=6021)[0m  + opentelemetry-proto==1.39.1
+[36m(setup pid=6021)[0m  + opentelemetry-sdk==1.39.1
+[36m(setup pid=6021)[0m  + opentelemetry-semantic-conventions==0.60b1
+[36m(setup pid=6021)[0m  + opentelemetry-util-http==0.60b1
+[36m(setup pid=6021)[0m  + orjson==3.11.7
+[36m(setup pid=6021)[0m  + outlines-core==0.2.11
+[36m(setup pid=6021)[0m  + packaging==26.0
+[36m(setup pid=6021)[0m  + pandas==3.0.1
+[36m(setup pid=6021)[0m  + partial-json-parser==0.2.1.1.post7
+[36m(setup pid=6021)[0m  + pathspec==1.0.4
+[36m(setup pid=6021)[0m  + peft==0.18.1
+[36m(setup pid=6021)[0m  + pillow==12.1.1
+[36m(setup pid=6021)[0m  + platformdirs==4.9.2
+[36m(setup pid=6021)[0m  + polars==1.38.1
+[36m(setup pid=6021)[0m  + polars-runtime-32==1.38.1
+[36m(setup pid=6021)[0m  + postgrest==2.28.0
+[36m(setup pid=6021)[0m  + prometheus-client==0.24.1
+[36m(setup pid=6021)[0m  + prometheus-fastapi-instrumentator==7.1.0
+[36m(setup pid=6021)[0m  + propcache==0.4.1
+[36m(setup pid=6021)[0m  + protobuf==6.33.5
+[36m(setup pid=6021)[0m  + psutil==7.2.2
+[36m(setup pid=6021)[0m  + py-cpuinfo==9.0.0
+[36m(setup pid=6021)[0m  + pyarrow==23.0.1
+[36m(setup pid=6021)[0m  + pybase64==1.4.3
+[36m(setup pid=6021)[0m  + pybind11==3.0.2
+[36m(setup pid=6021)[0m  + pycountry==26.2.16
+[36m(setup pid=6021)[0m  + pycparser==3.0
+[36m(setup pid=6021)[0m  + pydantic==2.12.5
+[36m(setup pid=6021)[0m  + pydantic-core==2.41.5
+[36m(setup pid=6021)[0m  + pydantic-extra-types==2.11.0
+[36m(setup pid=6021)[0m  + pydantic-settings==2.13.0
+[36m(setup pid=6021)[0m  + pygments==2.19.2
+[36m(setup pid=6021)[0m  + pyiceberg==0.11.0
+[36m(setup pid=6021)[0m  + pyjwt==2.11.0
+[36m(setup pid=6021)[0m  + pyparsing==3.3.2
+[36m(setup pid=6021)[0m  + pyroaring==1.0.3
+[36m(setup pid=6021)[0m  + python-dateutil==2.9.0.post0
+[36m(setup pid=6021)[0m  + python-dotenv==1.2.1
+[36m(setup pid=6021)[0m  + python-json-logger==4.0.0
+[36m(setup pid=6021)[0m  + python-multipart==0.0.22
+[36m(setup pid=6021)[0m  + pyvers==0.2.2
+[36m(setup pid=6021)[0m  + pyyaml==6.0.3
+[36m(setup pid=6021)[0m  + pyzmq==27.1.0
+[36m(setup pid=6021)[0m  + ray==2.51.1
+[36m(setup pid=6021)[0m  + realtime==2.28.0
+[36m(setup pid=6021)[0m  + referencing==0.37.0
+[36m(setup pid=6021)[0m  + regex==2026.1.15
+[36m(setup pid=6021)[0m  + requests==2.32.5
+[36m(setup pid=6021)[0m  + requests-oauthlib==2.0.0
+[36m(setup pid=6021)[0m  + rich==14.3.2
+[36m(setup pid=6021)[0m  + rich-toolkit==0.19.4
+[36m(setup pid=6021)[0m  + rignore==0.7.6
+[36m(setup pid=6021)[0m  + rpds-py==0.30.0
+[36m(setup pid=6021)[0m  + runloop-api-client==1.8.0
+[36m(setup pid=6021)[0m  + s3fs==2025.10.0
+[36m(setup pid=6021)[0m  + safetensors==0.7.0
+[36m(setup pid=6021)[0m  + scantree==0.0.4
+[36m(setup pid=6021)[0m  + scipy==1.17.0
+[36m(setup pid=6021)[0m  + sentencepiece==0.2.1
+[36m(setup pid=6021)[0m  + sentry-sdk==2.53.0
+[36m(setup pid=6021)[0m  + setproctitle==1.3.7
+[36m(setup pid=6021)[0m  + setuptools==80.10.2
+[36m(setup pid=6021)[0m  + shellingham==1.5.4
+[36m(setup pid=6021)[0m  + shortuuid==1.0.13
+[36m(setup pid=6021)[0m  + six==1.17.0
+[36m(setup pid=6021)[0m  + skyrl-gym==0.1.1 (from file:///home/gcpuser/sky_workdir/skyrl-train/skyrl-gym)
+[36m(setup pid=6021)[0m  + skyrl-train==0.3.1 (from file:///home/gcpuser/sky_workdir/skyrl-train)
+[36m(setup pid=6021)[0m  + smmap==5.0.2
+[36m(setup pid=6021)[0m  + sniffio==1.3.1
+[36m(setup pid=6021)[0m  + sse-starlette==3.2.0
+[36m(setup pid=6021)[0m  + starlette==0.52.1
+[36m(setup pid=6021)[0m  + storage3==2.28.0
+[36m(setup pid=6021)[0m  + strenum==0.4.15
+[36m(setup pid=6021)[0m  + strictyaml==1.7.3
+[36m(setup pid=6021)[0m  + supabase==2.28.0
+[36m(setup pid=6021)[0m  + supabase-auth==2.28.0
+[36m(setup pid=6021)[0m  + supabase-functions==2.28.0
+[36m(setup pid=6021)[0m  + supervisor==4.3.0
+[36m(setup pid=6021)[0m  + sympy==1.14.0
+[36m(setup pid=6021)[0m  + synchronicity==0.11.1
+[36m(setup pid=6021)[0m  + tabulate==0.9.0
+[36m(setup pid=6021)[0m  + tenacity==9.1.4
+[36m(setup pid=6021)[0m  + tensorboard==2.20.0
+[36m(setup pid=6021)[0m  + tensorboard-data-server==0.7.2
+[36m(setup pid=6021)[0m  + tensordict==0.11.0
+[36m(setup pid=6021)[0m  + tiktoken==0.12.0
+[36m(setup pid=6021)[0m  + tokenizers==0.22.2
+[36m(setup pid=6021)[0m  + toml==0.10.2
+[36m(setup pid=6021)[0m  + torch==2.9.0+cu128
+[36m(setup pid=6021)[0m  + torchaudio==2.9.0
+[36m(setup pid=6021)[0m  + torchdata==0.11.0
+[36m(setup pid=6021)[0m  + torchvision==0.24.0+cu128
+[36m(setup pid=6021)[0m  + tqdm==4.67.3
+[36m(setup pid=6021)[0m  + transformers==4.57.6
+[36m(setup pid=6021)[0m  + triton==3.5.0
+[36m(setup pid=6021)[0m  + typer==0.24.0
+[36m(setup pid=6021)[0m  + types-certifi==2021.10.8.3
+[36m(setup pid=6021)[0m  + types-toml==0.10.8.20240310
+[36m(setup pid=6021)[0m  + typing-extensions==4.15.0
+[36m(setup pid=6021)[0m  + typing-inspection==0.4.2
+[36m(setup pid=6021)[0m  + urllib3==2.6.3
+[36m(setup pid=6021)[0m  + uuid-utils==0.14.0
+[36m(setup pid=6021)[0m  + uvicorn==0.41.0
+[36m(setup pid=6021)[0m  + uvloop==0.22.1
+[36m(setup pid=6021)[0m  + vllm==0.13.0
+[36m(setup pid=6021)[0m  + wadler-lindig==0.1.7
+[36m(setup pid=6021)[0m  + wandb==0.25.0
+[36m(setup pid=6021)[0m  + watchfiles==1.1.1
+[36m(setup pid=6021)[0m  + wcmatch==10.1
+[36m(setup pid=6021)[0m  + websocket-client==1.9.0
+[36m(setup pid=6021)[0m  + websockets==15.0.1
+[36m(setup pid=6021)[0m  + werkzeug==3.1.5
+[36m(setup pid=6021)[0m  + wrapt==1.17.3
+[36m(setup pid=6021)[0m  + xgrammar==0.1.27
+[36m(setup pid=6021)[0m  + xxhash==3.6.0
+[36m(setup pid=6021)[0m  + yarl==1.22.0
+[36m(setup pid=6021)[0m  + zipp==3.23.0
+[36m(setup pid=6021)[0m  + zstandard==0.25.0
+[36m(setup pid=6021)[0m Preparing training dataset: data/train.parquet
+[36m(setup pid=6021)[0m Downloading data/train.parquet...
+ERROR: [31mJob 1's setup failed. Failed workers: (pid=6021, returncode=1). See error logs above for more details.[0m
+[36m(setup pid=6021)[0m Traceback (most recent call last):
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 403, in hf_raise_for_status
+[36m(setup pid=6021)[0m     response.raise_for_status()
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/requests/models.py", line 1026, in raise_for_status
+[36m(setup pid=6021)[0m     raise HTTPError(http_error_msg, response=self)
+[36m(setup pid=6021)[0m requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://huggingface.co/api/datasets/data/train.parquet/revision/main
+[36m(setup pid=6021)[0m 
+[36m(setup pid=6021)[0m The above exception was the direct cause of the following exception:
+[36m(setup pid=6021)[0m 
+[36m(setup pid=6021)[0m Traceback (most recent call last):
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/examples/harbor/prepare_harbor_dataset.py", line 157, in <module>
+[36m(setup pid=6021)[0m     prepare(args.dataset, args.output_dir)
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/examples/harbor/prepare_harbor_dataset.py", line 116, in prepare
+[36m(setup pid=6021)[0m     snapshot_dir = Path(snapshot_download(repo_id=dataset_name, repo_type="dataset"))
+[36m(setup pid=6021)[0m                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+[36m(setup pid=6021)[0m     return fn(*args, **kwargs)
+[36m(setup pid=6021)[0m            ^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 245, in snapshot_download
+[36m(setup pid=6021)[0m     raise api_call_error
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 165, in snapshot_download
+[36m(setup pid=6021)[0m     repo_info = api.repo_info(repo_id=repo_id, repo_type=repo_type, revision=revision)
+[36m(setup pid=6021)[0m                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+[36m(setup pid=6021)[0m     return fn(*args, **kwargs)
+[36m(setup pid=6021)[0m            ^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2867, in repo_info
+[36m(setup pid=6021)[0m     return method(
+[36m(setup pid=6021)[0m            ^^^^^^^
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+[36m(setup pid=6021)[0m     return fn(*args, **kwargs)
+[36m(setup pid=6021)[0m            ^^^^^^^^^^^^^^^^^^^
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/hf_api.py", line 2731, in dataset_info
+[36m(setup pid=6021)[0m     hf_raise_for_status(r)
+[36m(setup pid=6021)[0m   File "/home/gcpuser/sky_workdir/skyrl-train/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 453, in hf_raise_for_status
+[36m(setup pid=6021)[0m     raise _format(RepositoryNotFoundError, message, response) from e
+[36m(setup pid=6021)[0m huggingface_hub.errors.RepositoryNotFoundError: 401 Client Error. (Request ID: Root=1-69e697c3-29c50339335b0cf616c49ba9;eed64d57-ffa8-40ca-8b3a-a263b059cba1)
+[36m(setup pid=6021)[0m 
+[36m(setup pid=6021)[0m Repository Not Found for url: https://huggingface.co/api/datasets/data/train.parquet/revision/main.
+[36m(setup pid=6021)[0m Please make sure you specified the correct `repo_id` and `repo_type`.
+[36m(setup pid=6021)[0m If you are trying to access a private or gated repo, make sure you are authenticated. For more details, see https://huggingface.co/docs/huggingface_hub/authentication
+[36m(setup pid=6021)[0m Invalid username or password.
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m

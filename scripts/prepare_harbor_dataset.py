@@ -50,6 +50,7 @@ def main():
         return
 
     dataset_rows = []
+    processed_ids = set()
     
     for task_dir in sorted(tasks_root.glob("task_*")):
         task_json_path = task_dir / "task.json"
@@ -61,6 +62,8 @@ def main():
         if instance_id not in passed_ids:
             continue
             
+        if instance_id in processed_ids: continue
+        processed_ids.add(instance_id)
         print(f"Processing {instance_id}...")
         tar_bytes = create_task_tar(task_dir)
         if tar_bytes:

@@ -1,0 +1,23 @@
+--- Poll @ Mon Apr 20 18:41:14 EDT 2026 ---
+awk: illegal field $(), name "status"
+ input record number 1, file 
+ source line number 1
+[fleet-swe-a100] Status: 
+awk: illegal field $(), name "status"
+ input record number 1, file 
+ source line number 1
+[fleet-swe-l4-4b] Status: 
+--- Poll @ Mon Apr 20 18:46:46 EDT 2026 ---
+awk: illegal field $(), name "status"
+ input record number 1, file 
+ source line number 1
+[fleet-swe-a100] Status: 
+WINNER: fleet-swe-a100 with https://wandb.ai/thefleet/fleet-worktrial-eric
+
+
+Firewall rule sky-ports-fleet-swe-l4-4b-729f9496 not found. Skip cleanup.
+
+Cluster 'fleet-swe-l4-4b' is already terminated. Skipped.
+
+Terminating cluster fleet-swe-l4-4b...done.
+Terminating 1 cluster ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00

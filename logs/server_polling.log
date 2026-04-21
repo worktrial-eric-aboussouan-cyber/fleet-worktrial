@@ -1,0 +1,745 @@
+--- Starting Server Poll ---
+--- Poll at Mon Apr 20 19:54:53 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (us-east1-c)         1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 min ago    
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 min ago    
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         13 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(setup pid=7901)[0m  Downloaded nvidia-nvjitlink-cu12
+[36m(setup pid=7901)[0m  Downloaded llvmlite
+[36m(setup pid=7901)[0m  Downloaded polars-runtime-32
+[36m(setup pid=7901)[0m  Downloaded opencv-python-headless
+[36m(setup pid=7901)[0m  Downloaded nvidia-curand-cu12
+[36m(setup pid=7901)[0m  Downloaded claude-agent-sdk
+[36m(setup pid=7901)[0m  Downloaded pyarrow
+[36m(setup pid=7901)[0m  Downloaded nvidia-cutlass-dsl-libs-base
+[36m(setup pid=7901)[0m  Downloaded nvidia-cuda-nvrtc-cu12
+[36m(setup pid=7901)[0m  Downloaded nvidia-nvshmem-cu12
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 19:56:03 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (us-west1-a)         1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         31 secs ago  
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         2 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         14 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m     auth = _find_or_prompt_for_key(
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m            ^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv/lib/python3.12/site-packages/wandb/sdk/wandb_login.py", line 266, in _find_or_prompt_for_key
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m     auth = wbauth.authenticate_session(
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv/lib/python3.12/site-packages/wandb/sdk/lib/wbauth/authenticate.py", line 139, in authenticate_session
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m     raise UsageError(
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m wandb.errors.errors.UsageError: No API key configured. Use `wandb login` to log in.
+ERROR: [31mJob 1 failed with return code list:[0m [1] 
+[0m[32m✓ Job finished (status: FAILED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 19:57:13 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (us-west1-b)         1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         40 secs ago  
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         3 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         16 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m     auth = _find_or_prompt_for_key(
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m            ^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv/lib/python3.12/site-packages/wandb/sdk/wandb_login.py", line 266, in _find_or_prompt_for_key
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m     auth = wbauth.authenticate_session(
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv/lib/python3.12/site-packages/wandb/sdk/lib/wbauth/authenticate.py", line 139, in authenticate_session
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m     raise UsageError(
+[36m(harbor-grpo-qwen3-8b, pid=7901)[0m wandb.errors.errors.UsageError: No API key configured. Use `wandb login` to log in.
+ERROR: [31mJob 1 failed with return code list:[0m [1] 
+[0m[32m✓ Job finished (status: FAILED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 19:58:22 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  INIT    -         28 secs ago  
+fleet-swe-track-a    GCP (us-west1-c)         1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         36 secs ago  
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         17 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-final'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-final' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-final[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 19:59:28 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         34 secs ago  
+fleet-swe-track-a    GCP (us-west1-c)         1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 min ago    
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         18 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(setup pid=7902)[0m  + wrapt==1.17.3
+[36m(setup pid=7902)[0m  + xgrammar==0.1.27
+[36m(setup pid=7902)[0m  + xxhash==3.6.0
+[36m(setup pid=7902)[0m  + yarl==1.22.0
+[36m(setup pid=7902)[0m  + zipp==3.23.0
+[36m(setup pid=7902)[0m  + zstandard==0.25.0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m wandb: [wandb.login()] Using explicit session credentials for https://api.wandb.ai.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m wandb: No netrc file found, creating one.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m wandb: Appending key for api.wandb.ai to your netrc file: /home/gcpuser/.netrc
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m wandb: Currently logged in as: worktrial-eric-aboussouan (thefleet) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:00:36 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 min ago    
+fleet-swe-track-a    GCP (us-west1-c)         1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         2 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         19 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: For more information, check out the docs at: https://weave-docs.wandb.ai/
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m W0421 00:00:36.651000 34494 .venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py:117] No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,127 I 35295 35295] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,129 I 35294 35294] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,147 I 35296 35296] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,150 I 35298 35298] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,171 I 35299 35299] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,178 I 35300 35300] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,180 I 35301 35301] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,198 I 35297 35297] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:01:47 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-a)      1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         2 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         20 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: For more information, check out the docs at: https://weave-docs.wandb.ai/
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m W0421 00:00:36.651000 34494 .venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py:117] No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,127 I 35295 35295] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,129 I 35294 35294] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,147 I 35296 35296] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,150 I 35298 35298] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,171 I 35299 35299] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,178 I 35300 35300] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,180 I 35301 35301] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:00:40,198 I 35297 35297] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:02:57 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-b)      1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         4 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         21 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [33m(raylet)[0m [2026-04-21 00:02:52,904 I 39563 39563] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(pid=39560)[0m Using blocking ray.get inside async actor. This blocks the event loop. Please use `await` on object ref with asyncio.gather if you want to yield execution to the event loop instead.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(pid=39561)[0m Using blocking ray.get inside async actor. This blocks the event loop. Please use `await` on object ref with asyncio.gather if you want to yield execution to the event loop instead.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(pid=39564)[0m Using blocking ray.get inside async actor. This blocks the event loop. Please use `await` on object ref with asyncio.gather if you want to yield execution to the event loop instead.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(pid=39562)[0m Using blocking ray.get inside async actor. This blocks the event loop. Please use `await` on object ref with asyncio.gather if you want to yield execution to the event loop instead.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(pid=39557)[0m Using blocking ray.get inside async actor. This blocks the event loop. Please use `await` on object ref with asyncio.gather if you want to yield execution to the event loop instead.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(pid=39558)[0m Using blocking ray.get inside async actor. This blocks the event loop. Please use `await` on object ref with asyncio.gather if you want to yield execution to the event loop instead.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(pid=39563)[0m Using blocking ray.get inside async actor. This blocks the event loop. Please use `await` on object ref with asyncio.gather if you want to yield execution to the event loop instead.
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:03:01.075[0m | [1m[32mINFO    [0m | [36mskyrl_train.workers.worker[0m:[36m_initiate_actors[0m:[36m536[0m - [1m[32mInitialized process group for RayActorGroup[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:03:01.089[0m | [1m[32mINFO    [0m | [36mskyrl_train.workers.worker[0m:[36m_initiate_actors[0m:[36m538[0m - [1m[32mMesh Ranks: [MeshRank(dp=0, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=1, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=2, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=3, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=4, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=5, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=6, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=7, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1)][0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:04:07 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         5 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         23 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:03:01.075[0m | [1m[32mINFO    [0m | [36mskyrl_train.workers.worker[0m:[36m_initiate_actors[0m:[36m536[0m - [1m[32mInitialized process group for RayActorGroup[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:03:01.089[0m | [1m[32mINFO    [0m | [36mskyrl_train.workers.worker[0m:[36m_initiate_actors[0m:[36m538[0m - [1m[32mMesh Ranks: [MeshRank(dp=0, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=1, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=2, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=3, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=4, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=5, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=6, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1), MeshRank(dp=7, sp=0, tp=0, pp=0, world_size=8, dp_size=8, pp_size=1)][0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:07.265[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mbuild_models[0m:[36m571[0m - [1m[32minit policy/ref/critic models done[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:07.266[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mtrain[0m:[36m178[0m - [1m[32mStarted: 'init_weight_sync_state'[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:11.625[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36minit_weight_sync_state[0m:[36m578[0m - [1m[32mInitialized weight sync state for policy model and inference engines.[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:11.625[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mtrain[0m:[36m178[0m - [1m[32mFinished: 'init_weight_sync_state', time cost: 4.36s[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:11.625[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mtrain[0m:[36m183[0m - [1m[32mStarted: 'load_checkpoints'[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:11.627[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mload_checkpoints[0m:[36m1272[0m - [1m[32mNo checkpoint found, starting training from scratch[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:11.627[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mtrain[0m:[36m183[0m - [1m[32mFinished: 'load_checkpoints', time cost: 0.00s[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:04:11.627[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mtrain[0m:[36m187[0m - [1m[32mStarted: 'sync_weights'[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:05:17 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         6 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         24 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:05:19.733[0m | [1m[32mINFO    [0m | [36mskyrl_train.utils.trainer_utils[0m:[36mdump_per_dataset_eval_results[0m:[36m281[0m - [1m[32mDumped eval data for /home/gcpuser/data/harbor/train/requests-7205 to /home/gcpuser/exports/dumped_evals/global_step_3_evals/_home_gcpuser_data_harbor_train_requests-7205.jsonl[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m 
+Evaluation Progress: 100%|██████████| 1/1 [00:02<00:00,  3.00s/it]
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m 
+Training Batches Processed: 100%|██████████| 3/3 [01:01<00:00, 19.74s/it][32m2026-04-21 00:05:19.733[0m | [1m[32mINFO    [0m | [36mskyrl_train.utils.trainer_utils[0m:[36mdump_per_dataset_eval_results[0m:[36m288[0m - [1m[32mDumped aggregated eval metrics to /home/gcpuser/exports/dumped_evals/global_step_3_evals/aggregated_results.jsonl[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:05:19.733[0m | [1m[32mINFO    [0m | [36mskyrl_train.evaluate[0m:[36mevaluate[0m:[36m111[0m - [1m[32mFinished: 'dump_eval_results', time cost: 0.01s[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:05:19.734[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mtrain[0m:[36m321[0m - [1m[32mFinished: 'eval', time cost: 3.00s[0m
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m 
+Training Batches Processed: 100%|██████████| 3/3 [01:02<00:00, 20.75s/it]
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m [32m2026-04-21 00:05:20.688[0m | [1m[32mINFO    [0m | [36mskyrl_train.trainer[0m:[36mtrain[0m:[36m344[0m - [1m[32mStarted: 'save_checkpoints'[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:06:27 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         7 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         25 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6356/avg_score 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: eval/_home_gcpuser_data_harbor_train_requests-6356/mean_positive_reward 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6356/pass_at_1 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6589/avg_score 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:                                                                     +70 ...
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 🚀 View run harbor-qwen3-8b-fleet-v5 at: https://wandb.ai/thefleet/fleet-worktrial-eric/runs/h46gf83j
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: ⭐️ View project at: https://wandb.ai/thefleet/fleet-worktrial-eric
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Find logs at: ./wandb/run-20260421_000030-h46gf83j/logs
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-track-a' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-track-a[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:07:37 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   INIT    -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         8 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         26 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: eval/_home_gcpuser_data_harbor_train_requests-6356/mean_positive_reward 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6356/pass_at_1 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6589/avg_score 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:                                                                     +70 ...
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 🚀 View run harbor-qwen3-8b-fleet-v5 at: https://wandb.ai/thefleet/fleet-worktrial-eric/runs/h46gf83j
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: ⭐️ View project at: https://wandb.ai/thefleet/fleet-worktrial-eric
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Find logs at: ./wandb/run-20260421_000030-h46gf83j/logs
+[0m[32m✓ Job finished (status: SUCCEEDED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[36m(setup pid=8590)[0m  Downloaded pandas
+[36m(setup pid=8590)[0m  Downloaded botocore
+[36m(setup pid=8590)[0m       Built harbor @ git+https://github.com/laude-institute/harbor@8c040e1bb010201fd3c75bee3dede2407b9f57cd
+[36m(setup pid=8590)[0m  Downloaded litellm
+[36m(setup pid=8590)[0m       Built func-timeout==4.3.5
+[36m(setup pid=8590)[0m       Built antlr4-python3-runtime==4.9.3
+[36m(setup pid=8590)[0m  Downloaded cuda-bindings
+[36m(setup pid=8590)[0m       Built skyrl-gym @ file:///home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl-gym
+[36m(setup pid=8590)[0m  Downloaded numpy
+[36m(setup pid=8590)[0m       Built skyrl-train @ file:///home/gcpuser/sky_workdir/harbor-train/skyrl-train
+---------------------------
+--- Poll at Mon Apr 20 20:08:52 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         9 mins ago   
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         27 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: eval/_home_gcpuser_data_harbor_train_requests-6356/mean_positive_reward 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6356/pass_at_1 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6589/avg_score 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:                                                                     +70 ...
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 🚀 View run harbor-qwen3-8b-fleet-v5 at: https://wandb.ai/thefleet/fleet-worktrial-eric/runs/h46gf83j
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: ⭐️ View project at: https://wandb.ai/thefleet/fleet-worktrial-eric
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Find logs at: ./wandb/run-20260421_000030-h46gf83j/logs
+[0m[32m✓ Job finished (status: SUCCEEDED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+---------------------------
+--- Poll at Mon Apr 20 20:10:07 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         11 mins ago  
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         29 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: eval/_home_gcpuser_data_harbor_train_requests-6356/mean_positive_reward 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6356/pass_at_1 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:            eval/_home_gcpuser_data_harbor_train_requests-6589/avg_score 0
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb:                                                                     +70 ...
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: 🚀 View run harbor-qwen3-8b-fleet-v5 at: https://wandb.ai/thefleet/fleet-worktrial-eric/runs/h46gf83j
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: ⭐️ View project at: https://wandb.ai/thefleet/fleet-worktrial-eric
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[36m(harbor-grpo-qwen3-8b, pid=7902)[0m [36m(skyrl_entrypoint pid=34494)[0m wandb: Find logs at: ./wandb/run-20260421_000030-h46gf83j/logs
+[0m[32m✓ Job finished (status: SUCCEEDED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:11:22 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  INIT    -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         30 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-final'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-final' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-final[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:12:32 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         31 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(setup pid=7895)[0m  + werkzeug==3.1.5
+[36m(setup pid=7895)[0m  + wrapt==1.17.3
+[36m(setup pid=7895)[0m  + xgrammar==0.1.27
+[36m(setup pid=7895)[0m  + xxhash==3.6.0
+[36m(setup pid=7895)[0m  + yarl==1.22.0
+[36m(setup pid=7895)[0m  + zipp==3.23.0
+[36m(setup pid=7895)[0m  + zstandard==0.25.0
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m wandb: [wandb.login()] Using explicit session credentials for https://api.wandb.ai.
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m wandb: Appending key for api.wandb.ai to your netrc file: /home/gcpuser/.netrc
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m wandb: Currently logged in as: worktrial-eric-aboussouan (thefleet) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:13:46 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         32 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 219, in validate_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_generator_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 390, in validate_generator_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     cfg.generator.max_input_length == cfg.trainer.max_prompt_length
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m AssertionError: generator.max_input_length should be set equal to trainer.max_prompt_length for single-turn generation
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m 
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+ERROR: [31mJob 3 failed with return code list:[0m [1] 
+[0m[32m✓ Job finished (status: FAILED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:15:01 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         33 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 219, in validate_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_generator_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 390, in validate_generator_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     cfg.generator.max_input_length == cfg.trainer.max_prompt_length
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m AssertionError: generator.max_input_length should be set equal to trainer.max_prompt_length for single-turn generation
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m 
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+ERROR: [31mJob 3 failed with return code list:[0m [1] 
+[0m[32m✓ Job finished (status: FAILED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:16:15 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         35 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 219, in validate_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_generator_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 390, in validate_generator_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     cfg.generator.max_input_length == cfg.trainer.max_prompt_length
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m AssertionError: generator.max_input_length should be set equal to trainer.max_prompt_length for single-turn generation
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m 
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+ERROR: [31mJob 3 failed with return code list:[0m [1] 
+[0m[32m✓ Job finished (status: FAILED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:17:29 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         36 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 219, in validate_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     validate_generator_cfg(cfg)
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m   File "/home/gcpuser/sky_workdir/harbor-train/skyrl-train/skyrl_train/utils/utils.py", line 390, in validate_generator_cfg
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m     cfg.generator.max_input_length == cfg.trainer.max_prompt_length
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m AssertionError: generator.max_input_length should be set equal to trainer.max_prompt_length for single-turn generation
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m 
+[36m(harbor-grpo-qwen3-8b, pid=7895)[0m Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+ERROR: [31mJob 3 failed with return code list:[0m [1] 
+[0m[32m✓ Job finished (status: FAILED).[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:18:43 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  INIT    -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         37 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-final'...[0m
+sky.exceptions.ClusterNotUpError: [33mTailing logs: skipped for cluster 'fleet-swe-final' (status: INIT). It is only allowed for UP and AUTOSTOPPING clusters.[0m Wait for a launch to finish, or use this command to try to transition the cluster to UP: [1msky start fleet-swe-final[0m[0m
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:19:53 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         38 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(setup pid=7823)[0m  + werkzeug==3.1.5
+[36m(setup pid=7823)[0m  + wrapt==1.17.3
+[36m(setup pid=7823)[0m  + xgrammar==0.1.27
+[36m(setup pid=7823)[0m  + xxhash==3.6.0
+[36m(setup pid=7823)[0m  + yarl==1.22.0
+[36m(setup pid=7823)[0m  + zipp==3.23.0
+[36m(setup pid=7823)[0m  + zstandard==0.25.0
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m wandb: [wandb.login()] Using explicit session credentials for https://api.wandb.ai.
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m wandb: Appending key for api.wandb.ai to your netrc file: /home/gcpuser/.netrc
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m wandb: Currently logged in as: worktrial-eric-aboussouan (thefleet) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+>>> L4 (Track A) LAST 10 LINES:
+[33mTailing logs of the last job on cluster 'fleet-swe-track-a'...[0m
+Job ID not provided. Streaming the logs of the latest job.
+[2m├── [0m[2mWaiting for task resources on 1 node.[0m
+[2m└── [0mJob started. Streaming logs... [2m(Ctrl-C to exit log streaming; job will not be killed)[0m
+ERROR: [31mJob 2's setup failed. Failed workers: (pid=8577, returncode=2). See error logs above for more details.[0m
+[36m(setup pid=8577)[0m Using CPython 3.12.13
+[36m(setup pid=8577)[0m Creating virtual environment with seed packages at: .venv
+[36m(setup pid=8577)[0m error: Failed to create virtual environment
+[36m(setup pid=8577)[0m   Caused by: A virtual environment already exists at `/home/gcpuser/sky_workdir/harbor-train/skyrl-train/.venv`. Use `--clear` to replace it
+[0m[32m✓ Job finished (status: FAILED_SETUP).[0m[0m
+---------------------------
+--- Poll at Mon Apr 20 20:21:07 EDT 2026 ---
+>>> STATUS:
+Enabled Infra: gcp
+
+Clusters
+NAME                 INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-final      GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 hr ago     
+fleet-swe-track-a    GCP (asia-south1-c)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         1 hr ago     
+fleet-swe-l4-backup  GCP (us-central1-b)      1x(gpus=L4:4, g2-standard-48, ...)   UP      -         40 mins ago  
+
+Managed jobs
+No in-progress managed jobs. (See: sky jobs -h)
+
+Services
+No live services. (See: sky serve -h)
+>>> A100 (Track B) LAST 10 LINES:
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [36m(skyrl_entrypoint pid=76126)[0m wandb: For more information, check out the docs at: https://weave-docs.wandb.ai/
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [36m(skyrl_entrypoint pid=76126)[0m W0421 00:21:05.873000 76126 .venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py:117] No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,353 I 76952 76952] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,379 I 76954 76954] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,391 I 76956 76956] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,393 I 76955 76955] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,398 I 76957 76957] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,404 I 76953 76953] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,419 I 76958 76958] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+[36m(harbor-grpo-qwen3-8b, pid=7823)[0m [33m(raylet)[0m [2026-04-21 00:21:09,471 I 76959 76959] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 3
+>>> L4 (Track A) LAST 10 LINES:

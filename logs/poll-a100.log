@@ -1,0 +1,46 @@
+--- Poll 1 (T+0 min) ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED   
+fleet-swe-a100  GCP (asia-southeast1-a)  1x(gpus=A100:8, a2-highgpu-8g, ...)  INIT    -         1 min ago  
+--- Poll 2 (T+2 min) ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-a100  GCP (asia-southeast1-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  INIT    -         54 secs ago  
+--- Poll 3 (T+4 min) ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED     
+fleet-swe-a100  GCP (asia-northeast1-c)  1x(gpus=A100:8, a2-highgpu-8g, ...)  INIT    -         20 secs ago  
+--- Poll 4 (T+6 min) ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED   
+fleet-swe-a100  GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  INIT    -         1 min ago  
+--- Poll 5 (T+8 min) ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED   
+fleet-swe-a100  GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         1 min ago  
+Cluster is UP. Checking logs...
+--- Poll 6 (T+10 min) ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED    
+fleet-swe-a100  GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         3 mins ago  
+Cluster is UP. Checking logs...
+--- Poll 7 (T+12 min) ---
+Enabled Infra: gcp
+
+Clusters
+NAME            INFRA                    RESOURCES                            STATUS  AUTOSTOP  LAUNCHED    
+fleet-swe-a100  GCP (asia-northeast3-b)  1x(gpus=A100:8, a2-highgpu-8g, ...)  UP      -         5 mins ago  
+Cluster is UP. Checking logs...
+WANDB_FOUND: https://wandb.ai/thefleet/fleet-worktrial-eric

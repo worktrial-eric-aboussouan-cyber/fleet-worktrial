@@ -1,0 +1,3 @@
+PR: Fix malformed value parsing for Content-Type
+
+This PR addresses https://github.com/psf/requests/issues/6646 by cleaning up `_parse_content_type_header`. Instead of setting a default that we can't use in practice, we now skip value assignment completely if the value is malformed. Every RFC from 1521 to 9110 is clear that an `=` is required for a valid parameter. If it doesn't exist, we need to ignore it.

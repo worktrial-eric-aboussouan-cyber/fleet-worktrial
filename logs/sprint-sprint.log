@@ -1,0 +1,38 @@
+--- Poll 1 (T+0 min) @ Mon Apr 20 19:27:30 EDT 2026 ---
+--- Poll 2 (T+1 min) @ Mon Apr 20 19:29:00 EDT 2026 ---
+--- Poll 3 (T+3 min) @ Mon Apr 20 19:30:30 EDT 2026 ---
+--- Poll 4 (T+4 min) @ Mon Apr 20 19:32:00 EDT 2026 ---
+--- Poll 5 (T+6 min) @ Mon Apr 20 19:33:30 EDT 2026 ---
+--- Poll 6 (T+7 min) @ Mon Apr 20 19:35:00 EDT 2026 ---
+--- Poll 7 (T+9 min) @ Mon Apr 20 19:36:30 EDT 2026 ---
+--- Poll 8 (T+10 min) @ Mon Apr 20 19:38:00 EDT 2026 ---
+--- Poll 9 (T+12 min) @ Mon Apr 20 19:39:30 EDT 2026 ---
+--- Poll 10 (T+13 min) @ Mon Apr 20 19:41:00 EDT 2026 ---
+--- Poll 11 (T+15 min) @ Mon Apr 20 19:42:30 EDT 2026 ---
+--- Poll 12 (T+16 min) @ Mon Apr 20 19:44:00 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 13 (T+18 min) @ Mon Apr 20 19:45:30 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 14 (T+19 min) @ Mon Apr 20 19:47:00 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 15 (T+21 min) @ Mon Apr 20 19:48:30 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 16 (T+22 min) @ Mon Apr 20 19:50:00 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 17 (T+24 min) @ Mon Apr 20 19:51:30 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 18 (T+25 min) @ Mon Apr 20 19:53:00 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 19 (T+27 min) @ Mon Apr 20 19:54:30 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
+--- Poll 20 (T+28 min) @ Mon Apr 20 19:56:00 EDT 2026 ---
+A100 STUCK IN SETUP. KILLING AND PIVOTING TO L4.
+./scripts/sprint_monitor.sh: line 34: sky: command not found
