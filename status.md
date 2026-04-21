@@ -1,65 +1,49 @@
 # Status — Fleet Work Trial
 
-## Done
-- `scrape_prs.py` — written with all filters (linked issue, noise title, doc-only, max files, source+test required)
-- `candidates_psf_requests.json` — 40 candidates scraped for `psf/requests`
-- Dockerfile templates for all 4 repos (requests, click, flask, httpx) in `templates/`
-- `build_task.py` — materializes candidates → `tasks/task_XXX/{task.json, Dockerfile, eval_script.sh}`
-- `validate_task.py` — two-canary Docker validation
-- `push_images.py` — parallel build + push to registry
-- `harbor-train/` — SkyRL repo cloned locally
+## 🏆 Current State: Training Loop Live & Telemetry Flowing
+We have successfully moved from raw PR scraping to a live end-to-end GRPO training run on an 8x A100 GPU cluster.
 
-## In Progress
-- Scraping other 3 repos — click, flask, httpx not scraped yet
+### Live Run Details
+- **Winning Track**: Track B (Easy Task Injection) + Track A (Fractional Reward Patch)
+- **Active WandB Run**: [ajachaix](https://wandb.ai/thefleet/fleet-worktrial-eric/runs/ajachaix)
+- **Hardware**: 8x A100 (GCP `fleet-swe-final`)
+- **Model**: Qwen3-8B
 
-## Known Bugs to Fix Before Build
-1. Dockerfile has `/workspace` but validate_task.py expects `/repo` — need to align to `/repo`
-2. `build_task.py` does string replace of `${BASE_COMMIT}` — works, but `ARG BASE_COMMIT` line in template is dead weight (harmless)
-3. `DOCKER_REGISTRY` in `.env` is empty — need to set before push
+---
 
-## Next Steps (in order)
-1. **Scrape** — `uv run scripts/scrape_prs.py pallets/click pallets/flask encode/httpx`
-2. **Fix Dockerfile** — change `/workspace` → `/repo` in all 4 templates
-3. **Build tasks** — `uv run scripts/build_task.py tasks/candidates_psf_requests.json` (test with requests first)
-4. **Validate** — `uv run scripts/validate_task.py` (runs Docker canary tests, ~30-60 min)
-5. **Set DOCKER_REGISTRY** in `.env`, then push — `uv run scripts/push_images.py`
-6. **Part 2** — SkyRL/Harbor training on GCP with generated tasks
-7. **Part 3** — OOD eval on SWE-bench Verified subset
+## ✅ Accomplishments (Sprint 2 & 3)
+### 1. Training Pipeline Automation
+- **`prepare_harbor_dataset.py`**: Fully automated extraction of validated tasks into Harbor's parquet format.
+- **`repackage_train.py`**: Handles local structure preparation for SkyPilot file mounts.
+- **`harbor-grpo-qwen3-8b.yaml`**: Hardened SkyPilot config with explicit environment injection and optimized VRAM utilization.
 
-## Blockers
-- Need to scrape click/flask/httpx before building tasks for those repos
-- Docker must be running locally for validate + build steps
+### 2. Reward Engineering (Track A)
+- **Fractional Rewards**: Patched `mini_swe_utils.py` to calculate rewards as `passed_tests / total_tests` instead of binary success/failure.
+- **Eval Script Hardening**: Modified `eval_script.sh` templates to remove `set -e` and pipe Pytest output to `tee`, ensuring the reward parser always sees the test summary line.
 
+### 3. Dataset Injection (Track B)
+- **Insurance Tasks**: Injected "easy" tasks (`requests-7309`, `requests-7305`) which had empty canary passes, ensuring the model sees positive reward signal early to bootstrap learning.
 
-======
-# Work Trial Status
+### 4. Critical Debugging (The "1 Token" Bug)
+- **Root Cause**: Identified that `generator.max_input_length` defaulted to 512 tokens, causing severe truncation of SWE-bench prompts and resulting in `max_num_tokens: 1` errors.
+- **Fix**: Aligned `trainer.max_prompt_length` and `generator.max_input_length` to 16,384 tokens and increased generation budget to 8,192 tokens.
 
-## Done
-- Scraped PRs from `psf/requests` → 40 task candidates
-- Scraping `pallets/click`, `pallets/flask`, `encode/httpx` (running now)
-- Written scripts: scrape, build, validate, push
-- Dockerfile templates for all 4 repos (bug fixed: /workspace → /repo)
-- Cloned SkyRL/Harbor training repo (`harbor-train/`)
-- Read through the training pipeline code
+---
 
-## In Progress
-- Scraper running for click/flask/httpx
+## 🛠️ Infrastructure Status
+- **Cluster `fleet-swe-final`**: **UP** & Training.
+- **Cluster `fleet-swe-track-a`**: **UP** & Standby (Backup for 4B model).
+- **Daytona Sandboxes**: Actively executing agent rollouts.
 
-## Not Started
-- Building task folders (`tasks/task_XXX/`) from candidates
-- Validating tasks (Docker canary tests)
-- Pushing images to GCR
-- Training run on GCP
+---
 
-## Key Open Question (for colleague)
-The training code uses **OpenHands runtime** to run the agent inside containers —
-not a simple `docker run`. We need to know:
+## ⏭️ Next Steps
+1. **Monitor `ajachaix`**: Verify `avg_num_tokens > 1` and `reward > 0` on the first training step.
+2. **OOD Evaluation**: Prepare the materialized OOD tasks for a checkpoint evaluation.
+3. **Cleanup**: Execute `sky down` across all clusters once the demo window closes.
 
-> Does training require a running OpenHands runtime server, or is there a simpler
-> path that runs our `eval_script.sh` directly against our Docker images?
+---
 
-The answer determines how we wire our task images into the training loop.
-
-## What's Working End-to-End
-Nothing yet — we haven't built or validated a single task instance.
-The next milestone is: build 1 task → validate it passes both canaries → push to GCR.
+## 📄 References
+- **Root Cause Analysis**: [notes/root-cause.md](file:///Users/fleet/fleet-worktrial/notes/root-cause.md)
+- **Training Config**: [harbor-grpo-qwen3-8b.yaml](file:///Users/fleet/fleet-worktrial/harbor-train/skyrl-train/tasks/harbor-grpo-qwen3-8b.yaml)
