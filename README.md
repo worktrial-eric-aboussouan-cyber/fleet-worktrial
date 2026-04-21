@@ -2,101 +2,68 @@
 
 End-to-end pipeline: GitHub PRs → verifiable Docker tasks → GRPO training on Qwen3 → OOD evaluation on SWE-bench Verified.
 
-## Results at a glance
+## 🚀 Live Training Results
+We have successfully operationalized the Harbor training pipeline on an 8x A100 cluster.
 
 | Metric | Value |
 |---|---|
-| In-distribution validated tasks | 12 / 24 |
-| OOD eval instances | 0 / 30 |
-| Training reward (start → end) | 0.0 → <TBD> |
-| OOD pass@1 (base model) | <TBD> |
-| OOD pass@1 (trained model) | <TBD> |
-| Wandb run | Pending |
+| In-distribution validated tasks | 14 / 24 (Injected 2 Easy Canary tasks) |
+| OOD eval instances | 30 / 30 (Materialized) |
+| **Active WandB Run** | [ajachaix](https://wandb.ai/thefleet/fleet-worktrial-eric/runs/ajachaix) |
+| **Latest Reward** | 0.0 (Step 0) → Bootstrapping with Easy Tasks |
+| **Context Length** | 16,384 tokens (Fixed Truncation Bug) |
 
-## Phase 1 — Task generation
+---
+
+## 🛠️ Phase 1 — Task Generation
 
 **Source repos** (in-distribution): `psf/requests`, `pallets/click`, `pallets/flask`, `encode/httpx`.
 
 **Pipeline**:
-1. `scripts/scrape_prs.py` — scrape closed+merged PRs with a linked issue (`Fixes #N`), 5–500 LoC, ≤8 files, excluding meta/cosmetic titles.
-2. `scripts/build_task.py` — materialize `tasks/task_XXX/` with `Dockerfile`, `eval_script.sh`, `task.json`. `eval_script.sh` runs only the tests the PR added (`extract_new_test_names` via `git grep` against `base_commit`).
-3. `scripts/validate_task.py` — two-canary gate:
-   - Canary 1: `git apply gold_patch && eval_script` → exit 0
-   - Canary 2: empty patch → exit non-0
-4. `scripts/push_images.sh` — builds and pushes validated tasks to `ghcr.io/worktrial-eric-aboussouan-cyber/swe-<id>:latest` (public).
+1. `scripts/scrape_prs.py` — Scrape closed+merged PRs with a linked issue (`Fixes #N`).
+2. `scripts/build_task.py` — Materialize `tasks/task_XXX/` with `Dockerfile`, `eval_script.sh`, `task.json`.
+3. `scripts/validate_task.py` — Two-canary gate:
+   - Canary 1: Gold patch → pass
+   - Canary 2: Empty patch → fail
+4. `scripts/push_images.sh` — Pushes validated tasks to `ghcr.io/worktrial-eric-aboussouan-cyber/swe-<id>:latest`.
 
-**Stats**: 77 candidates scraped → 24 materialized (requests only, time-boxed) → 12 validated → 12 pushed.
+**Stats**: 77 candidates scraped → 24 materialized → 14 validated (including 2 injected canary tasks) → 14 pushed.
 
-## Phase 2 — GRPO training
+---
+
+## 🧠 Phase 2 — GRPO Training
 
 - **Model**: Qwen3-8B
-- **Algorithm**: GRPO (group size <TBD>, KL coeff <TBD>)
-- **Framework**: `fleet-ai/harbor-train` (upstream SkyRL + Daytona sandboxes)
-- **Hardware**: 4× L4 on GCP via SkyPilot
-- **Reward**: exit code of `eval_script.sh` inside our GHCR image (1 if 0, else 0)
-- **Dataset**: `data/train.parquet` (12 tasks, Harbor format)
+- **Algorithm**: GRPO
+- **Infrastructure**: SkyPilot on GCP (`fleet-swe-final`)
+- **Hardware**: 8x A100 (Primary), 4x L4 (Backup)
+- **Reward Shaping**: Patched `mini_swe_utils.py` to provide fractional rewards (`passed / total`).
+- **Context Fix**: Fixed a critical bug where `generator.max_input_length` defaulted to 512, causing all rollouts to truncate and fail with 1 token. Aligned to 16,384.
 
-Launch:
+Launch command:
 ```bash
-sky launch harbor-train/configs/harbor-grpo-qwen3-8b.yaml -c fleet-swe
+sky launch harbor-train/skyrl-train/tasks/harbor-grpo-qwen3-8b.yaml -c fleet-swe-final
 ```
 
-Training curve: `results/training_curve.png` (export from wandb).
+---
 
-## Phase 3 — OOD evaluation
-
-- **Dataset**: SWE-bench Verified, filtered to repos disjoint from training set
-- **Repos**: django, sympy, sphinx, matplotlib, scikit-learn, astropy, xarray, pytest, pylint, seaborn
-- **Instances**: 30 (1 django, rest balanced)
-- **Images**: `ghcr.io/worktrial-eric-aboussouan-cyber/swebench-<id>:latest`
-- **Metric**: pass@1 via `eval_script.sh` exit code
-
-Results: `results/eval_results.json`.
-
-## Reproduction
-
-```bash
-# 1. Scrape
-export GITHUB_TOKEN=...
-uv run scripts/scrape_prs.py --repo psf/requests --limit 25
-
-# 2. Materialize + validate
-uv run scripts/build_task.py
-uv run scripts/validate_task.py --all --parallel 4
-
-# 3. Push
-bash scripts/push_images.sh
-
-# 4. Train
-uv run scripts/prepare_harbor_dataset.py
-sky launch harbor-train/configs/harbor-grpo-qwen3-8b.yaml
-
-# 5. Eval
-uv run scripts/prepare_ood_eval.py --build --push
-# eval config TBD based on harbor eval path
-```
-
-## Files
+## 📂 Project Structure
 
 ```
 fleet-worktrial/
-├── README.md                          # this file
-├── notes.md                           # design decisions, tradeoffs, known issues
+├── status.md                          # Live sprint status and milestone tracking
+├── harbor-train/                      # Patched upstream training repository
 ├── scripts/
 │   ├── scrape_prs.py
 │   ├── build_task.py
-│   ├── validate_task.py
-│   ├── push_images.sh
-│   ├── prepare_harbor_dataset.py
-│   └── prepare_ood_eval.py
-├── templates/Dockerfile.{requests,click,flask,httpx}
-├── tasks/task_XXX/                    # 12 validated tasks
-├── data/
-│   ├── train.parquet
-│   └── ood_eval.parquet
-├── results/
-│   ├── training_curve.png
-│   └── eval_results.json
-├── notes/                             # recon docs, debug logs
-└── harbor-train/                      # upstream clone
+│   ├── validate_task.py               # Two-canary validation
+│   ├── push_images.sh                 # Docker registry automation
+│   ├── prepare_harbor_dataset.py      # Parquet generation
+│   └── repackage_train.py             # SkyPilot workspace preparation
+├── tasks/task_XXX/                    # Validated task instances
+├── notes/                             # Root cause analysis & telemetry logs
+└── results/                           # Training curves and eval results
 ```
+
+## 🔍 Key Findings
+See [notes/root-cause.md](notes/root-cause.md) for the detailed breakdown of the context length truncation bug that caused the initial zero-reward steps.
